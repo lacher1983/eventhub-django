@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    {% if event.image %}
+    <img src="{{ event.get_image_url }}" alt="{{ event.title }}" class="img-fluid">
+    {% else %}
+    <img src="{{ event.get_image_url }}" alt="{{ event.title }}" class="img-fluid">
+    {% endif %}
+    <div class="card-body">
+        <h1>{{ event.title }}</h1>
+        <p class="text-muted">
+            {{ event.start_time|date:"d.m.Y H:i" }} - {{ event.end_time|date:"H:i" }}
+            {{ event.location }}
+            Организатор: {{ event.organizer.username }}
+        </p>
+        <p>{{ event.description }}</p>
+        
+        <div class="mt-4">
+            <a href="{% url 'event_list' %}" class="btn btn-secondary">Назад к списку</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% for banner in banners %}
+<div class="ad-banner mb-4" data-ad-id="{{ banner.id }}">
+    <a href="{{ banner.link }}?ref={{ banner.id }}" target="_blank" 
+       onclick="incrementAdClick({{ banner.id }})" class="text-decoration-none ad-link">
+        {% if banner.image %}
+            <img src="{{ banner.image.url }}" alt="{{ banner.title }}" 
+                 class="img-fluid rounded shadow-sm ad-image" 
+                 style="max-height: 200px; width: 100%; object-fit: cover;"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            
+            {% if banner.content %}
+            <div class="ad-content p-3 bg-light rounded" style="display: none;">
+                <h6 class="mb-1">{{ banner.title }}</h6>
+                <p class="mb-0 small text-muted">{{ banner.content|truncatewords:15 }}</p>
+            </div>
+            {% endif %}
+            
+        {% elif banner.content %}
+            <div class="ad-content p-3 bg-light rounded">
+                <h6 class="mb-1">{{ banner.title }}</h6>
+                <p class="mb-0 small text-muted">{{ banner.content|truncatewords:15 }}</p>
+                <small class="text-primary">Нажмите для перехода →</small>
+            </div>
+        {% else %}
+            <div class="ad-content p-3 bg-primary text-white rounded text-center">
+                <h6 class="mb-0">{{ banner.title }}</h6>
+                <small>Рекламный баннер</small>
+            </div>
+        {% endif %}
+    </a>
+    
+    {% if not banner.image and not banner.content %}
+    <style>
+        .ad-content:hover {
+            background-color: #0056b3 !important;
+            transition: background-color 0.3s ease;
+        }
+    </style>
+    {% endif %}
+</div>
+{% empty %}
+{# Опционально: можно добавить сообщение если баннеров нет #}
+<div class="text-center py-3 text-muted">
+    <small>Рекламный баннер</small>
+</div>
+{% endfor %}

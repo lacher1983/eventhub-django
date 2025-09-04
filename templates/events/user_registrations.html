@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои регистрации - EventHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Мои регистрации</h2>
+    
+    {% if registrations %}
+        <div class="row">
+            {% for registration in registrations %}
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>{{ registration.event.title }}</h5>
+                        <p class="text-muted">{{ registration.event.date|date:"d M Y, H:i" }}</p>
+                        <p>{{ registration.event.location }}</p>
+                        <a href="{% url 'event_detail' registration.event.pk %}" class="btn btn-primary btn-sm">
+                            Подробнее
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            Вы еще не зарегистрированы ни на одно мероприятие.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

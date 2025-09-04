@@ -1,0 +1,48 @@
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.event-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.category-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 10;
+}
+
+.ad-banner {
+    transition: transform 0.2s ease;
+}
+
+.ad-banner:hover {
+    transform: translateY(-2px);
+}
+
+.ad-link:hover {
+    text-decoration: none !important;
+}
+
+.ad-image {
+    border: 1px solid #eee;
+}
+
+.ad-content {
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+
+.ad-content:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+}

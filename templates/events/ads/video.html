@@ -1,0 +1,16 @@
+{% if video_ad %}
+<div class="video-ad mb-4">
+    <h5 class="text-center mb-3">🎥 {{ video_ad.title }}</h5>
+    <div class="ratio ratio-16x9">
+        <iframe src="{{ video_ad.video_url }}" 
+                frameborder="0" 
+                allowfullscreen
+                class="rounded shadow"></iframe>
+    </div>
+    <div class="text-center mt-2">
+        <a href="{{ video_ad.link }}" class="btn btn-sm btn-outline-primary">
+            Узнать больше
+        </a>
+    </div>
+</div>
+{% endif %}
