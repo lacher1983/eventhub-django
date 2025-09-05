@@ -83,8 +83,7 @@ class Event(models.Model):
         ('offline', 'Оффлайн'),
         ('hybrid', 'Гибридный'),
     ]
-    
-      
+  
     title = models.CharField(max_length=200, verbose_name="Название мероприятия")
     description = models.TextField(verbose_name="Описание")
     short_description = models.CharField(max_length=300, verbose_name="Краткое описание", 
@@ -92,18 +91,24 @@ class Event(models.Model):
     date = models.DateTimeField(verbose_name="Дата и время")
     location = models.CharField(max_length=200, verbose_name="Место проведения")
     event_type = models.CharField(max_length=10, choices=EVENT_TYPES, verbose_name="Тип мероприятия")
-    image = models.ImageField(upload_to='events/', blank=True, null=True, verbose_name="Изображение мероприятия")
+    image = models.ImageField(upload_to='events/', blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, 
                                null=True, verbose_name="Категория")
-    organizer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, 
+    organizer = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='organized_events', 
                                 verbose_name="Организатор")
     price = models.DecimalField(max_digits=10, decimal_places=2, 
                               default=0, verbose_name="Цена")
     capacity = models.PositiveIntegerField(verbose_name="Вместимость", default=50)
     is_active = models.BooleanField(default=True, verbose_name="Активно")
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name="Дата обновления")
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0, verbose_name="Средний рейтинг")
 
+    class Meta:
+        verbose_name = "Мероприятие"
+        verbose_name_plural = "Мероприятия"
+        ordering = ['-date']
+    
     def update_average_rating(self):
         """Обновляет средний рейтинг мероприятия"""
         from django.db.models import Avg
@@ -117,84 +122,83 @@ class Event(models.Model):
             return self.reviews.get(user=user)
         except Review.DoesNotExist:
             return None
+        
+    def get_absolute_url(self):
+        return reverse('event_detail', kwargs={'pk': self.pk})
 
-    def __str__(self):
-        return self.title
+    def get_image_url(self):
+        if self.image and hasattr(self.image, 'url'):
+            try:
+                if os.path.exists(self.image.path):
+                    return self.image.url
+            except:
+                pass
+        return f"{settings.STATIC_URL}images/default-event.jpg"
 
     def save(self, *args, **kwargs):
+        # Создание default изображения если нет
         if not self.image:
-            # cоздадим програмно простое изображение
             try:
                 img = Image.new('RGB', (300, 200), color='#f0f0f0')
                 img_io = io.BytesIO()
                 img.save(img_io, format='JPEG')
                 self.image.save('default_event.jpg', ContentFile(img_io.getvalue()), save=False)
             except:
-                # не создалось изображение - ну и пес с ним
                 pass
-        super().save(*args, **kwargs)
     
-    def get_image_url(self):
-        if self.image and hasattr(self.image, 'url'):
-        # проверим есть ли файлик на диске
+       # Ресайз изображения если нужно
+        super().save(*args, **kwargs)
+        if self.image:
             try:
-                if os.path.exists(self.image.path):
-                    return self.image.url
+                img = Image.open(self.image.path)
+                if img.height > 600 or img.width > 800:
+                    output_size = (800, 600)
+                    img.thumbnail(output_size)
+                    img.save(self.image.path)
             except:
                 pass
-        # возврат изображения по умолчанию
-        return f"{settings.STATIC_URL}images/default-event.jpg"
-
-    class Meta:
-        verbose_name = "Мероприятие"
-        verbose_name_plural = "Мероприятия"
-        ordering = ['-date']
 
     def __str__(self):
         return self.title
     
-    def get_absolute_url(self):
-        return reverse('event_detail', kwargs={'pk': self.pk})
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self.image:
-            img = Image.open(self.image.path)
-            if img.height > 600 or img.width > 800:
-                output_size = (800, 600)
-                img.thumbnail(output_size)
-                img.save(self.image.path)
-
 class Registration(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Пользователь")
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, verbose_name="Мероприятие")
-    registered_at = models.DateTimeField(auto_now_add=True)
-    is_confirmed = models.BooleanField(default=False, verbose_name="Подтверждено")
+    STATUS_CHOICES = [
+        ('pending', 'Ожидает'),
+        ('confirmed', 'Подтверждена'),
+        ('cancelled', 'Отменена'),
+    ]
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='registrations')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='registrations')
+    registration_date = models.DateTimeField(auto_now_add=True)  # ТОЛЬКО ОДНО поле!
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     class Meta:
         unique_together = ['user', 'event']
+        ordering = ['-registration_date']
         verbose_name = "Регистрация"
         verbose_name_plural = "Регистрации"
 
     def __str__(self):
-        return f"{self.user.username} - {self.event.title}"        
+        return f"{self.user.username} - {self.event.title}"
 
 User = get_user_model()
+
 
 class Favorite(models.Model):
     """Модель для избранных мероприятий пользователя"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites', verbose_name="Пользователь")
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='favorited_by', verbose_name="Мероприятие")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата добавления")
+    registration_date = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="Дата регистрации")
 
     class Meta:
         verbose_name = "Избранное"
         verbose_name_plural = "Избранные мероприятия"
         unique_together = ['user', 'event']  # Один пользователь - одно избранное на событие
-        ordering = ['-created_at']
+        ordering = ['-registration_date']
 
     def __str__(self):
         return f"{self.user.username} - {self.event.title}"
+
 
 class Review(models.Model):
     """Модель отзывов и рейтингов мероприятий"""
@@ -227,7 +231,7 @@ class Review(models.Model):
         blank=True,
         verbose_name="Комментарий"
     )
-    created_at = models.DateTimeField(
+    registration_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Дата создания"
     )
@@ -240,10 +244,32 @@ class Review(models.Model):
         verbose_name = "Отзыв"
         verbose_name_plural = "Отзывы"
         unique_together = ['event', 'user']  # Один пользователь - один отзыв на событие
-        ordering = ['-created_at']
+        ordering = ['-registration_date']
 
     def __str__(self):
         return f"{self.user.username} - {self.event.title} ({self.rating}⭐)"
+    
+
+class Registration(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Ожидает'),
+        ('confirmed', 'Подтверждена'),
+        ('cancelled', 'Отменена'),
+    ]
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='registrations')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='registrations')
+    registration_date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    registration_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'event']
+        ordering = ['-registration_date']
+        verbose_name = "Регистрация"
+        verbose_name_plural = "Регистрации"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.event.title}"        
 
 # монетизируемся
 class Partner(models.Model):
