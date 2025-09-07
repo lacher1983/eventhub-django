@@ -22,3 +22,47 @@
     </div>
 </div>
 {% endblock %}
+
+{% if not event.is_free and event.price > 0 %}
+<form method="post" action="{% url 'add_to_cart' event.id %}" class="add-to-cart-form">
+    {% csrf_token %}
+    <div class="input-group mb-2" style="max-width: 150px;">
+        <input type="number" name="quantity" value="1" min="1" max="10" class="form-control">
+        <button type="submit" class="btn btn-success">В корзину</button>
+    </div>
+</form>
+{% endif %}
+
+<div class="card-body">
+    <h1>{{ event.title }}</h1>
+    <p class="text-muted">
+        📅 {{ event.start_time|date:"d.m.Y H:i" }} - {{ event.end_time|date:"H:i" }}
+        📍 {{ event.location }}
+        👤 Организатор: {{ event.organizer.username }}
+    </p>
+    
+    <!-- Цена и кнопка корзины -->
+    <div class="mb-3">
+        {% if event.is_free %}
+        <span class="badge bg-success fs-6">Бесплатное мероприятие</span>
+        {% else %}
+        <h4 class="text-primary">{{ event.price }} ₽</h4>
+        
+        <form method="post" action="{% url 'add_to_cart' event.id %}" class="mt-2">
+            {% csrf_token %}
+            <div class="input-group" style="max-width: 200px;">
+                <span class="input-group-text">Количество:</span>
+                <input type="number" name="quantity" value="1" min="1" max="10" 
+                       class="form-control">
+                <button type="submit" class="btn btn-success">Добавить в корзину</button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+    
+    <p>{{ event.description }}</p>
+    
+    <div class="mt-4">
+        <a href="{% url 'event_list' %}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+</div>

@@ -98,6 +98,8 @@ class Event(models.Model):
                                 verbose_name="Организатор")
     price = models.DecimalField(max_digits=10, decimal_places=2, 
                               default=0, verbose_name="Цена")
+    is_free = models.BooleanField(default=False, verbose_name="Бесплатное мероприятие")
+    tickets_available = models.PositiveIntegerField(default=100, verbose_name="Доступно билетов")
     capacity = models.PositiveIntegerField(verbose_name="Вместимость", default=50)
     is_active = models.BooleanField(default=True, verbose_name="Активно")
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="Дата создания")
@@ -160,6 +162,10 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
+    
+    @property
+    def is_free_event(self):
+        return self.price <= 0 or self.is_free
     
 class Registration(models.Model):
     STATUS_CHOICES = [
@@ -288,3 +294,91 @@ class Promotion(models.Model):
     promo_type = models.CharField(max_length=20, choices=PROMO_TYPES)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
+
+    from django.db import models
+from decimal import Decimal
+
+class Cart(models.Model):
+    user = models.OneToOneField('accounts.User', on_delete=models.CASCADE, related_name='cart')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Корзина {self.user.username}"
+
+    @property
+    def total_price(self):
+        total = 0
+        for item in self.items.all():
+            total += item.total_price
+        return total
+
+    @property
+    def items_count(self):
+        return self.items.count()
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [['cart', 'event']]
+
+    def __str__(self):
+        return f"{self.quantity} x {self.event.title}"
+
+    @property
+    def total_price(self):
+        return self.event.price * self.quantity
+    
+    class Meta:
+        unique_together = [['cart', 'event']]  # Один товар - одна позиция в корзине
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Ожидает оплаты'),
+        ('paid', 'Оплачено'),
+        ('cancelled', 'Отменено'),
+        ('refunded', 'Возврат'),
+    ]
+
+    PAYMENT_METHODS = [
+        ('card', 'Банковская карта'),
+        ('paypal', 'PayPal'),
+        ('qiwi', 'QIWI'),
+        ('yoomoney', 'ЮMoney'),
+    ]
+
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='orders')
+    order_number = models.CharField(max_length=20, unique=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    payment_date = models.DateTimeField(null=True, blank=True)
+    stripe_payment_intent_id = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return f"Заказ #{self.order_number}"
+
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            self.order_number = f"ORD{timezone.now().strftime('%Y%m%d')}{self.user.id:04d}"
+        super().save(*args, **kwargs)
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.event.title}"
+
+    @property
+    def total_price(self):
+        return self.price * self.quantity

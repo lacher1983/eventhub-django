@@ -98,6 +98,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'events.context_processors.advertisements',
+                'events.context_processors.cart_context',
             ],
         },
     },
@@ -168,3 +169,17 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Время
 TIME_ZONE = 'Europe/Moscow'
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-app-password'
+DEFAULT_FROM_EMAIL = 'EventHub <noreply@eventhub.com>'
+
+# Stripe settings (для реальной оплаты)
+STRIPE_PUBLIC_KEY = 'pk_test_your_public_key'
+STRIPE_SECRET_KEY = 'sk_test_your_secret_key'
+STRIPE_WEBHOOK_SECRET = 'whsec_your_webhook_secret'

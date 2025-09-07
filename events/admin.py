@@ -4,8 +4,9 @@ from config.admin_customization import admin_site
 
 @admin.register(Event, site=admin_site)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('title', 'organizer', 'date', 'location', 'event_type', 'is_active')
-    list_filter = ('event_type', 'is_active', 'category', 'date')
+    list_display = ['title', 'organizer', 'date', 'location', 'event_type', 'is_active', 'price', 'is_free', 'tickets_available', 'created_at']
+    list_editable = ['price', 'is_free', 'tickets_available']
+    list_filter = ['event_type', 'is_active', 'category', 'date', 'is_free', 'created_at']
     search_fields = ('title', 'description', 'location', 'organizer__username')
     list_per_page = 20
     fieldsets = (

@@ -3,6 +3,7 @@ from . import views
 from .views import (EventListView, EventDetailView, EventCreateView, 
                     EventUpdateView, EventDeleteView, 
                     EventCalendarView, OrganizerDashboardView, FavoriteListView)
+from .views_cart import add_to_cart, cart_view, update_cart_item, checkout, payment, order_success
 
 urlpatterns = [
     path('', EventListView.as_view(), name='event_list'),
@@ -19,4 +20,10 @@ urlpatterns = [
     path('dashboard/', views.OrganizerDashboardView.as_view(), name='organizer_dashboard'),
     path('favorites/', views.FavoriteListView.as_view(), name='favorite_list'),
     path('event/<int:event_id>/favorite/', views.toggle_favorite, name='toggle_favorite'),
+    path('cart/add/<int:event_id>/', add_to_cart, name='add_to_cart'),
+    path('cart/', cart_view, name='cart_view'),
+    path('cart/update/<int:item_id>/', update_cart_item, name='update_cart_item'),
+    path('checkout/', checkout, name='checkout'),
+    path('payment/', payment, name='payment'),
+    path('order/success/<int:order_id>/', order_success, name='order_success'),
 ]

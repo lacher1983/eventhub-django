@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>🛒 Ваша корзина</h2>
+    
+    {% if cart.items.all %}
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Табличное представление для компактности -->
+            <div class="table-responsive d-md-block d-none">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Мероприятие</th>
+                            <th>Цена</th>
+                            <th>Количество</th>
+                            <th>Общая стоимость</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart.items.all %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if item.event.image %}
+                                    <img src="{{ item.event.image.url }}" class="img-fluid rounded me-2" 
+                                         alt="{{ item.event.title }}" style="height: 50px; width: 50px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-secondary rounded d-flex align-items-center justify-content-center me-2" 
+                                         style="height: 50px; width: 50px;">
+                                        <span class="text-white">Нет фото</span>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-0">{{ item.event.title }}</h6>
+                                        <small class="text-muted">
+                                            {{ item.event.start_time|date:"d.m.Y H:i" }}<br>
+                                            {{ item.event.location }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ item.price }} ₽</td>
+                            <td>
+                                <form method="post" action="{% url 'update_cart_item' item.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <div class="input-group" style="width: 120px;">
+                                        <button type="submit" name="action" value="decrease" class="btn btn-outline-secondary">-</button>
+                                        <span class="form-control text-center">{{ item.quantity }}</span>
+                                        <button type="submit" name="action" value="increase" class="btn btn-outline-secondary">+</button>
+                                    </div>
+                                </form>
+                            </td>
+                            <td>{{ item.total_price }} ₽</td>
+                            <td>
+                                <form method="post" action="{% url 'update_cart_item' item.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" name="action" value="remove" class="btn btn-danger btn-sm">Удалить</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Карточки для мобильных устройств -->
+            <div class="d-md-none">
+                {% for item in cart.items.all %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-3">
+                                {% if item.event.image %}
+                                <img src="{{ item.event.image.url }}" class="img-fluid rounded" 
+                                     alt="{{ item.event.title }}" style="height: 60px; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
+                                     style="height: 60px;">
+                                    <span class="text-white">Нет фото</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-5">
+                                <h6 class="card-title mb-0">{{ item.event.title }}</h6>
+                                <small class="text-muted">
+                                    {{ item.event.start_time|date:"d.m.Y" }}<br>
+                                    {{ item.price }} ₽
+                                </small>
+                            </div>
+                            
+                            <div class="col-4 text-end">
+                                <p class="fw-bold mb-1">{{ item.total_price }} ₽</p>
+                                <div class="d-flex justify-content-end align-items-center">
+                                    <form method="post" action="{% url 'update_cart_item' item.id %}" class="d-inline me-1">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="decrease">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
+                                    </form>
+                                    
+                                    <span class="mx-1 fw-bold">{{ item.quantity }}</span>
+                                    
+                                    <form method="post" action="{% url 'update_cart_item' item.id %}" class="d-inline ms-1">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="increase">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                                    </form>
+                                </div>
+                                <form method="post" action="{% url 'update_cart_item' item.id %}" class="mt-1">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="remove">
+                                    <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Сумма заказа</h5>
+                    <hr>
+                    
+                    {% for item in cart.items.all %}
+                    <div class="d-flex justify-content-between mb-1">
+                        <small>{{ item.event.title }} x{{ item.quantity }}</small>
+                        <small>{{ item.total_price }} ₽</small>
+                    </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Итого:</span>
+                        <span>{{ cart.total_price }} ₽</span>
+                    </div>
+                    
+                    <a href="{% url 'checkout' %}" class="btn btn-primary w-100 mt-3">
+                        Перейти к оплате
+                    </a>
+                    
+                    <a href="{% url 'event_list' %}" class="btn btn-outline-secondary w-100 mt-2">
+                        Продолжить покупки
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="text-center py-5">
+        <div class="display-1 text-muted">🛒</div>
+        <h3 class="text-muted">Корзина пуста</h3>
+        <p>Добавьте мероприятия из каталога</p>
+        <a href="{% url 'event_list' %}" class="btn btn-primary">Перейти к мероприятиям</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
