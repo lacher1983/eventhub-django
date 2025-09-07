@@ -11,8 +11,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Review
-        fields = ['id', 'user', 'rating', 'comment', 'created_at']
-        read_only_fields = ['user', 'created_at']
+        fields = ['id', 'user', 'rating', 'comment', 'registration_date']
+        read_only_fields = ['user', 'registration_date']
 
 class EventSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
@@ -26,7 +26,7 @@ class EventSerializer(serializers.ModelSerializer):
             'id', 'title', 'short_description', 'description',
             'date', 'location', 'event_type', 'price', 'capacity',
             'category', 'image', 'average_rating', 'reviews',
-            'is_favorite', 'created_at'
+            'is_favorite', 'registration_date'
         ]
     
     def get_is_favorite(self, obj):
@@ -40,4 +40,4 @@ class FavoriteSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Favorite
-        fields = ['id', 'event', 'created_at']
+        fields = ['id', 'event', 'registration_date']

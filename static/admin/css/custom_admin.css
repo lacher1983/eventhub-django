@@ -1,0 +1,92 @@
+/* Темная тема для админки */
+:root {
+    --primary: #2D2D2D;
+    --secondary: #FF6B35;
+    --accent: #4FC3F7;
+    --dark-bg: #1A1A1A;
+    --dark-text: #FFFFFF;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
+}
+
+#header {
+    background-color: var(--primary) !important;
+    color: var(--dark-text) !important;
+}
+
+.module h2, .module caption {
+    background-color: var(--primary) !important;
+    color: var(--dark-text) !important;
+}
+
+.dashboard .module table th {
+    background-color: var(--primary) !important;
+    color: var(--dark-text) !important;
+}
+
+.submit-row input {
+    background-color: var(--secondary) !important;
+}
+
+.submit-row input:hover {
+    background-color: #E55A2B !important;
+}
+
+a:link, a:visited {
+    color: var(--accent) !important;
+}
+
+a:hover {
+    color: #29B6F6 !important;
+}
+
+/* Стили для форм */
+input, textarea, select {
+    background-color: #2D2D2D !important;
+    color: var(--dark-text) !important;
+    border: 1px solid #444 !important;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--secondary) !important;
+    box-shadow: 0 0 5px var(--secondary) !important;
+}
+
+/* Таблицы */
+table {
+    background-color: #2D2D2D !important;
+    color: var(--dark-text) !important;
+}
+
+thead th {
+    background-color: var(--primary) !important;
+    color: var(--dark-text) !important;
+}
+
+tr:hover {
+    background-color: #3D3D3D !important;
+}
+
+/* Навигация */
+#user-tools a:focus, #user-tools a:hover {
+    color: var(--secondary) !important;
+}
+
+/* Кнопки */
+.button, input[type=submit], input[type=button] {
+    background-color: var(--secondary) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover {
+    background-color: #E55A2B !important;
+}
+
+/* Иконки */
+.icon-addlink, .icon-changelink, .icon-deletelink {
+    filter: invert(1) brightness(2);
+}

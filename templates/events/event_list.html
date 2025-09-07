@@ -6,7 +6,31 @@
 
 {% block content %}
 <!-- Верхний баннер -->
-{% show_banner 'top' %}
+ <!-- {% show_banner 'top' %} # убрал баннер и поменял на СТА -->
+<div class="mb-4">
+    <div class="card border-0 shadow-sm bg-gradient-primary">
+        <div class="card-body p-3 text-center text-white">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-1">🚀 Специальное предложение!</h5>
+                    <p class="mb-0">Получите скидку 25% на первый заказ</p>
+                </div>
+                <div class="col-md-4 mt-2 mt-md-0">
+                    <a href="https://ваш-сайт.com/promo" 
+                       class="btn btn-light btn-sm fw-bold">
+                        Получить скидку
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+</style>
 
 <!-- Герой секция -->
 <section class="hero-section text-center py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -59,7 +83,16 @@
 
                     <!-- Рекламка в сайдбаре -->
                     <div class="mt-5">
-                        {% show_banner 'sidebar' %}
+                        <div class="card border-0 bg-light">
+                            <div class="card-body p-3">
+                                <h6 class="card-title fw-bold">📢 Рекламный блок</h6>
+                                <p class="small mb-2">Здесь может быть ваша реклама</p>
+                                <a href="mailto:ads@ваш-сайт.com" 
+                                    class="btn btn-outline-primary btn-sm w-100">
+                                     Разместить рекламу
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mt-4">
@@ -150,6 +183,33 @@
                                     </small>
                                 </div>
                             </div>
+
+                            <div class="card-body">
+                                <h5 class="card-title">{{ event.title }}</h5>
+                                <p class="card-text">{{ event.description|truncatewords:20 }}</p>
+                                <p class="text-muted">
+                                    📅 {{ event.start_time|date:"d.m.Y H:i" }}<br>
+                                    📍 {{ event.location }}
+                                </p>
+    
+                                <!-- Кнопка "В корзину" для платных событий -->
+                                {% if not event.is_free and event.price > 0 %}
+                                <form method="post" action="{% url 'add_to_cart' event.id %}">
+                                    {% csrf_token %}
+                                    <div class="input-group mb-2" style="max-width: 150px;">
+                                        <input type="number" name="quantity" value="1" min="1" max="10" 
+                                               class="form-control form-control-sm">
+                                        <button type="submit" class="btn btn-success btn-sm">В корзину</button>
+                                    </div>
+                                </form>
+                                {% else %}
+                                <span class="badge bg-success">Бесплатно</span>
+                                {% endif %}
+    
+                                <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary btn-sm">
+                                    Подробнее
+                                </a>
+                            </div>
                             
                             <!-- Футер с кнопками -->
                             <div class="card-footer bg-transparent border-0 p-3 pt-0">
@@ -203,9 +263,21 @@
                     <!-- Рекламка между каждыми 3-мя событиями -->
                     {% if forloop.counter0|divisibleby:3 and forloop.counter0 > 0 %}
                         <div class="col-12 mb-4">
-                            <div class="card border-0 shadow-sm">
+                            <div class="card border-0 bg-light">
                                 <div class="card-body p-3">
-                                    {% show_banner 'between_events' %}
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <span class="fs-4">🔥</span>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="fw-bold mb-1">Горящее предложение</h6>
+                                            <p class="small mb-2">Скидка 20% на все услуги до конца недели</p>
+                                            <a href="https://ваш-сайт.com/hot-offer" 
+                                                class="btn btn-outline-danger btn-sm">
+                                                 Успеть получить
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -227,8 +299,17 @@
             <!-- Нижний баннер -->
             <div class="mt-5">
                 <div class="card border-0 shadow-sm">
-                    <div class="card-body p-3">
-                        {% show_banner 'bottom' %}
+                    <div class="card-body p-3 text-center bg-primary text-white">
+                        <a href="https://ваш-сайт.com/целевая-страница" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="text-decoration-none text-white">
+                         <div class="banner-content">
+                            <h4 class="mb-2">Специальное предложение!</h4>
+                            <p class="mb-3">Скидка 20% на все товары</p>
+                            <span class="btn btn-light btn-sm">Узнать больше</span>
+                         </div>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -491,3 +572,13 @@ body {
 }
 </style>
 {% endblock %}
+
+{% if not event.is_free and event.price > 0 %}
+<form method="post" action="{% url 'add_to_cart' event.id %}" class="add-to-cart-form">
+    {% csrf_token %}
+    <div class="input-group mb-2" style="max-width: 150px;">
+        <input type="number" name="quantity" value="1" min="1" max="10" class="form-control">
+        <button type="submit" class="btn btn-success">В корзину</button>
+    </div>
+</form>
+{% endif %}

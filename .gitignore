@@ -33,6 +33,10 @@ Thumbs.db
 
 # Database
 *.db
+db.sqlite3
+*.pyc
+__pycache__/
+.env
 
 # для игнора .env
 .env

@@ -8,11 +8,12 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = ['title', 'short_description', 'description', 'date', 
                  'location', 'event_type', 'category', 'image', 
-                 'price', 'capacity']
+                 'price', 'capacity', 'is_free', 'tickets_available']
         widgets = {
             'date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'description': forms.Textarea(attrs={'rows': 4}),
             'short_description': forms.Textarea(attrs={'rows': 2}),
+            'tickets_available': forms.NumberInput(attrs={'min': 1})
         }
         labels = {
             'title': 'Название мероприятия',
@@ -58,3 +59,45 @@ class RegistrationForm(forms.ModelForm):
     class Meta:
         model = Registration
         fields = []  # формочка только для создания регистрации
+
+
+from django import forms
+from .models import CartItem, Order
+
+class AddToCartForm(forms.ModelForm):
+    quantity = forms.IntegerField(
+        min_value=1,
+        max_value=10,
+        initial=1,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'style': 'width: 80px'})
+    )
+
+    class Meta:
+        model = CartItem
+        fields = ['quantity']
+
+class CheckoutForm(forms.ModelForm):
+    payment_method = forms.ChoiceField(
+        choices=Order.PAYMENT_METHODS,
+        widget=forms.RadioSelect,
+        initial='card'
+    )
+
+    class Meta:
+        model = Order
+        fields = ['payment_method']
+
+class PaymentForm(forms.Form):
+    card_number = forms.CharField(
+        max_length=19,
+        widget=forms.TextInput(attrs={'placeholder': '1234 5678 9012 3456'})
+    )
+    expiry_date = forms.CharField(
+        max_length=5,
+        widget=forms.TextInput(attrs={'placeholder': 'MM/YY'})
+    )
+    cvv = forms.CharField(
+        max_length=3,
+        widget=forms.TextInput(attrs={'placeholder': '123'})
+    )
+    cardholder_name = forms.CharField(max_length=100)

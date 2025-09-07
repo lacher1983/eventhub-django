@@ -53,8 +53,8 @@ class EventListView(ListView):
             is_active=True, 
             date__gte=timezone.now()
         ).select_related('category', 'organizer').annotate(
-            registrations_count=Count('registration'),
-            average_rating=Avg('reviews__rating')
+            registrations_count=Count('registrations'),
+            avg_rating=Avg('reviews__rating')
         )
         
         # Фильтрация по категории
@@ -78,7 +78,7 @@ class EventListView(ListView):
         elif sort == 'price_desc':
             queryset = queryset.order_by('-price')
         elif sort == 'rating':
-            queryset = queryset.order_by('-average_rating')
+            queryset = queryset.order_by('-avg_rating')
         else:
             queryset = queryset.order_by('date')
             
@@ -121,8 +121,7 @@ class EventDetailView(DetailView):
         ).prefetch_related(
             'reviews', 'reviews__user'
         ).annotate(
-            registrations_count=Count('registration'),
-            average_rating=Avg('reviews__rating')
+            registrations_count=Count('registrations'),
         )
     
     def get_context_data(self, **kwargs):
@@ -237,7 +236,7 @@ class EventSearchView(ListView):
             is_active=True, 
             date__gte=timezone.now()
         ).select_related('category', 'organizer').annotate(
-            registrations_count=Count('registration'),
+            registrations_count=Count('registrations'),
             average_rating=Avg('reviews__rating')
         )
         
@@ -340,7 +339,7 @@ def register_for_event(request, pk):
     
     if Registration.objects.filter(user=request.user, event=event).exists():
         messages.info(request, 'Вы уже зарегистрированы на это мероприятие')
-    elif event.registration_set.count() >= event.capacity:
+    elif event.registrations.count() >= event.capacity:
         messages.error(request, 'К сожалению, все места заняты.')
     elif event.date < timezone.now():
         messages.error(request, 'Мероприятие уже прошло.')
@@ -356,7 +355,7 @@ def user_registrations(request):
     """Страница с регистрациями пользователя"""
     registrations = Registration.objects.filter(
         user=request.user
-    ).select_related('event', 'event__category').order_by('-created_at')
+    ).select_related('event', 'event__category').order_by('-registration_date')
     
     return render(request, 'events/user_registrations.html', {
         'registrations': registrations

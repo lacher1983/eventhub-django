@@ -35,13 +35,16 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'admin_interface',
+    'colorfield',
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Наши приложения
+    # Внес мои приложения
     'events',
     'accounts',
     'crispy_forms',
@@ -51,7 +54,10 @@ INSTALLED_APPS = [
     'celery',
 ]
 
-# Указываем кастомную модельку пользователя
+X_FRAME_OPTIONS = "SAMEORIGIN"
+SILENCED_SYSTEM_CHECKS = ["security.W019"]
+
+# Указываю кастомную модельку пользователя
 AUTH_USER_MODEL = 'accounts.User'
 
 # Настройки crispy-forms
@@ -73,7 +79,7 @@ ROOT_URLCONF = 'config.urls'
 # REST Framework настроечка
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -92,6 +98,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'events.context_processors.advertisements',
+                'events.context_processors.cart_context',
             ],
         },
     },
@@ -146,6 +153,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -157,3 +169,17 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Время
 TIME_ZONE = 'Europe/Moscow'
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-app-password'
+DEFAULT_FROM_EMAIL = 'EventHub <noreply@eventhub.com>'
+
+# Stripe settings (для реальной оплаты)
+STRIPE_PUBLIC_KEY = 'pk_test_your_public_key'
+STRIPE_SECRET_KEY = 'sk_test_your_secret_key'
+STRIPE_WEBHOOK_SECRET = 'whsec_your_webhook_secret'
