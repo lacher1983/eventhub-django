@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Подтверждение регистрации</title>
+</head>
+<body>
+    <h2>Подтверждение регистрации</h2>
+    <p>Здравствуйте, {{ user.username }}!</p>
+    
+    <p>Вы успешно зарегистрировались на мероприятие:</p>
+    
+    <div style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
+        <h3>{{ event.title }}</h3>
+        <p><strong>Дата:</strong> {{ event.date|date:"d.m.Y H:i" }}</p>
+        <p><strong>Место:</strong> {{ event.location }}</p>
+        <p><strong>Тип:</strong> {{ event.get_event_type_display }}</p>
+    </div>
+    
+    <p>Ждем вас на мероприятии!</p>
+    
+    <hr>
+    <p style="color: #666; font-size: 12px;">
+        Это автоматическое письмо, пожалуйста, не отвечайте на него.
+    </p>
+</body>
+</html>

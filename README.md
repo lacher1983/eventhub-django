@@ -1,3 +1,4 @@
+README.md:
 # EventHub - Платформа мероприятий
 
 Django-приложение для организации и управления мероприятиями.
@@ -17,6 +18,13 @@ Django-приложение для организации и управлени�
 4. Запустите сервер: `python manage.py runserver`
 5. python manage.py createsuperuser --username admin --email admin@example.com
 6. python add_events.py  # или python scripts/add_events.py, если вынесли
+
+## 🐳 Docker Deployment
+### Quick Start with Docker
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd EventHub
 
 ## Версии
 0. нулевая версия потерялася

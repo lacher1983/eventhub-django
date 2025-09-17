@@ -1,6 +1,6 @@
 from django import forms
 from django.conf import settings 
-from .models import Event, Category, Registration, Review
+from .models import Event, Category, Order, Registration, Review
 from django.utils import timezone
 
 class EventForm(forms.ModelForm):
@@ -77,27 +77,31 @@ class AddToCartForm(forms.ModelForm):
         fields = ['quantity']
 
 class CheckoutForm(forms.ModelForm):
-    payment_method = forms.ChoiceField(
-        choices=Order.PAYMENT_METHODS,
-        widget=forms.RadioSelect,
-        initial='card'
-    )
-
     class Meta:
         model = Order
-        fields = ['payment_method']
+        fields = ['first_name', 'last_name', 'email', 'phone', 'address', 'city', 'postal_code', 'country']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Имя'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Фамилия'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Телефон'}),
+            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
+            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Город'}),
+            'postal_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Почтовый индекс'}),
+            'country': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Страна'}),
+        }
 
 class PaymentForm(forms.Form):
-    card_number = forms.CharField(
-        max_length=19,
-        widget=forms.TextInput(attrs={'placeholder': '1234 5678 9012 3456'})
+    PAYMENT_METHODS = [
+        ('card', '💳 Банковская карта'),
+        ('paypal', '📱 PayPal'),
+        ('qiwi', '🧾 QIWI'),
+        ('yoomoney', '💸 ЮMoney'),
+    ]
+    
+    payment_method = forms.ChoiceField(
+        choices=PAYMENT_METHODS,
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        label='Способ оплаты',
+        initial='card'
     )
-    expiry_date = forms.CharField(
-        max_length=5,
-        widget=forms.TextInput(attrs={'placeholder': 'MM/YY'})
-    )
-    cvv = forms.CharField(
-        max_length=3,
-        widget=forms.TextInput(attrs={'placeholder': '123'})
-    )
-    cardholder_name = forms.CharField(max_length=100)

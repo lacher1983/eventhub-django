@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -13,70 +14,203 @@
             padding: 100px 0;
         }
         .event-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: none;
             border-radius: 15px;
             overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
         }
+
         .event-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
+
+        .event-image {
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .event-card:hover .event-image {
+            transform: scale(1.1);
+        }
+
         .category-badge {
             position: absolute;
             top: 15px;
             right: 15px;
-            z-index: 2;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.9);
         }
-        .event-image {
-            height: 200px;
-            object-fit: cover;
-        }
-        .navbar-brand {
+
+        .price-tag {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
             font-weight: bold;
-            font-size: 1.5rem;
+        }
+
+        /* Стили для видео */
+        .video-hero {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .background-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translateX(-50%) translateY(-50%);
+            z-index: -2;
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+            z-index: -1;
+        }
+
+        .video-background {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .video-background video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translateX(-50%) translateY(-50%);
+            z-index: -1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            color: white;
+            height: 100vh;а
+            display: flex;
+            align-items: center;
+        }
+        
+        .video-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
     <!-- Навигация -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'event_list' %}">🎉 EventHub</a>
+            <a class="navbar-brand fw-bold fs-3" href="{% url 'events:event_list' %}">
+                🎉 EventHub <small class="fs-6 text-warning">DarkSide</small>
+            </a>
+        
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <div class="navbar-nav me-auto">
+                    <a class="nav-link" href="{% url 'events:event_list' %}">
+                        <i class="fas fa-calendar-alt me-1"></i>Мероприятия
+                    </a>
+                    {% if user.is_authenticated %}
+                    <a class="nav-link" href="{% url 'events:event_create' %}">
+                        <i class="fas fa-plus-circle me-1"></i>Создать
+                    </a>
+                    {% endif %}
+                </div>
             
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="{% url 'event_list' %}">Мероприятия</a>
+                <div class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>{{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'events:user_registrations' %}">
+                                <i class="fas fa-ticket-alt me-2"></i>Мои билеты
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'events:favorite_list' %}">
+                                <i class="fas fa-heart me-2"></i>Избранное
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Выйти
+                            </a></li>
+                        </ul>
+                    </div>
                 
-                {% if user.is_authenticated %}
-                    <a class="nav-link" href="{% url 'event_create' %}">Создать мероприятие</a>
-                    <a class="nav-link" href="{% url 'user_registrations' %}">Мои регистрации</a>
-                    <span class="nav-link">Привет, {{ user.username }}!</span>
-                    <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
-                {% else %}
-                    <a class="nav-link" href="{% url 'login' %}">Войти</a>
-                    <a class="nav-link" href="/admin/">Регистрация</a>
-                {% endif %}
-
-                {% if user.is_authenticated %}
-                <!-- Кнопка корзины -->
-                <a class="nav-link position-relative" href="{% url 'cart_view' %}">
-                    <a class="nav-link" href="{% url 'cart_view' %}">
-                        🛒 Корзина 
+                    <a class="nav-link position-relative" href="{% url 'events:cart' %}">
+                        <i class="fas fa-shopping-cart"></i>
                         {% if cart_items_count > 0 %}
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                             {{ cart_items_count }}
                         </span>
                         {% endif %}
                     </a>
-
-                    <a class="nav-link" href="/admin/">Админка</a>
-                    <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
                     {% else %}
-                    <a class="nav-link" href="{% url 'login' %}">Войти</a>
+                    <a class="nav-link" href="{% url 'login' %}">
+                        <i class="fas fa-sign-in-alt me-1"></i>Войти
+                    </a>
+                    <a class="nav-link" href="/admin/">
+                        <i class="fas fa-user-plus me-1"></i>Регистрация
+                    </a>
                     {% endif %}
+                </div>
             </div>
         </div>
     </nav>
+
+    <!-- Фоновое видео на главной -->
+    {% if request.path == '/' %}
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="{% static 'videos/hero-trailer.mp4' %}" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+        </video>
+        <div class="video-overlay"></div>
+        
+        <div class="container hero-content">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-4">EventHub</h1>
+                    <p class="lead mb-4">Откройте для себя лучшие мероприятия в вашем городе</p>
+                    <a href="{% url 'events:event_list' %}" class="btn btn-primary btn-lg">Смотреть мероприятия</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="video-controls">
+            <button class="btn btn-sm btn-outline-light" onclick="toggleMute()">
+                <i class="fas fa-volume-mute"></i>
+            </button>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Сообщения -->
     {% if messages %}
@@ -91,11 +225,13 @@
     {% endif %}
 
     <!-- Основной контент -->
-    <main>
+    <main class="{% if request.path != '/' %}container my-4{% endif %}">
         {% block content %}
         {% endblock %}
     </main>
 
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     function incrementAdClick(adId) {
         fetch(`/ads/click/${adId}/`, {
@@ -121,6 +257,36 @@
             });
         });
     });
+
+    // Управление видео
+    function toggleMute() {
+        const video = document.querySelector('.video-background video');
+        if (video) {
+            video.muted = !video.muted;
+            const icon = document.querySelector('.video-controls i');
+            if (icon) {
+                icon.className = video.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+            }
+        }
+    }
+    
+    // Пауза видео при скролле
+    document.addEventListener('DOMContentLoaded', function() {
+        const video = document.querySelector('.video-background video');
+        if (video) {
+            let isPaused = false;
+            
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 100 && !isPaused) {
+                    video.pause();
+                    isPaused = true;
+                } else if (window.scrollY <= 100 && isPaused) {
+                    video.play();
+                    isPaused = false;
+                }
+            });
+        }
+    });
     </script>
 
     <!-- Футер -->
@@ -129,7 +295,5 @@
             <p>&copy; 2025 EventHub. Все права защищены.</p>
         </div>
     </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

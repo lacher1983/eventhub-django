@@ -7,62 +7,90 @@
     {% else %}
     <img src="{{ event.get_image_url }}" alt="{{ event.title }}" class="img-fluid">
     {% endif %}
+    
     <div class="card-body">
         <h1>{{ event.title }}</h1>
         <p class="text-muted">
-            {{ event.start_time|date:"d.m.Y H:i" }} - {{ event.end_time|date:"H:i" }}
-            {{ event.location }}
-            Организатор: {{ event.organizer.username }}
+            📅 {{ event.start_time|date:"d.m.Y H:i" }} - {{ event.end_time|date:"H:i" }}
+            📍 {{ event.location }}
+            👤 Организатор: {{ event.organizer.username }}
         </p>
+        
+        <!-- Цена и кнопка корзины -->
+        <div class="mb-3">
+            {% if event.is_free %}
+            <span class="badge bg-success fs-6">Бесплатное мероприятие</span>а
+            {% else %}
+            <h4 class="text-primary">{{ event.price }} ₽</h4>
+            
+            <form method="post" action="{% url 'events:add_to_cart' event.id %}">
+                {% csrf_token %}
+                <div class="input-group" style="max-width: 200px;">
+                    <span class="input-group-text">Количество:</span>
+                    <input type="number" name="quantity" value="1" min="1" max="10" 
+                           class="form-control">
+                    <button type="submit" class="btn btn-success">Добавить в корзину</button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+        
         <p>{{ event.description }}</p>
         
+        {% if event.video_trailer %}
+        <div class="card mb-4 mt-4">
+            <div class="card-header">
+                <h4>Видео-трейлер</h4>
+            </div>
+            <div class="card-body">
+                <video 
+                    controls 
+                    poster="{% if event.video_thumbnail %}{{ event.video_thumbnail.url }}{% else %}{{ event.image.url }}{% endif %}"
+                    style="width: 100%; border-radius: 8px;"
+                >
+                    <source src="{{ event.video_trailer.url }}" type="video/mp4">
+                    Ваш браузер не поддерживает видео.
+                </video>
+            </div>
+        </div>
+        {% endif %}
+        
         <div class="mt-4">
-            <a href="{% url 'event_list' %}" class="btn btn-secondary">Назад к списку</a>
+            <a href="{% url 'events:event_list' %}" class="btn btn-secondary">Назад к списку</a>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% if not event.is_free and event.price > 0 %}
-<form method="post" action="{% url 'add_to_cart' event.id %}" class="add-to-cart-form">
-    {% csrf_token %}
-    <div class="input-group mb-2" style="max-width: 150px;">
-        <input type="number" name="quantity" value="1" min="1" max="10" class="form-control">
-        <button type="submit" class="btn btn-success">В корзину</button>
-    </div>
-</form>
-{% endif %}
-
-<div class="card-body">
-    <h1>{{ event.title }}</h1>
-    <p class="text-muted">
-        📅 {{ event.start_time|date:"d.m.Y H:i" }} - {{ event.end_time|date:"H:i" }}
-        📍 {{ event.location }}
-        👤 Организатор: {{ event.organizer.username }}
-    </p>
-    
-    <!-- Цена и кнопка корзины -->
-    <div class="mb-3">
-        {% if event.is_free %}
-        <span class="badge bg-success fs-6">Бесплатное мероприятие</span>
-        {% else %}
-        <h4 class="text-primary">{{ event.price }} ₽</h4>
-        
-        <form method="post" action="{% url 'add_to_cart' event.id %}" class="mt-2">
-            {% csrf_token %}
-            <div class="input-group" style="max-width: 200px;">
-                <span class="input-group-text">Количество:</span>
-                <input type="number" name="quantity" value="1" min="1" max="10" 
-                       class="form-control">
-                <button type="submit" class="btn btn-success">Добавить в корзину</button>
+<!-- Модальное окно для видео -->
+<div class="modal fade" id="videoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Трейлер мероприятия</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-        </form>
-        {% endif %}
-    </div>
-    
-    <p>{{ event.description }}</p>
-    
-    <div class="mt-4">
-        <a href="{% url 'event_list' %}" class="btn btn-secondary">Назад к списку</a>
+            <div class="modal-body">
+                <video id="modalVideo" controls style="width: 100%;">
+                    <source src="" type="video/mp4">
+                </video>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+function playVideo(videoUrl) {
+    const video = document.getElementById('modalVideo');
+    const source = video.querySelector('source');
+    source.src = videoUrl;
+    video.load();
+    
+    const modal = new bootstrap.Modal(document.getElementById('videoModal'));
+    modal.show();
+    
+    video.oncanplay = function() {
+        video.play();
+    };
+}
+</script>

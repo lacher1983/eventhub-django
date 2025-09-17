@@ -20,20 +20,30 @@ def advertisements(request):
 
 from .models import Cart
 
+
 def cart_context(request):
-    """
-    Контекстный процессор для добавления информации о корзине во все шаблоны
-    """
-    context = {
-        'cart_items_count': 0,
-        'cart_total_price': 0
-    }
-    
+    """Добавляет информацию о корзине в контекст всех шаблонов"""
+    cart = None    
     if request.user.is_authenticated:
-        try:
-            cart = Cart.objects.get(user=request.user)
-            return {'cart': cart}
-        except Cart.DoesNotExist:
-            cart = Cart.objects.create(user=request.user)
-            return {'cart': cart}
-    return {'cart': None}
+        cart, created = Cart.objects.get_or_create(user=request.user)
+    
+    return {
+        'cart': cart, 
+        'cart_items_count': cart.items_count if cart else 0, 
+        'cart_total_price': cart.total_price if cart else 0
+    }
+
+def background_video(request):
+    try:
+        # Ищем мероприятие с фоновым видео
+        background_event = Event.objects.filter(
+            is_background_video=True,
+            video_trailer__isnull=False
+        ).first()
+        
+        return {
+            'background_video': background_event.video_trailer.url if background_event else None,
+            'background_event': background_event
+        }
+    except:
+        return {'background_video': None, 'background_event': None}

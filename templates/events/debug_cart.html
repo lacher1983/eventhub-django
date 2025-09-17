@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>🐛 Отладка корзины</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Информация о корзине</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID корзины:</strong> {{ cart.id }}</p>
+                    <p><strong>Пользователь:</strong> {{ cart.user.username }}</p>
+                    <p><strong>Количество товаров:</strong> {{ cart_count }}</p>
+                    <p><strong>Общая сумма:</strong> {{ cart_total }} ₽</p>
+                    <p><strong>Создана:</strong> {{ cart.created_at }}</p>
+                    <p><strong>Обновлена:</strong> {{ cart.updated_at }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Тестовые кнопки</h5>
+                </div>
+                <div class="card-body">
+                    <button class="btn btn-primary me-2" onclick="testAjax()">
+                        Тест AJAX запроса
+                    </button>
+                    <button class="btn btn-secondary" onclick="testCSRF()">
+                        Тест CSRF токена
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>Товары в корзине ({{ cart_items|length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if cart_items %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Мероприятие</th>
+                        <th>Цена</th>
+                        <th>Количество</th>
+                        <th>Сумма</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.event.title }}</td>
+                        <td>{{ item.price }} ₽</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.total_price }} ₽</td>
+                        <td>
+                            <button class="btn btn-sm btn-success" 
+                                    onclick="testUpdate({{ item.id }}, 'increase')">+</button>
+                            <button class="btn btn-sm btn-warning" 
+                                    onclick="testUpdate({{ item.id }}, 'decrease')">-</button>
+                            <button class="btn btn-sm btn-danger" 
+                                    onclick="testRemove({{ item.id }})">Удалить</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">Корзина пуста</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>Raw SQL запрос</h5>
+        </div>
+        <div class="card-body">
+            <pre>CartItem.objects.filter(cart={{ cart.id }}).select_related('event')</pre>
+            <p>Найдено: {{ all_cart_items.count }} записей</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Функция для получения CSRF токена
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Тест AJAX запроса
+function testAjax() {
+    const csrfToken = getCookie('csrftoken');
+    console.log('CSRF Token:', csrfToken);
+    
+    fetch('/cart/update/999/', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify({ action: 'increase' })
+    })
+    .then(response => response.json())
+    .then(data => console.log('AJAX Response:', data))
+    .catch(error => console.error('AJAX Error:', error));
+}
+
+// Тест CSRF токена
+function testCSRF() {
+    const token = getCookie('csrftoken');
+    alert('CSRF Token: ' + (token ? '✅ Найден' : '❌ Не найден'));
+}
+
+// Тест обновления количества
+function testUpdate(itemId, action) {
+    const csrfToken = getCookie('csrftoken');
+    const formData = new FormData();
+    formData.append('action', action);
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    
+    console.log('Sending:', { itemId, action });
+    
+    fetch(`/cart/update/${itemId}/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Update Response:', data);
+        alert('Результат: ' + (data.success ? '✅ Успех' : '❌ Ошибка') + '\n' + JSON.stringify(data));
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Update Error:', error);
+        alert('Ошибка: ' + error.message);
+    });
+}
+
+// Тест удаления
+function testRemove(itemId) {
+    if (confirm('Тестовое удаление товара ' + itemId + '?')) {
+        const csrfToken = getCookie('csrftoken');
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        
+        fetch(`/cart/remove/${itemId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Remove Response:', data);
+            alert('Результат удаления: ' + (data.success ? '✅ Успех' : '❌ Ошибка'));
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Remove Error:', error);
+            alert('Ошибка удаления: ' + error.message);
+        });
+    }
+}
+</script>
+{% endblock %}

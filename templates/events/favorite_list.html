@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Избранные мероприятия - EventHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">❤️ Избранные мероприятия</h2>
+            
+            {% if favorites %}
+                <div class="row">
+                    {% for favorite in favorites %}
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card event-card h-100 shadow-sm border-0 overflow-hidden">
+                                <!-- Изображение мероприятия -->
+                                <div class="event-header position-relative" style="height: 160px;">
+                                    {% if favorite.event.image %}
+                                        <img src="{{ favorite.event.image.url }}" 
+                                             alt="{{ favorite.event.title }}" 
+                                             class="event-image w-100 h-100" style="object-fit: cover;">
+                                    {% else %}
+                                        <div class="event-image-placeholder w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                                            <i class="fas fa-calendar-alt fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Бейдж категории -->
+                                    <span class="badge category-badge position-absolute top-0 end-0 m-2">
+                                        <i class="fas fa-tag me-1"></i>
+                                        {{ favorite.event.category.name }}
+                                    </span>
+                                    
+                                    <!-- Цена -->
+                                    {% if favorite.event.price > 0 %}
+                                        <span class="badge price-badge position-absolute top-0 start-0 m-2">
+                                            {{ favorite.event.price }} ₽
+                                        </span>
+                                    {% else %}
+                                        <span class="badge free-badge position-absolute top-0 start-0 m-2">
+                                            Бесплатно
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ favorite.event.title }}</h5>
+                                    <p class="card-text text-muted small">
+                                        {{ favorite.event.short_description|truncatewords:15 }}
+                                    </p>
+                                    
+                                    <div class="event-meta mb-2">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-calendar text-primary me-2"></i>
+                                            <small>{{ favorite.event.date|date:"d M Y, H:i" }}</small>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                            <small>{{ favorite.event.location }}</small>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-users text-primary me-2"></i>
+                                            <small>{{ favorite.event.registrations_count }}/{{ favorite.event.capacity }} участников</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Рейтинг -->
+                                    {% if favorite.event.average_rating %}
+                                        <div class="mb-2">
+                                            <div class="text-warning">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= favorite.event.average_rating %}
+                                                        <i class="fas fa-star"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <small class="text-muted">({{ favorite.event.reviews_count }})</small>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="card-footer bg-transparent border-0">
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'events:event_detail' favorite.event.pk %}" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            Подробнее
+                                        </a>
+                                        
+                                        <form method="post" action="{% url 'events:toggle_favorite' favorite.event.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                                ❌ Удалить из избранного
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Пагинация -->
+                {% if is_paginated %}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперед</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+                
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="display-1 text-muted">❤️</div>
+                    <h3 class="text-muted">Нет избранных мероприятий</h3>
+                    <p class="text-muted">Добавляйте мероприятия в избранное, чтобы вернуться к ним позже</p>
+                    <a href="{% url 'events:event_list' %}" class="btn btn-primary">
+                        Перейти к мероприятиям
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

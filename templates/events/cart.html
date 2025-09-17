@@ -22,7 +22,7 @@
                     </thead>
                     <tbody>
                         {% for item in cart.items.all %}
-                        <tr>
+                        <tr class="cart-item" data-item-id="{{ item.id }}">
                             <td>
                                 <div class="d-flex align-items-center">
                                     {% if item.event.image %}
@@ -37,7 +37,7 @@
                                     <div>
                                         <h6 class="mb-0">{{ item.event.title }}</h6>
                                         <small class="text-muted">
-                                            {{ item.event.start_time|date:"d.m.Y H:i" }}<br>
+                                            {{ item.event.date|date:"d.m.Y H:i" }}<br>
                                             {{ item.event.location }}
                                         </small>
                                     </div>
@@ -45,21 +45,23 @@
                             </td>
                             <td>{{ item.price }} ₽</td>
                             <td>
-                                <form method="post" action="{% url 'update_cart_item' item.id %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <div class="input-group" style="width: 120px;">
-                                        <button type="submit" name="action" value="decrease" class="btn btn-outline-secondary">-</button>
-                                        <span class="form-control text-center">{{ item.quantity }}</span>
-                                        <button type="submit" name="action" value="increase" class="btn btn-outline-secondary">+</button>
-                                    </div>
-                                </form>
+                                <!-- ФОРМА ДЛЯ ОБНОВЛЕНИЯ КОЛИЧЕСТВА -->
+                                <div class="d-flex align-items-center">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary decrease-quantity me-1" 
+                                            data-item-id="{{ item.id }}">-</button>
+                                    
+                                    <span class="mx-2 fw-bold quantity-display" id="quantity-{{ item.id }}">
+                                        {{ item.quantity }}
+                                    </span>
+                                    
+                                    <button type="button" class="btn btn-sm btn-outline-secondary increase-quantity ms-1" 
+                                            data-item-id="{{ item.id }}">+</button>
+                                </div>
                             </td>
-                            <td>{{ item.total_price }} ₽</td>
+                            <td class="item-total" id="total-{{ item.id }}">{{ item.total_price }} ₽</td>
                             <td>
-                                <form method="post" action="{% url 'update_cart_item' item.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit" name="action" value="remove" class="btn btn-danger btn-sm">Удалить</button>
-                                </form>
+                                <button type="button" class="btn btn-danger btn-sm remove-item" 
+                                        data-item-id="{{ item.id }}">Удалить</button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -70,7 +72,7 @@
             <!-- Карточки для мобильных устройств -->
             <div class="d-md-none">
                 {% for item in cart.items.all %}
-                <div class="card mb-3">
+                <div class="card mb-3 cart-item" data-item-id="{{ item.id }}">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-3">
@@ -88,33 +90,28 @@
                             <div class="col-5">
                                 <h6 class="card-title mb-0">{{ item.event.title }}</h6>
                                 <small class="text-muted">
-                                    {{ item.event.start_time|date:"d.m.Y" }}<br>
+                                    {{ item.event.date|date:"d.m.Y" }}<br>
                                     {{ item.price }} ₽
                                 </small>
                             </div>
                             
                             <div class="col-4 text-end">
-                                <p class="fw-bold mb-1">{{ item.total_price }} ₽</p>
-                                <div class="d-flex justify-content-end align-items-center">
-                                    <form method="post" action="{% url 'update_cart_item' item.id %}" class="d-inline me-1">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="decrease">
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
-                                    </form>
+                                <p class="fw-bold mb-1 item-total" id="total-mobile-{{ item.id }}">{{ item.total_price }} ₽</p>
+                                
+                                <div class="d-flex justify-content-end align-items-center mb-1">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary decrease-quantity me-1" 
+                                            data-item-id="{{ item.id }}">-</button>
                                     
-                                    <span class="mx-1 fw-bold">{{ item.quantity }}</span>
+                                    <span class="mx-1 fw-bold quantity-display" id="quantity-mobile-{{ item.id }}">
+                                        {{ item.quantity }}
+                                    </span>
                                     
-                                    <form method="post" action="{% url 'update_cart_item' item.id %}" class="d-inline ms-1">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="increase">
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
-                                    </form>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary increase-quantity ms-1" 
+                                            data-item-id="{{ item.id }}">+</button>
                                 </div>
-                                <form method="post" action="{% url 'update_cart_item' item.id %}" class="mt-1">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="remove">
-                                    <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
-                                </form>
+                                
+                                <button type="button" class="btn btn-danger btn-sm remove-item" 
+                                        data-item-id="{{ item.id }}">Удалить</button>
                             </div>
                         </div>
                     </div>
@@ -130,23 +127,23 @@
                     <hr>
                     
                     {% for item in cart.items.all %}
-                    <div class="d-flex justify-content-between mb-1">
-                        <small>{{ item.event.title }} x{{ item.quantity }}</small>
-                        <small>{{ item.total_price }} ₽</small>
+                    <div class="d-flex justify-content-between mb-1 item-summary" data-item-id="{{ item.id }}">
+                        <small>{{ item.event.title }} x<span class="summary-quantity" id="summary-quantity-{{ item.id }}">{{ item.quantity }}</span></small>
+                        <small class="summary-total" id="summary-total-{{ item.id }}">{{ item.total_price }} ₽</small>
                     </div>
                     {% endfor %}
                     
                     <hr>
                     <div class="d-flex justify-content-between fw-bold">
                         <span>Итого:</span>
-                        <span>{{ cart.total_price }} ₽</span>
+                        <span id="cart-total">{{ cart.total_price }} ₽</span>
                     </div>
                     
-                    <a href="{% url 'checkout' %}" class="btn btn-primary w-100 mt-3">
+                    <a href="{% url 'events:checkout' %}" class="btn btn-primary w-100 mt-3">
                         Перейти к оплате
                     </a>
                     
-                    <a href="{% url 'event_list' %}" class="btn btn-outline-secondary w-100 mt-2">
+                    <a href="{% url 'events:event_list' %}" class="btn btn-outline-secondary w-100 mt-2">
                         Продолжить покупки
                     </a>
                 </div>
@@ -159,8 +156,161 @@
         <div class="display-1 text-muted">🛒</div>
         <h3 class="text-muted">Корзина пуста</h3>
         <p>Добавьте мероприятия из каталога</p>
-        <a href="{% url 'event_list' %}" class="btn btn-primary">Перейти к мероприятиям</a>
+        <a href="{% url 'events:event_list' %}" class="btn btn-primary">Перейти к мероприятиям</a>
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Функция для получения CSRF токена
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Функция для обновления количества
+function updateCartQuantity(itemId, action) {
+    const csrfToken = getCookie('csrftoken');
+    
+    fetch(`/cart/update/${itemId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken
+        },
+        body: `action=${action}&csrfmiddlewaretoken=${encodeURIComponent(crfToken)}`
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            if (data.removed) {
+                // Удаляем элемент из DOM
+                document.querySelectorAll(`[data-item-id="${itemId}"]`).forEach(el => el.remove());
+                
+                // Обновляем общую сумму
+                if (document.getElementById('cart-total')) {
+                    document.getElementById('cart-total').textContent = data.cart_total + ' ₽';
+                }
+                
+                // Если корзина пуста, перезагружаем страницу
+                if (data.cart_count === 0) {
+                    location.reload();
+                }
+            } else {
+                // Обновляем количество на всех экранах
+                document.querySelectorAll(`#quantity-${itemId}, #quantity-mobile-${itemId}`).forEach(el => {
+                    if (el) el.textContent = data.quantity;
+                });
+                
+                // Обновляем суммы
+                document.querySelectorAll(`#total-${itemId}, #total-mobile-${itemId}`).forEach(el => {
+                    if (el) el.textContent = data.item_total + ' ₽';
+                });
+                
+                // Обновляем количество в summary
+                const summaryQty = document.getElementById(`summary-quantity-${itemId}`);
+                if (summaryQty) summaryQty.textContent = data.quantity;
+                
+                // Обновляем сумму в summary  
+                const summaryTotal = document.getElementById(`summary-total-${itemId}`);
+                if (summaryTotal) summaryTotal.textContent = data.item_total + ' ₽';
+                
+                // Обновляем общую сумму корзины
+                const cartTotal = document.getElementById('cart-total');
+                if (cartTotal) cartTotal.textContent = data.cart_total + ' ₽';
+            }
+        } else {
+            alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при обновлении корзины');
+    });
+}
+
+// Функция для удаления элемента
+function removeCartItem(itemId) {
+    if (confirm('Вы уверены, что хотите удалить этот товар из корзины?')) {
+        const csrfToken = getCookie('csrftoken');
+        
+        fetch(`/cart/remove/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            },
+            body: `csrfmiddlewaretoken=${encodeURIComponent(csrfToken)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Удаляем элемент из DOM
+                document.querySelectorAll(`[data-item-id="${itemId}"]`).forEach(el => el.remove());
+                
+                // Обновляем общую сумму
+                const cartTotal = document.getElementById('cart-total');
+                if (cartTotal) cartTotal.textContent = data.cart_total + ' ₽';
+                
+                // Если корзина пуста, перезагружаем страницу
+                if (data.cart_count === 0) {
+                    location.reload();
+                }
+            } else {
+                alert('Ошибка при удалении: ' + (data.message || 'Неизвестная ошибка'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при удалении товара');
+        });
+    }
+}
+
+// Обработчики событий после загрузки DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // Увеличение количества
+    document.querySelectorAll('.increase-quantity').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            updateCartQuantity(itemId, 'increase');
+        });
+    });
+    
+    // Уменьшение количества
+    document.querySelectorAll('.decrease-quantity').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            updateCartQuantity(itemId, 'decrease');
+        });
+    });
+    
+    // Удаление элемента
+    document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.dataset.itemId;
+            removeCartItem(itemId);
+        });
+    });
+});
+</script>
 {% endblock %}

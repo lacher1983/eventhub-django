@@ -1,0 +1,421 @@
+[
+{
+  "model": "admin_interface.theme",
+  "pk": 1,
+  "fields": {
+    "name": "Django",
+    "active": true,
+    "title": "����������������� Django",
+    "title_color": "#F5DD5D",
+    "title_visible": true,
+    "logo": "",
+    "logo_color": "#FFFFFF",
+    "logo_max_width": 400,
+    "logo_max_height": 100,
+    "logo_visible": true,
+    "favicon": "",
+    "env_name": "",
+    "env_color": "#E74C3C",
+    "env_visible_in_header": true,
+    "env_visible_in_favicon": true,
+    "language_chooser_active": true,
+    "language_chooser_control": "default-select",
+    "language_chooser_display": "code",
+    "css_header_background_color": "#0C4B33",
+    "css_header_text_color": "#44B78B",
+    "css_header_link_color": "#FFFFFF",
+    "css_header_link_hover_color": "#C9F0DD",
+    "css_module_background_color": "#44B78B",
+    "css_module_background_selected_color": "#FFFFCC",
+    "css_module_text_color": "#FFFFFF",
+    "css_module_link_color": "#FFFFFF",
+    "css_module_link_selected_color": "#FFFFFF",
+    "css_module_link_hover_color": "#C9F0DD",
+    "css_module_rounded_corners": true,
+    "css_generic_link_color": "#0C3C26",
+    "css_generic_link_hover_color": "#156641",
+    "css_generic_link_active_color": "#29B864",
+    "css_save_button_background_color": "#0C4B33",
+    "css_save_button_background_hover_color": "#0C3C26",
+    "css_save_button_text_color": "#FFFFFF",
+    "css_delete_button_background_color": "#BA2121",
+    "css_delete_button_background_hover_color": "#A41515",
+    "css_delete_button_text_color": "#FFFFFF",
+    "related_modal_active": true,
+    "related_modal_background_color": "#000000",
+    "related_modal_background_opacity": "0.3",
+    "related_modal_rounded_corners": true,
+    "related_modal_close_button_visible": true,
+    "list_filter_highlight": true,
+    "list_filter_dropdown": true,
+    "list_filter_sticky": true,
+    "list_filter_removal_links": false,
+    "foldable_apps": true,
+    "show_fieldsets_as_tabs": false,
+    "show_inlines_as_tabs": false,
+    "collapsible_stacked_inlines": false,
+    "collapsible_stacked_inlines_collapsed": true,
+    "collapsible_tabular_inlines": false,
+    "collapsible_tabular_inlines_collapsed": true,
+    "recent_actions_visible": true,
+    "form_submit_sticky": false,
+    "form_pagination_sticky": false
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2025-09-05T17:38:50.026Z",
+    "user": 2,
+    "content_type": 8,
+    "object_id": "1",
+    "object_repr": "�����������",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 2,
+  "fields": {
+    "action_time": "2025-09-05T17:39:41.031Z",
+    "user": 2,
+    "content_type": 9,
+    "object_id": "1",
+    "object_repr": "TechConf 2025",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 3,
+  "fields": {
+    "action_time": "2025-09-05T17:41:01.033Z",
+    "user": 2,
+    "content_type": 9,
+    "object_id": "2",
+    "object_repr": "Summer Music Festival",
+    "action_flag": 2,
+    "change_message": "[]"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "t0eedrirzs5ry8bxnn2k2wz7xne5edwl",
+  "fields": {
+    "session_data": ".eJxVjEsOgkAQBe8yazNxGmwYl-49A-mvoAYSBlbGuysJC92-qnqv0NG69N1abO4GDecA4fC7McnDxg3oncbbFGUal3nguClxpyVeJ7XnZXf_Dnoq_bc-urhaxgzIVUZuLZkAALZAwFq7kSixJ_WmzQ0J1IrVKSVGR68lvD8MOjj6:1uuaLs:4MILt0FvRogi3s3NKwLbEdlA1VyZGyEPiEauJ2uufIU",
+    "expire_date": "2025-09-19T17:35:56.727Z"
+  }
+},
+{
+  "model": "events.category",
+  "pk": 1,
+  "fields": {
+    "name": "�����������",
+    "slug": "default-category",
+    "description": ""
+  }
+},
+{
+  "model": "events.category",
+  "pk": 2,
+  "fields": {
+    "name": "����������",
+    "slug": "technology",
+    "description": ""
+  }
+},
+{
+  "model": "events.category",
+  "pk": 3,
+  "fields": {
+    "name": "������",
+    "slug": "music",
+    "description": ""
+  }
+},
+{
+  "model": "events.category",
+  "pk": 4,
+  "fields": {
+    "name": "�����",
+    "slug": "sport",
+    "description": ""
+  }
+},
+{
+  "model": "events.category",
+  "pk": 5,
+  "fields": {
+    "name": "�����������",
+    "slug": "education",
+    "description": "��������������� ����������� � ��������"
+  }
+},
+{
+  "model": "events.category",
+  "pk": 6,
+  "fields": {
+    "name": "���������",
+    "slug": "art",
+    "description": "��������, ������� � �������������� �������"
+  }
+},
+{
+  "model": "events.category",
+  "pk": 7,
+  "fields": {
+    "name": "������",
+    "slug": "business",
+    "description": "������-�����������"
+  }
+},
+{
+  "model": "events.event",
+  "pk": 1,
+  "fields": {
+    "title": "TechConf 2025",
+    "description": "���������� ����������� � ����������� � ����������",
+    "short_description": "��������������� �����������",
+    "date": "2025-10-15T07:00:00Z",
+    "location": "������, ������ ���� ����",
+    "event_type": "offline",
+    "image": "events/default_event_OThPhzf.jpg",
+    "category": 1,
+    "organizer": 2,
+    "price": "5000.00",
+    "capacity": 50,
+    "is_active": true,
+    "created_at": "2025-09-05T17:39:41.012Z",
+    "updated_at": "2025-09-05T17:39:41.012Z",
+    "average_rating": "0.00",
+    "tickets_available": 0
+  }
+},
+{
+  "model": "events.event",
+  "pk": 2,
+  "fields": {
+    "title": "Summer Music Festival",
+    "description": "����������� ������ ��������, ������� � �����������",
+    "short_description": "���������� ������ ����������� ���������",
+    "date": "2025-11-04T17:40:41Z",
+    "location": "�����-���������, ���� 300-�����",
+    "event_type": "offline",
+    "image": "events/default_event_ygNJ8Hl.jpg",
+    "category": 3,
+    "organizer": 1,
+    "price": "3000.00",
+    "capacity": 10000,
+    "is_active": true,
+    "created_at": "2025-09-05T17:40:41.324Z",
+    "updated_at": "2025-09-05T17:41:01.029Z",
+    "average_rating": "0.00",
+    "tickets_available": 0
+  }
+},
+{
+  "model": "events.event",
+  "pk": 3,
+  "fields": {
+    "title": "���������� �������",
+    "description": "������� �� 42 �� �� ������ ������",
+    "short_description": "������� ������� �������� ����",
+    "date": "2025-10-20T17:40:41.405Z",
+    "location": "������, ��������� �������",
+    "event_type": "offline",
+    "image": "events/default_event_YNvmmrx.jpg",
+    "category": 4,
+    "organizer": 1,
+    "price": "2000.00",
+    "capacity": 5000,
+    "is_active": true,
+    "created_at": "2025-09-05T17:40:41.412Z",
+    "updated_at": "2025-09-05T17:40:41.412Z",
+    "average_rating": "0.00",
+    "tickets_available": 0
+  }
+},
+{
+  "model": "events.event",
+  "pk": 4,
+  "fields": {
+    "title": "Digital Marketing Webinar",
+    "description": "��������������� � ������ ������������� ��������, ��� �� ��������:\n� ������ digital-���������� 2025\n� ����������� ����������� SMM\n� SEO-����������� ��� ����� �������\n� ����� �������� ��������\n\n�������: ���� ������, ������� � 10-������ ������",
+    "short_description": "����������� ��������� ��������� ����������",
+    "date": "2025-09-12T17:44:20.745Z",
+    "location": "������-��������� Zoom",
+    "event_type": "online",
+    "image": "events/digital_marketing_webinar_xOamyxc.jpg",
+    "category": 5,
+    "organizer": 1,
+    "price": "0.00",
+    "capacity": 1000,
+    "is_active": true,
+    "created_at": "2025-09-05T17:44:20.792Z",
+    "updated_at": "2025-09-05T17:44:20.950Z",
+    "average_rating": "0.00",
+    "tickets_available": 0
+  }
+},
+{
+  "model": "events.event",
+  "pk": 5,
+  "fields": {
+    "title": "����������� ���������",
+    "description": "���������� �� ���������� ��������, �������������� ������ ������ ����������� ������� ����������. \n\n� ����������:\n� ������� ������� ��������\n� ����������� � �����-���\n� ���������� � ���-�������\n� ��������� � ���������������\n\n����: 15 ������� - 15 ������ 2025\n�����: 11:00 - 20:00, ���������",
+    "short_description": "������������ �������� ����������� ����������",
+    "date": "2025-10-05T17:44:20.978Z",
+    "location": "������, ��������������� ������������� �������, ������������ ��������, 10",
+    "event_type": "offline",
+    "image": "events/art_exhibition_NhJWM91.jpg",
+    "category": 6,
+    "organizer": 1,
+    "price": "1500.00",
+    "capacity": 200,
+    "is_active": true,
+    "created_at": "2025-09-05T17:44:20.982Z",
+    "updated_at": "2025-09-05T17:44:21.003Z",
+    "average_rating": "0.00",
+    "tickets_available": 0
+  }
+},
+{
+  "model": "events.event",
+  "pk": 6,
+  "fields": {
+    "title": "TechConf 2025",
+    "description": "���������� ����������� � ����������� � ����������. \n������� ������� � ���������� � ������� IT, �������������� ���������� � �������� �������������.\n\n�������� ����:\n� ������������� ��������� � �������� ��������\n� ����������������� � ��������\n� Cloud computing � DevOps\n� �������� � ��������� ����������",
+    "short_description": "������� ��������������� ����������� ����",
+    "date": "2025-10-21T03:44:21.062Z",
+    "location": "������, ������ ���� ����",
+    "event_type": "offline",
+    "image": "events/techconf_2025_Ah0MaMJ.jpg",
+    "category": 2,
+    "organizer": 1,
+    "price": "5000.00",
+    "capacity": 1000,
+    "is_active": true,
+    "created_at": "2025-09-05T17:44:21.066Z",
+    "updated_at": "2025-09-05T17:44:21.087Z",
+    "average_rating": "0.00",
+    "tickets_available": 0
+  }
+},
+{
+  "model": "events.event",
+  "pk": 7,
+  "fields": {
+    "title": "Business Forum 2025",
+    "description": "������� � �������� ����������������� � �����������",
+    "short_description": "������������� ������-�����",
+    "date": "2025-12-04T17:48:57.122Z",
+    "location": "��������",
+    "event_type": "hybrid",
+    "image": "",
+    "category": 7,
+    "organizer": 1,
+    "price": "10000.00",
+    "capacity": 500,
+    "is_active": true,
+    "created_at": "2025-09-05T17:48:57.123Z",
+    "updated_at": "2025-09-05T17:48:57.123Z",
+    "average_rating": "0.00",
+    "tickets_available": 0
+  }
+},
+{
+  "model": "events.registration",
+  "pk": 1,
+  "fields": {
+    "user": 2,
+    "event": 4,
+    "status": "pending",
+    "registration_date": "2025-09-05T19:28:09.716Z"
+  }
+},
+{
+  "model": "events.registration",
+  "pk": 2,
+  "fields": {
+    "user": 2,
+    "event": 5,
+    "status": "pending",
+    "registration_date": "2025-09-07T12:19:22.022Z"
+  }
+},
+{
+  "model": "events.cart",
+  "pk": 1,
+  "fields": {
+    "user": 2,
+    "created_at": "2025-09-06T21:28:14.861Z",
+    "updated_at": "2025-09-06T21:28:14.861Z"
+  }
+},
+{
+  "model": "accounts.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$2unCckd9bwwt5jLofP9Ewt$R7xOX0cnnBlwL34BCj/bBPZ9j2peWIY8g9OtNAVR30g=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "lacher83@mail.ru",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-09-05T17:25:19.033Z",
+    "role": "user",
+    "phone": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$Pv5sxAvQkfrKj67abZ7o8D$BX8tzJ50Pi8b/k17l5h5p/SxGCVx3TobCPoMjmAa3NI=",
+    "last_login": "2025-09-05T17:35:56.717Z",
+    "is_superuser": true,
+    "username": "Olaf",
+    "first_name": "",
+    "last_name": "",
+    "email": "lacher83@mail.ru",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-09-05T17:31:28.231Z",
+    "role": "user",
+    "phone": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "accounts.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$RmHeJgnp7GIMsq2CTXQ4Xs$JEcJf2eZ1M0zxuTzj1dfeHjTZoD7o4awMT0EV3V9Ouw=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "lacher83",
+    "first_name": "",
+    "last_name": "",
+    "email": "lacher83@mail.ru",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-09-07T13:30:31.477Z",
+    "role": "user",
+    "phone": "",
+    "avatar": "",
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]

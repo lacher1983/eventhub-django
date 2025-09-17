@@ -1,12 +1,12 @@
 from rest_framework import viewsets
-from ..models import Event
-from .serializers import EventSerializer
-from rest_framework import viewsets, permissions, status
+from ..models import Registration
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from ..models import Event, Favorite, Review
-from .serializers import EventSerializer, FavoriteSerializer, ReviewSerializer
+from .serializers import EventSerializer, FavoriteSerializer, ReviewSerializer, RegistrationSerializer
+from rest_framework import generics
 
 class EventViewSet(viewsets.ReadOnlyModelViewSet):
     """API для мероприятий"""
@@ -53,6 +53,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         return Review.objects.filter(user=self.request.user).select_related('event')
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class EventListAPIView(generics.ListAPIView):
+    serializer_class = EventSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        return Event.objects.filter(is_active=True)
+
+class RegistrationCreateAPIView(generics.CreateAPIView):
+    serializer_class = RegistrationSerializer
+    permission_classes = [permissions.IsAuthenticated]
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
