@@ -170,7 +170,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Время
 TIME_ZONE = 'Europe/Moscow'
 
-# Email settings
+# Email настройки
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -178,6 +178,10 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'your-email@gmail.com'
 EMAIL_HOST_PASSWORD = 'your-app-password'
 DEFAULT_FROM_EMAIL = 'EventHub <noreply@eventhub.com>'
+
+# Для тестирования (в разработке)
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 # Stripe settings (для реальной оплаты)
 STRIPE_PUBLIC_KEY = 'pk_test_your_public_key'

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -9,6 +10,128 @@ from django.utils import timezone
 import stripe
 from .models import Cart, CartItem, Order, OrderItem, Event
 from .forms import AddToCartForm, CheckoutForm, PaymentForm
+import json
+
+
+@login_required
+def cart_detail(request):
+    """Детальная страница корзины"""
+    try:
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart_items = cart.items.select_related('event').all()
+        
+        total_amount = sum(item.total_price for item in cart_items)
+        total_quantity = sum(item.quantity for item in cart_items)
+        
+        context = {
+            'cart_items': cart_items,
+            'total_amount': total_amount,
+            'total_quantity': total_quantity,
+        }
+        return render(request, 'events/cart_detail.html', context)
+        
+    except Exception as e:
+        messages.error(request, f'Ошибка при загрузке корзины: {str(e)}')
+        return redirect('event_list')
+    
+@login_required
+@require_POST
+def cart_add(request, event_id):
+    """Добавление мероприятия в корзину"""
+    try:
+        event = get_object_or_404(Event, id=event_id, is_active=True)
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        
+        # Проверяем, не добавлено ли уже мероприятие в корзину
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            event=event,
+            defaults={'quantity': 1}
+        )
+        
+        if not created:
+            cart_item.quantity += 1
+            cart_item.save()
+        
+        messages.success(request, f'Мероприятие "{event.title}" добавлено в корзину')
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Мероприятие добавлено в корзину',
+                'cart_count': cart.items.count()
+            })
+            
+    except Exception as e:
+        messages.error(request, f'Ошибка при добавлении в корзину: {str(e)}')
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=400)
+    
+    return redirect('event_detail', pk=event_id)
+
+@login_required
+@require_POST
+def cart_remove(request, event_id):
+    """Удаление мероприятия из корзины"""
+    try:
+        cart = get_object_or_404(Cart, user=request.user)
+        cart_item = get_object_or_404(CartItem, cart=cart, event_id=event_id)
+        cart_item.delete()
+        
+        messages.success(request, 'Мероприятие удалено из корзины')
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Мероприятие удалено из корзины'
+            })
+            
+    except Exception as e:
+        messages.error(request, f'Ошибка при удалении из корзины: {str(e)}')
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=400)
+    
+    return redirect('cart_detail')
+
+@login_required
+@require_POST
+def cart_update(request, event_id):
+    """Обновление количества билетов в корзине"""
+    try:
+        action = request.POST.get('action')
+        cart = get_object_or_404(Cart, user=request.user)
+        cart_item = get_object_or_404(CartItem, cart=cart, event_id=event_id)
+        
+        if action == 'increase':
+            cart_item.quantity += 1
+        elif action == 'decrease' and cart_item.quantity > 1:
+            cart_item.quantity -= 1
+        
+        cart_item.save()
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'success',
+                'quantity': cart_item.quantity,
+                'total_price': cart_item.total_price
+            })
+            
+    except Exception as e:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=400)
+    
+    return redirect('cart_detail')
+
+
 
 def get_user_cart(user):
     """Вспомогательная функция для получения корзины пользователя"""
@@ -199,51 +322,70 @@ def checkout(request):
 
 @login_required
 def payment(request):
-    order_id = request.session.get('order_id')
-    if not order_id:
-        return redirect('cart_view')
-    
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-    
-    if request.method == 'POST':
-        form = PaymentForm(request.POST)
-        if form.is_valid():
-            # Здесь будет интеграция с платежной системой
-            # Для демонстрации просто помечаем как оплаченное
-            order.status = 'paid'
-            order.payment_date = timezone.now()
-            order.save()
+    """Страница оплаты"""
+    try:
+        cart = get_object_or_404(Cart, user=request.user)
+        cart_items = cart.items.select_related('event').all()
+        
+        if not cart_items:
+            messages.warning(request, 'Ваша корзина пуста')
+            return redirect('cart_detail')
+        
+        total_amount = sum(item.total_price for item in cart_items)
+        
+        # Обработка выбора способа оплаты
+        selected_method = None
+        if request.method == 'POST':
+            selected_method = request.POST.get('payment_method')
             
-            # Обновляем количество доступных билетов
-            for order_item in order.items.all():
-                event = order_item.event
-                event.tickets_available -= order_item.quantity
-                event.save()
-
-            # Очищаем корзину
-            CartItem.objects.filter(cart__user=request.user).delete()
-
-            # Очищаем сессию (исправление)
-            del request.session['order_id']
-            
-            # Отправляем email
-            send_order_confirmation(order)
-            
-            messages.success(request, "Оплата прошла успешно! Чек отправлен на email.")
-            return redirect('order_success', order_id=order.id)
-    else:
-        form = PaymentForm()
-    
-    return render(request, 'events/payment.html', {
-        'order': order,
-        'form': form,
-        'stripe_public_key': settings.STRIPE_PUBLIC_KEY
-    })
+            # Здесь должна быть логика обработки платежа
+            if selected_method in ['card', 'yoomoney']:
+                # Создаем заказ
+                order = Order.objects.create(
+                    user=request.user,
+                    total_amount=total_amount,
+                    status='pending'
+                )
+                
+                # Добавляем items в заказ
+                for cart_item in cart_items:
+                    order.items.create(
+                        event=cart_item.event,
+                        quantity=cart_item.quantity,
+                        price=cart_item.event.price
+                    )
+                
+                # Очищаем корзину
+                cart.items.all().delete()
+                
+                messages.success(request, 'Заказ успешно создан! Перенаправляем на оплату...')
+                return redirect('payment_success')
+        
+        context = {
+            'cart_items': cart_items,
+            'total_amount': total_amount,
+            'selected_method': selected_method,
+        }
+        return render(request, 'events/payment.html', context)
+        
+    except Exception as e:
+        messages.error(request, f'Ошибка при оформлении заказа: {str(e)}')
+        return redirect('cart_detail')
 
 @login_required
-def order_success(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-    return render(request, 'events/order_success.html', {'order': order})
+def payment_success(request):
+    """Страница успешной оплаты"""
+    from django.utils import timezone
+    context = {
+        'current_date': timezone.now().strftime('%d.%m.%Y %H:%M')
+    }
+    return render(request, 'events/payment_success.html', context)
+
+@login_required
+def payment_cancel(request):
+    """Страница отмены оплаты"""
+    messages.info(request, 'Оплата была отменена')
+    return render(request, 'events/payment_cancel.html')
 
 def send_order_confirmation(order):
     subject = f"Подтверждение заказа #{order.order_number}"
@@ -260,3 +402,8 @@ def send_order_confirmation(order):
         [order.user.email],
         html_message=html_message
     )
+
+# Подсчет общей стоимости
+@property
+def total_price(self):
+    return sum(item.price * item.quantity for item in self.items.all())

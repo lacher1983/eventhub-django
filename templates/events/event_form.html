@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Редактирование {{ object.title }}{% else %}Создание мероприятия{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        {% if object %}
+                            <i class="bi bi-pencil-square"></i> Редактировать мероприятие
+                        {% else %}
+                            <i class="bi bi-plus-circle"></i> Создать новое мероприятие
+                        {% endif %}
+                    </h4>
+                </div>
+                
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Основная информация -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Основная информация</h5>
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">
+                                    {{ form.title.label }} *
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger small">{{ form.title.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.short_description.id_for_label }}" class="form-label">
+                                    {{ form.short_description.label }} *
+                                </label>
+                                {{ form.short_description }}
+                                <div class="form-text">Краткое описание для карточек мероприятий</div>
+                                {% if form.short_description.errors %}
+                                    <div class="text-danger small">{{ form.short_description.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    {{ form.description.label }} *
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger small">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Классификация мероприятия -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Классификация</h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">
+                                    {{ form.category.label }} *
+                                </label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger small">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.event_type.id_for_label }}" class="form-label">
+                                    {{ form.event_type.label }} *
+                                </label>
+                                {{ form.event_type }}
+                                {% if form.event_type.errors %}
+                                    <div class="text-danger small">{{ form.event_type.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.event_format.id_for_label }}" class="form-label">
+                                    {{ form.event_format.label }} *
+                                </label>
+                                {{ form.event_format }}
+                                {% if form.event_format.errors %}
+                                    <div class="text-danger small">{{ form.event_format.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.difficulty_level.id_for_label }}" class="form-label">
+                                    {{ form.difficulty_level.label }}
+                                </label>
+                                {{ form.difficulty_level }}
+                                {% if form.difficulty_level.errors %}
+                                    <div class="text-danger small">{{ form.difficulty_level.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Дата и место -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Дата и место проведения</h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.date.id_for_label }}" class="form-label">
+                                    {{ form.date.label }} *
+                                </label>
+                                {{ form.date }}
+                                {% if form.date.errors %}
+                                    <div class="text-danger small">{{ form.date.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.location.id_for_label }}" class="form-label">
+                                    {{ form.location.label }} *
+                                </label>
+                                {{ form.location }}
+                                <div class="form-text">Для онлайн мероприятий - укажите платформу</div>
+                                {% if form.location.errors %}
+                                    <div class="text-danger small">{{ form.location.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.requirements.id_for_label }}" class="form-label">
+                                    {{ form.requirements.label }}
+                                </label>
+                                {{ form.requirements }}
+                                <div class="form-text">Что участникам нужно взять с собой или подготовить</div>
+                                {% if form.requirements.errors %}
+                                    <div class="text-danger small">{{ form.requirements.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Организация и билеты -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Организация</h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.capacity.id_for_label }}" class="form-label">
+                                    {{ form.capacity.label }} *
+                                </label>
+                                {{ form.capacity }}
+                                {% if form.capacity.errors %}
+                                    <div class="text-danger small">{{ form.capacity.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tickets_available.id_for_label }}" class="form-label">
+                                    {{ form.tickets_available.label }} *
+                                </label>
+                                {{ form.tickets_available }}
+                                {% if form.tickets_available.errors %}
+                                    <div class="text-danger small">{{ form.tickets_available.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Финансы -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Стоимость участия</h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.price.id_for_label }}" class="form-label">
+                                    {{ form.price.label }}
+                                </label>
+                                {{ form.price }}
+                                {% if form.price.errors %}
+                                    <div class="text-danger small">{{ form.price.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4 pt-2">
+                                    {{ form.is_free }}
+                                    <label for="{{ form.is_free.id_for_label }}" class="form-check-label">
+                                        {{ form.is_free.label }}
+                                    </label>
+                                </div>
+                                {% if form.is_free.errors %}
+                                    <div class="text-danger small">{{ form.is_free.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Изображение и теги -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Визуал и теги</h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.image.id_for_label }}" class="form-label">
+                                    {{ form.image.label }}
+                                </label>
+                                {{ form.image }}
+                                {% if form.image.errors %}
+                                    <div class="text-danger small">{{ form.image.errors }}</div>
+                                {% endif %}
+                                {% if object and object.image %}
+                                    <div class="mt-2">
+                                        <img src="{{ object.image.url }}" alt="{{ object.title }}" class="img-thumbnail" style="max-height: 150px;">
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.tags.id_for_label }}" class="form-label">
+                                    {{ form.tags.label }}
+                                </label>
+                                {{ form.tags }}
+                                {% if form.tags.errors %}
+                                    <div class="text-danger small">{{ form.tags.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Статус -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Статус мероприятия</h5>
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <div class="form-check">
+                                    {{ form.is_active }}
+                                    <label for="{{ form.is_active.id_for_label }}" class="form-check-label">
+                                        {{ form.is_active.label }}
+                                    </label>
+                                </div>
+                                <div class="form-text">Если снять галочку, мероприятие не будет отображаться в каталоге</div>
+                                {% if form.is_active.errors %}
+                                    <div class="text-danger small">{{ form.is_active.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Кнопки -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{% if object %}{% url 'event_detail' object.pk %}{% else %}{% url 'event_list' %}{% endif %}" 
+                                       class="btn btn-secondary">Отмена</a>
+                                    <button type="submit" class="btn btn-primary">
+                                        {% if object %}Сохранить изменения{% else %}Создать мероприятие{% endif %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('{{ form.category.id_for_label }}');
+    const typeSelect = document.getElementById('{{ form.event_type.id_for_label }}');
+    
+    if (categorySelect && typeSelect) {
+        // Все типы мероприятий из контекста
+        const allTypes = JSON.parse('{{ event_types_json|escapejs }}');
+        
+        // Группировка типов по категориям
+        const typeGroups = {
+            'education': ['webinar', 'workshop', 'course', 'lecture', 'training'],
+            'business': ['conference', 'business_meeting', 'networking', 'exhibition'],
+            'entertainment': ['concert', 'party', 'festival', 'show'],
+            'culture': ['exhibition_culture', 'tour', 'master_class'],
+            'sport': ['competition', 'sport_event', 'tournament'],
+            'social': ['charity', 'volunteering', 'community'],
+        };
+
+        function updateEventTypes() {
+            const category = categorySelect.value;
+            const currentValue = typeSelect.value;
+            
+            // Сохраняем текущее выбранное значение
+            const currentSelected = typeSelect.value;
+            
+            // Очищаем выпадающий список
+            typeSelect.innerHTML = '';
+            
+            // Добавляем пустой option
+            const emptyOption = document.createElement('option');
+            emptyOption.value = '';
+            emptyOption.textContent = '–––– Выберите тип ––––';
+            typeSelect.appendChild(emptyOption);
+            
+            // Фильтруем типы по категории
+            let filteredTypes = allTypes;
+            if (category && typeGroups[category]) {
+                filteredTypes = allTypes.filter(type => 
+                    typeGroups[category].includes(type[0])
+                );
+            }
+            
+            // Добавляем отфильтрованные options
+            filteredTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type[0];
+                option.textContent = type[1];
+                
+                // Восстанавливаем выбранное значение
+                if (type[0] === currentSelected) {
+                    option.selected = true;
+                }
+                
+                typeSelect.appendChild(option);
+            });
+            
+            // Если текущее значение не в отфильтрованном списке, сбрасываем выбор
+            if (currentSelected && !filteredTypes.some(type => type[0] === currentSelected)) {
+                typeSelect.value = '';
+            }
+        }
+        
+        // Обработчик изменения категории
+        categorySelect.addEventListener('change', updateEventTypes);
+        
+        // Инициализация при загрузке страницы
+        updateEventTypes();
+        
+        // Обработчик для поля "Бесплатное мероприятие"
+        const isFreeCheckbox = document.getElementById('{{ form.is_free.id_for_label }}');
+        const priceInput = document.getElementById('{{ form.price.id_for_label }}');
+        
+        if (isFreeCheckbox && priceInput) {
+            function updatePriceField() {
+                if (isFreeCheckbox.checked) {
+                    priceInput.value = '0';
+                    priceInput.disabled = true;
+                    priceInput.classList.add('bg-light');
+                } else {
+                    priceInput.disabled = false;
+                    priceInput.classList.remove('bg-light');
+                }
+            }
+            
+            isFreeCheckbox.addEventListener('change', updatePriceField);
+            updatePriceField(); // Инициализация
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,19 +1,37 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db.models import Q, Count, Avg
 from django_filters import FilterSet, CharFilter, NumberFilter, ChoiceFilter, DateFilter
 from django.utils import timezone
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-
 from .models import Event, Category, Registration, Advertisement, Favorite, Review
-from .forms import EventForm, RegistrationForm, ReviewForm
+from .forms import EventForm, RegistrationForm, ReviewForm, EventFilterForm, CustomUserCreationForm
+import json
+from django.contrib.auth import login, logout
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import get_user_model
+from django.contrib.auth.views import LogoutView
+from django.contrib.auth.models import User
 
+# Подтверждение email
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from .models import EmailConfirmation
+
+# Обработка исключений
+from django.db import DatabaseError
+from django.http import Http404
+
+# Используем кастомную модель пользователя
+User = get_user_model()
 
 # ==================== РЕКЛАМНЫЕ ФУНКЦИИ ====================
 @require_POST
@@ -46,21 +64,49 @@ class EventListView(ListView):
     model = Event
     template_name = 'events/event_list.html'
     context_object_name = 'events'
-    paginate_by = 9
+    paginate_by = 12
 
     def get_queryset(self):
-        queryset = Event.objects.filter(
-            is_active=True, 
-            date__gte=timezone.now()
-        ).select_related('category', 'organizer').annotate(
-            registrations_count=Count('registrations'),
-            avg_rating=Avg('reviews__rating')
-        )
+        queryset = Event.objects.filter(is_active=True).select_related('organizer')
         
+        print("=== DEBUG FILTERS ===")
+        print(f"Initial queryset count: {queryset.count()}")
+
+        # Получаем параметры фильтрации
+        category = self.request.GET.get('category', '')
+        event_type = self.request.GET.get('event_type', '')
+        event_format = self.request.GET.get('event_format', '')
+        difficulty_level = self.request.GET.get('difficulty_level', '')
+        price_type = self.request.GET.get('price_type', '')
+        search_query = self.request.GET.get('q', '')
+
+        print(f"Category filter: '{category}'")
+        print(f"Event type filter: '{event_type}'")
+        print(f"Event format filter: '{event_format}'")
+        print(f"Difficulty level filter: '{difficulty_level}'")
+        print(f"Price type filter: '{price_type}'")
+        print(f"Search query: '{search_query}'")
+
         # Фильтрация по категории
-        category_slug = self.request.GET.get('category')
-        if category_slug:
-            queryset = queryset.filter(category__slug=category_slug)
+        if category:
+            # Находим ID категории по slug
+            try:
+                category_obj = Category.objects.get(slug=category)
+                queryset = queryset.filter(category=str(category_obj.id))
+            except Category.DoesNotExist:
+                # Если категория не найдена, возвращаем пустой queryset
+                queryset = queryset.none()
+
+        if event_type:
+            queryset = queryset.filter(event_type=event_type)
+        if event_format:
+            queryset = queryset.filter(event_format=event_format)
+        if difficulty_level:
+            queryset = queryset.filter(difficulty_level=difficulty_level)
+        if price_type == 'free':
+            queryset = queryset.filter(Q(price=0) | Q(is_free=True))
+        elif price_type == 'paid':
+            queryset = queryset.filter(price__gt=0, is_free=False)        
         
         # Поиск
         search_query = self.request.GET.get('q')
@@ -82,22 +128,35 @@ class EventListView(ListView):
         else:
             queryset = queryset.order_by('date')
             
-        return queryset
+        return queryset.order_by('-date')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.all()
-        context['current_category'] = self.request.GET.get('category', '')
-        context['search_query'] = self.request.GET.get('q', '')
-        context['current_sort'] = self.request.GET.get('sort', 'date')
         
-        # ДОБАВЛЯЕМ ИНФОРМАЦИЮ О РЕГИСТРАЦИЯХ И ИЗБРАННОМ
+        # Добавляем категории в контекст
+        context['categories'] = Category.objects.all()
+
+        # Добавляем текущие параметры фильтрации в контекст
+        context['current_filters'] = {
+            'category': self.request.GET.get('category', ''),
+            'event_type': self.request.GET.get('event_type', ''),
+            'event_format': self.request.GET.get('event_format', ''),
+            'difficulty_level': self.request.GET.get('difficulty_level', ''),
+            'price_type': self.request.GET.get('price_type', ''),
+            'search': self.request.GET.get('q', ''),
+        }
+        
+        # ИНФОРМАЦИЯ О РЕГИСТРАЦИЯХ
         if self.request.user.is_authenticated:
-            # ID мероприятий на которые пользователь зарегистрирован
-            user_events = Registration.objects.filter(
+            # ID мероприятий, на которые пользователь зарегистрирован
+            user_registered_ids = Registration.objects.filter(
                 user=self.request.user
             ).values_list('event_id', flat=True)
-            context['user_registered_events'] = user_events
+            context['user_registered_events'] = list(user_registered_ids)
+
+            # Отладочная информация
+            print(f"User: {self.request.user.username}")
+            print(f"Registered events IDs: {list(user_registered_ids)}")
             
             # Помечаем избранные события
             for event in context['events']:
@@ -105,7 +164,10 @@ class EventListView(ListView):
                     user=self.request.user, 
                     event=event
                 ).exists()
-        
+        else:
+            context['user_registered_events'] = []
+            print("User is not authenticated")
+
         return context
 
 
@@ -117,17 +179,19 @@ class EventDetailView(DetailView):
 
     def get_queryset(self):
         return Event.objects.select_related(
-            'category', 'organizer'
+            'organizer'
         ).prefetch_related(
             'reviews', 'reviews__user'
         ).annotate(
             registrations_count=Count('registrations'),
+            avg_rating=Avg('reviews__rating')
         )
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         event = self.get_object()
         
+        # Информация о регистрации и избранном
         context['is_registered'] = False
         context['is_favorite'] = False
         context['user_review'] = None
@@ -148,12 +212,24 @@ class EventDetailView(DetailView):
                 user=self.request.user, event=event
             ).first()
         
-        context['available_seats'] = event.capacity - event.registrations_count
+        # Все отзывы о мероприятии
         context['reviews'] = event.reviews.all().select_related('user')
         context['review_form'] = ReviewForm()
-        
-        return context
+        context['available_seats'] = event.capacity - event.registrations_count
 
+        # Используем аннотацию avg_rating
+        context['average_rating'] = getattr(event, 'avg_rating', None)
+
+        return context
+    
+    def get_object(self, queryset=None):
+        try:
+            return super().get_object(queryset)
+        except Http404:
+            raise Http404("Мероприятие не найдено")
+        except DatabaseError:
+            messages.error(self.request, "Ошибка базы данных")
+            return redirect('event_list')
 
 class EventCreateView(LoginRequiredMixin, CreateView):
     """Создание мероприятия"""
@@ -167,6 +243,10 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'Мероприятие успешно создано!')
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['event_types_json'] = json.dumps(list(Event.EVENT_TYPES))
+        return context
 
 class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """Редактирование мероприятия"""
@@ -235,7 +315,7 @@ class EventSearchView(ListView):
         queryset = Event.objects.filter(
             is_active=True, 
             date__gte=timezone.now()
-        ).select_related('category', 'organizer').annotate(
+        ).select_related('organizer').annotate(
             registrations_count=Count('registrations'),
             average_rating=Avg('reviews__rating')
         )
@@ -291,7 +371,7 @@ class EventCalendarView(TemplateView):
         context['events'] = Event.objects.filter(
             is_active=True, 
             date__gte=timezone.now()
-        ).select_related('category')
+        )
         return context
 
 
@@ -302,12 +382,30 @@ class FavoriteListView(LoginRequiredMixin, ListView):
     context_object_name = 'favorites'
 
     def get_queryset(self):
+        # Простой запрос без аннотаций
         return Favorite.objects.filter(
             user=self.request.user
-        ).select_related('event', 'event__category').annotate(
-            registrations_count=Count('event__registration'),
-            average_rating=Avg('event__reviews__rating')
-        )
+        ).select_related('event', 'event__organizer')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Добавляем дополнительную информацию для каждого избранного мероприятия
+        for favorite in context['favorites']:
+            # Количество регистраций
+            favorite.event.registrations_count = favorite.event.registrations.count()
+            
+            # Средний рейтинг
+            avg_rating = favorite.event.reviews.aggregate(
+                avg_rating=Avg('rating')
+            )['avg_rating']
+            favorite.event.average_rating = avg_rating if avg_rating else 0
+            
+            # Краткое описание (если пустое)
+            if not favorite.event.short_description:
+                favorite.event.short_description = "Описание отсутствует"
+        
+        return context
 
 
 # ==================== ФУНКЦИИ ДЕКОРАТОРЫ ====================
@@ -353,10 +451,7 @@ def register_for_event(request, pk):
 @login_required
 def user_registrations(request):
     """Страница с регистрациями пользователя"""
-    registrations = Registration.objects.filter(
-        user=request.user
-    ).select_related('event', 'event__category').order_by('-registration_date')
-    
+    registrations = Registration.objects.filter(user=request.user).select_related('event', 'event__organizer')
     return render(request, 'events/user_registrations.html', {
         'registrations': registrations
     })
@@ -413,4 +508,176 @@ def edit_review(request, review_id):
     return render(request, 'events/edit_review.html', {
         'form': form,
         'review': review
+    })
+
+from django.contrib.auth import login
+
+
+class CustomLogoutView(LogoutView):
+    """Кастомный выход из системы"""
+    next_page = 'event_list'
+
+    def get(self, request, *args, **kwargs):
+        # Разрешаем GET запросы для выхода
+        return self.post(request, *args, **kwargs)
+    
+def register(request):
+    """Регистрация нового пользователя"""
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        print("=== ДЕБАГ РЕГИСТРАЦИИ ===")  # Добавим отладочный вывод
+        print("Данные формы:", request.POST)
+        print("Форма valid:", form.is_valid())
+        print("Ошибки формы:", form.errors)
+
+        if form.is_valid():
+            user = form.save()
+
+            # Отправляем email подтверждения
+            send_confirmation_email(user)
+            
+            # Автоматически входим после регистрации
+            login(request, user)
+            
+            messages.success(request, f'Регистрация прошла успешно! Добро пожаловать, {user.username}!')
+            return redirect('event_list')
+        else:
+            messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
+            print("ДЕТАЛЬНЫЕ ОШИБКИ:")
+            for field, errors in form.errors.items():
+                print(f"Поле {field}: {errors}")
+    else:
+        form = CustomUserCreationForm()
+    
+    return render(request, 'events/register.html', {'form': form})
+
+def custom_logout(request):
+    """Кастомный выход из системы"""
+    auth_logout(request)
+    messages.success(request, 'Вы успешно вышли из системы.')
+    return redirect('event_list')
+
+def send_confirmation_email(user):
+    """Отправка email для подтверждения"""
+    confirmation = EmailConfirmation.objects.get(user=user)
+    
+    subject = 'Подтверждение email на EventHub'
+    html_message = render_to_string('events/emails/confirmation_email.html', {
+        'user': user,
+        'confirmation_code': confirmation.confirmation_code,
+        'site_url': 'http://127.0.0.1:8000',  # Замените на ваш домен
+    })
+    plain_message = strip_tags(html_message)
+    
+    send_mail(
+        subject,
+        plain_message,
+        None,  # Используется DEFAULT_FROM_EMAIL
+        [user.email],
+        html_message=html_message,
+    )
+
+def confirm_email(request, confirmation_code):
+    """Подтверждение email"""
+    try:
+        confirmation = EmailConfirmation.objects.get(
+            confirmation_code=confirmation_code,
+            confirmed=False
+        )
+        
+        if confirmation.is_expired():
+            messages.error(request, 'Ссылка для подтверждения устарела.')
+            # Можно отправить новую ссылку
+            send_confirmation_email(confirmation.user)
+            messages.info(request, 'Новая ссылка отправлена на ваш email.')
+        else:
+            confirmation.confirmed = True
+            confirmation.save()
+            messages.success(request, 'Email успешно подтвержден!')
+            
+    except EmailConfirmation.DoesNotExist:
+        messages.error(request, 'Неверная ссылка подтверждения.')
+    
+    return redirect('event_list')
+
+# Управление подписками
+@login_required
+def subscription_settings(request):
+    """Настройки подписки на уведомления"""
+    subscription, created = Subscription.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        selected_categories = request.POST.getlist('categories')
+        subscription.categories.set(selected_categories)
+        subscription.is_active = bool(selected_categories)
+        subscription.save()
+        
+        messages.success(request, 'Настройки подписки обновлены!')
+        return redirect('subscription_settings')
+    
+    categories = Category.objects.all()
+    return render(request, 'events/subscription_settings.html', {
+        'subscription': subscription,
+        'categories': categories,
+    })
+
+@login_required
+def notifications(request):
+    """Страница уведомлений пользователя"""
+    notifications = Notification.objects.filter(
+        user=request.user
+    ).select_related('event').order_by('-sent_at')
+    
+    return render(request, 'events/notifications.html', {
+        'notifications': notifications,
+    })
+
+# Статистика 
+@login_required
+def event_statistics(request, pk):
+    """Статистика конкретного мероприятия"""
+    event = get_object_or_404(Event, pk=pk, organizer=request.user)
+    
+    # Базовая статистика
+    stats = {
+        'views': event.views_count or 0,
+        'registrations': event.registrations.count(),
+        'favorites': event.favorited_by.count(),
+        'conversion_rate': 0,
+    }
+    
+    if stats['views'] > 0:
+        stats['conversion_rate'] = round((stats['registrations'] / stats['views']) * 100, 2)
+    
+    return render(request, 'events/event_statistics.html', {
+        'event': event,
+        'stats': stats,
+    })
+
+@staff_member_required
+def platform_statistics(request):
+    """Статистика платформы (только для staff)"""
+    today = timezone.now().date()
+    
+    stats = {
+        'total_users': User.objects.count(),
+        'total_events': Event.objects.filter(is_active=True).count(),
+        'total_registrations': Registration.objects.count(),
+        'active_events_today': Event.objects.filter(
+            date__date=today,
+            is_active=True
+        ).count(),
+        'new_users_today': User.objects.filter(
+            date_joined__date=today
+        ).count(),
+    }
+    
+    # Популярные категории
+    popular_categories = Category.objects.annotate(
+        event_count=Count('event')
+    ).order_by('-event_count')[:5]
+    
+    return render(request, 'events/platform_statistics.html', {
+        'stats': stats,
+        'popular_categories': popular_categories,
     })

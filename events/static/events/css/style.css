@@ -46,3 +46,22 @@
     border-color: #007bff;
     box-shadow: 0 2px 8px rgba(0,123,255,0.1);
 }
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    --hover-transform: translateY(-5px) scale(1.02);
+}
+
+.modern-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.modern-card:hover {
+    transform: var(--hover-transform);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}

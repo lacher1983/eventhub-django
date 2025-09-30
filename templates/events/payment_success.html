@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Оплата успешна - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-header bg-success text-white py-4">
+                    <i class="fas fa-check-circle fa-4x mb-3"></i>
+                    <h1 class="h3 mb-0">Оплата прошла успешно!</h1>
+                </div>
+                
+                <div class="card-body p-5">
+                    <div class="success-animation mb-4">
+                        <i class="fas fa-check-circle text-success fa-5x"></i>
+                    </div>
+                    
+                    <h2 class="h4 mb-3">Спасибо за ваш заказ!</h2>
+                    
+                    <div class="alert alert-success mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Ваш заказ успешно оплачен. Билеты отправлены на вашу электронную почту.
+                    </div>
+                    
+                    <div class="order-details mb-4 p-3 bg-light rounded">
+                        <h5 class="mb-3">Детали заказа</h5>
+                        <div class="row text-start">
+                            <div class="col-6">
+                                <strong>Статус:</strong>
+                            </div>
+                            <div class="col-6">
+                                <span class="badge bg-success">Оплачено</span>
+                            </div>
+                        </div>
+                        <div class="row text-start mt-2">
+                            <div class="col-6">
+                                <strong>Дата оплаты:</strong>
+                            </div>
+                            <div class="col-6">
+                                {{ current_date }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="next-steps mb-4">
+                        <h5 class="mb-3">Что дальше?</h5>
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2">
+                                <i class="fas fa-envelope text-primary me-2"></i>
+                                Проверьте вашу электронную почту для получения билетов
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-calendar text-primary me-2"></i>
+                                Добавьте мероприятия в ваш календарь
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-user text-primary me-2"></i>
+                                Вы можете просмотреть свои регистрации в личном кабинете
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <a href="{% url 'event_list' %}" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-calendar me-2"></i>
+                                    Найти еще мероприятия
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{% url 'user_registrations' %}" class="btn btn-primary w-100">
+                                    <i class="fas fa-ticket-alt me-2"></i>
+                                    Мои регистрации
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Дополнительная информация -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body">
+                    <h5 class="mb-3">Нужна помощь?</h5>
+                    <p class="text-muted mb-3">
+                        Если у вас возникли вопросы по поводу вашего заказа, пожалуйста, свяжитесь с нашей службой поддержки.
+                    </p>
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-2">
+                            <i class="fas fa-envelope text-primary me-2"></i>
+                            <small>support@eventhub.ru</small>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <i class="fas fa-phone text-primary me-2"></i>
+                            <small>+7 (999) 123-45-67</small>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <i class="fas fa-clock text-primary me-2"></i>
+                            <small>24/7 Поддержка</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.success-animation {
+    animation: bounce 1s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.order-details {
+    border-left: 4px solid #28a745;
+}
+</style>
+{% endblock %}

@@ -1,14 +1,16 @@
 from django.db import models
-from django.conf import settings
 from django.urls import reverse
-from django.utils import timezone
-from PIL import Image
-from django.utils.text import slugify
 from django.core.files.base import ContentFile
 from PIL import Image
 import io
 import os
+from django.conf import settings
+from django.utils import timezone
+from django.utils.text import slugify
 from django.contrib.auth import get_user_model
+from datetime import timedelta
+import uuid
+
 
 class Advertisement(models.Model):
     AD_TYPES = [
@@ -78,10 +80,65 @@ class Category(models.Model):
         super().save(*args, **kwargs)
 
 class Event(models.Model):
+    # Группировка по категориям
+    EVENT_CATEGORIES = [
+        ('education', 'Образовательные'),
+        ('business', 'Бизнес'),
+        ('entertainment', 'Развлечения'),
+        ('culture', 'Культура'),
+        ('sport', 'Спорт'),
+        ('social', 'Социальные'),
+    ]
+    
+    # Детальные типы мероприятий
     EVENT_TYPES = [
+        # Образовательные
+        ('webinar', 'Вебинар'),
+        ('workshop', 'Мастер-класс'),
+        ('course', 'Курс'),
+        ('lecture', 'Лекция'),
+        ('training', 'Тренинг'),
+        
+        # Бизнес
+        ('conference', 'Конференция'),
+        ('business_meeting', 'Бизнес-встреча'),
+        ('networking', 'Нетворкинг'),
+        ('exhibition', 'Выставка'),
+        
+        # Развлечения
+        ('concert', 'Концерт'),
+        ('party', 'Вечеринка'),
+        ('festival', 'Фестиваль'),
+        ('show', 'Шоу'),
+        
+        # Культура
+        ('exhibition_culture', 'Выставка (культурная)'),
+        ('tour', 'Экскурсия'),
+        ('master_class', 'Мастер-класс (творческий)'),
+        
+        # Спорт
+        ('competition', 'Соревнование'),
+        ('sport_event', 'Спортивное событие'),
+        ('tournament', 'Турнир'),
+        
+        # Социальные
+        ('charity', 'Благотворительное'),
+        ('volunteering', 'Волонтерство'),
+        ('community', 'Сообщество'),
+    ]
+
+    EVENT_FORMATS = [
         ('online', 'Онлайн'),
         ('offline', 'Оффлайн'),
         ('hybrid', 'Гибридный'),
+    ]
+
+    # Уровни сложности
+    DIFFICULTY_LEVELS = [
+        ('beginner', 'Для начинающих'),
+        ('intermediate', 'Средний уровень'),
+        ('advanced', 'Для продвинутых'),
+        ('all', 'Для всех уровней'),
     ]
   
     title = models.CharField(max_length=200, verbose_name="Название мероприятия")
@@ -90,10 +147,18 @@ class Event(models.Model):
                                        default='Краткое описание мероприятия')
     date = models.DateTimeField(verbose_name="Дата и время")
     location = models.CharField(max_length=200, verbose_name="Место проведения")
-    event_type = models.CharField(max_length=10, choices=EVENT_TYPES, verbose_name="Тип мероприятия")
+    category = models.CharField(max_length=20, choices=EVENT_CATEGORIES, verbose_name="Категория", default='education')
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPES, verbose_name="Тип мероприятия", default='workshop')
+    event_format = models.CharField(max_length=10, choices=EVENT_FORMATS, verbose_name="Формат проведения", default='offline')
+    # Поля для сложности и требований
+    difficulty_level = models.CharField(
+        max_length=20, 
+        choices=DIFFICULTY_LEVELS, 
+        default='all',
+        verbose_name="Уровень сложности"
+    )
+    requirements = models.TextField(blank=True, verbose_name="Что нужно взять с собой")
     image = models.ImageField(upload_to='events/', blank=True, null=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, 
-                               null=True, verbose_name="Категория")
     organizer = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='organized_events', 
                                 verbose_name="Организатор")
     price = models.DecimalField(max_digits=10, decimal_places=2, 
@@ -104,7 +169,10 @@ class Event(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Активно")
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name="Дата обновления")
-    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0, verbose_name="Средний рейтинг")
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0, blank=True, verbose_name="Средний рейтинг")
+    
+    # Теги
+    tags = models.ManyToManyField('Tag', blank=True, verbose_name="Теги")
 
     class Meta:
         verbose_name = "Мероприятие"
@@ -148,7 +216,7 @@ class Event(models.Model):
             except:
                 pass
     
-       # Ресайз изображения если нужно
+       # Ресайз изображения
         super().save(*args, **kwargs)
         if self.image:
             try:
@@ -167,6 +235,50 @@ class Event(models.Model):
     def is_free_event(self):
         return self.price <= 0 or self.is_free
     
+    @property
+    def get_category_display_name(self):
+        """Возвращает читаемое название категории"""
+        return dict(self.EVENT_CATEGORIES).get(self.category, self.category)
+    
+    @property
+    def get_type_display_name(self):
+        """Возвращает читаемое название типа"""
+        return dict(self.EVENT_TYPES).get(self.event_type, self.event_type)
+    
+    @property
+    def get_difficulty_display_name(self):
+        """Возвращает читаемое название уровня сложности"""
+        return dict(self.DIFFICULTY_LEVELS).get(self.difficulty_level, self.difficulty_level)
+    
+    def get_similar_events(self):
+        """Получить похожие мероприятия (по категории и типу)"""
+        from django.db.models import Q
+        return Event.objects.filter(
+            Q(category=self.category) | Q(event_type=self.event_type),
+            is_active=True
+        ).exclude(pk=self.pk).distinct()[:6]
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True, verbose_name="Название тега")
+    slug = models.SlugField(unique=True)
+    color = models.CharField(max_length=7, default='#007bff', verbose_name="Цвет тега")  # HEX цвет
+    
+    class Meta:
+        verbose_name = "Тег"
+        verbose_name_plural = "Теги"
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+
 class Registration(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Ожидает'),
@@ -175,7 +287,7 @@ class Registration(models.Model):
     ]
     user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='registrations')
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='registrations')
-    registration_date = models.DateTimeField(auto_now_add=True)  # ТОЛЬКО ОДНО поле!
+    registration_date = models.DateTimeField(auto_now_add=True) 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     class Meta:
@@ -194,13 +306,15 @@ class Favorite(models.Model):
     """Модель для избранных мероприятий пользователя"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites', verbose_name="Пользователь")
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='favorited_by', verbose_name="Мероприятие")
+    created_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True)  # Персональные заметки
     registration_date = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="Дата регистрации")
 
     class Meta:
+        unique_together = ['user', 'event']  # Один пользователь может добавить событие в избранное только один раз
         verbose_name = "Избранное"
         verbose_name_plural = "Избранные мероприятия"
-        unique_together = ['user', 'event']  # Один пользователь - одно избранное на событие
-        ordering = ['-registration_date']
+        ordering = ['-registration_date', '-created_at']
 
     def __str__(self):
         return f"{self.user.username} - {self.event.title}"
@@ -256,27 +370,6 @@ class Review(models.Model):
         return f"{self.user.username} - {self.event.title} ({self.rating}⭐)"
     
 
-class Registration(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Ожидает'),
-        ('confirmed', 'Подтверждена'),
-        ('cancelled', 'Отменена'),
-    ]
-    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='registrations')
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='registrations')
-    registration_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    registration_date = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ['user', 'event']
-        ordering = ['-registration_date']
-        verbose_name = "Регистрация"
-        verbose_name_plural = "Регистрации"
-
-    def __str__(self):
-        return f"{self.user.username} - {self.event.title}"        
-
 # монетизируемся
 class Partner(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -321,21 +414,24 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = [['cart', 'event']]
+        unique_together = [['cart', 'event']]  # Один товар - одна позиция в корзине
+
+    @property
+    def total_price(self):
+        return self.quantity * self.price
 
     def __str__(self):
         return f"{self.quantity} x {self.event.title}"
 
-    @property
-    def total_price(self):
-        return self.event.price * self.quantity
-    
-    class Meta:
-        unique_together = [['cart', 'event']]  # Один товар - одна позиция в корзине
+    def save(self, *args, **kwargs):
+        # Автоматически устанавливаем цену из события при сохранении
+        if not self.price and self.event:
+            self.price = self.event.price
+        super().save(*args, **kwargs)
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -352,9 +448,9 @@ class Order(models.Model):
         ('yoomoney', 'ЮMoney'),
     ]
 
-    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='orders')
-    order_number = models.CharField(max_length=20, unique=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    order_number = models.CharField(max_length=20, unique=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -363,12 +459,31 @@ class Order(models.Model):
     stripe_payment_intent_id = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return f"Заказ #{self.order_number}"
+        return f"Заказ #{self.order_number} - {self.user.username}"
 
     def save(self, *args, **kwargs):
         if not self.order_number:
-            self.order_number = f"ORD{timezone.now().strftime('%Y%m%d')}{self.user.id:04d}"
+            # Генерируем уникальный номер заказа
+            self.order_number = self.generate_order_number()
         super().save(*args, **kwargs)
+
+    def generate_order_number(self):
+        """Генерация уникального номера заказа"""
+        import random
+        import string
+        from django.utils import timezone
+        
+        # Формат: ORDER-ГГММДД-XXXXX
+        date_part = timezone.now().strftime('%y%m%d')
+        random_part = ''.join(random.choices(string.digits, k=5))
+        order_number = f"ORDER-{date_part}-{random_part}"
+        
+        # Проверяем уникальность
+        while Order.objects.filter(order_number=order_number).exists():
+            random_part = ''.join(random.choices(string.digits, k=5))
+            order_number = f"ORDER-{date_part}-{random_part}"
+        
+        return order_number
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
@@ -382,3 +497,51 @@ class OrderItem(models.Model):
     @property
     def total_price(self):
         return self.price * self.quantity
+    
+
+User = get_user_model()
+
+class EmailConfirmation(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    confirmation_code = models.UUIDField(default=uuid.uuid4, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    confirmed = models.BooleanField(default=False)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + timedelta(hours=24)
+
+    def __str__(self):
+        return f"Confirmation for {self.user.email}"
+# Подписка на мероприятия
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    categories = models.ManyToManyField(Category, blank=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Subscription: {self.user.username}"
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ['user', 'event']
+
+# Статистика
+class EventStatistic(models.Model):
+    event = models.OneToOneField(Event, on_delete=models.CASCADE)
+    views_count = models.PositiveIntegerField(default=0)
+    registrations_count = models.PositiveIntegerField(default=0)
+    favorites_count = models.PositiveIntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
+
+class PlatformStatistic(models.Model):
+    date = models.DateField(unique=True)
+    total_users = models.PositiveIntegerField(default=0)
+    total_events = models.PositiveIntegerField(default=0)
+    total_registrations = models.PositiveIntegerField(default=0)
+    active_users = models.PositiveIntegerField(default=0)

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Заказ оформлен - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-header bg-success text-white py-4">
+                    <i class="fas fa-check-circle fa-4x mb-3"></i>
+                    <h1 class="h3 mb-0">Заказ успешно оформлен!</h1>
+                </div>
+                
+                <div class="card-body p-5">
+                    <p class="lead mb-4">
+                        Ваш заказ принят в обработку. Мы свяжемся с вами в ближайшее время.
+                    </p>
+                    
+                    <div class="action-buttons">
+                        <a href="{% url 'event_list' %}" class="btn btn-primary me-3">
+                            <i class="fas fa-calendar me-2"></i>
+                            Найти мероприятия
+                        </a>
+                        <a href="{% url 'user_registrations' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-ticket-alt me-2"></i>
+                            Мои регистрации
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

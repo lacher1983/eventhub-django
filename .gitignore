@@ -41,3 +41,14 @@ __pycache__/
 # для игнора .env
 .env
 *.env
+
+echo "__pycache__/" >> .gitignore
+echo "*.pyc" >> .gitignore
+echo "*.pyo" >> .gitignore
+echo "*.pyd" >> .gitignore
+echo "db.sqlite3" >> .gitignore
+echo ".Python" >> .gitignore
+echo "env/" >> .gitignore
+echo "venv/" >> .gitignore
+echo ".env" >> .gitignore
+echo ".vscode/" >> .gitignore

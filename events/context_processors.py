@@ -21,19 +21,16 @@ def advertisements(request):
 from .models import Cart
 
 def cart_context(request):
-    """
-    Контекстный процессор для добавления информации о корзине во все шаблоны
-    """
-    context = {
-        'cart_items_count': 0,
-        'cart_total_price': 0
-    }
-    
+    """Добавляет количество товаров в корзине в контекст всех шаблонов"""
     if request.user.is_authenticated:
         try:
             cart = Cart.objects.get(user=request.user)
-            return {'cart': cart}
+            cart_items_count = cart.items.count()
         except Cart.DoesNotExist:
-            cart = Cart.objects.create(user=request.user)
-            return {'cart': cart}
-    return {'cart': None}
+            cart_items_count = 0
+    else:
+        cart_items_count = 0
+    
+    return {
+        'cart_items_count': cart_items_count
+    }

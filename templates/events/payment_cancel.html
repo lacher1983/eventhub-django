@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Оплата отменена - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-header bg-warning text-dark py-4">
+                    <i class="fas fa-times-circle fa-4x mb-3"></i>
+                    <h1 class="h3 mb-0">Оплата отменена</h1>
+                </div>
+                
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-times-circle text-warning fa-5x"></i>
+                    </div>
+                    
+                    <h2 class="h4 mb-3">Оплата не была завершена</h2>
+                    
+                    <div class="alert alert-warning mb-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Вы отменили процесс оплаты. Ваши товары остались в корзине.
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <a href="{% url 'cart_detail' %}" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-shopping-cart me-2"></i>
+                                    Вернуться в корзину
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{% url 'event_list' %}" class="btn btn-primary w-100">
+                                    <i class="fas fa-calendar me-2"></i>
+                                    Продолжить покупки
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
