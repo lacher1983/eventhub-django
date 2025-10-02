@@ -8,7 +8,8 @@ from .views import (
     subscription_settings, notifications,
     event_statistics, platform_statistics
 )
-from .views_cart import cart_detail, cart_add, cart_remove, cart_update, payment, payment_success, payment_cancel
+from .views_cart import checkout
+from .views_cart import cart_detail, cart_add, cart_remove, cart_update, payment, payment_success, payment_cancel, checkout
 
 urlpatterns = [
     # Основные маршруты мероприятий
@@ -51,9 +52,11 @@ urlpatterns = [
     path('cart/remove/<int:event_id>/', cart_remove, name='cart_remove'),
     path('cart/update/<int:event_id>/', cart_update, name='cart_update'),
     path('payment/', payment, name='payment'),
+    # path('payment/<int:order_id>/', views.payment, name='payment'),
     path('payment/success/', payment_success, name='payment_success'),
     path('payment/cancel/', payment_cancel, name='payment_cancel'),
-
+    path('checkout/', checkout, name='checkout'),
+    
     # Подписки и уведомления
     path('subscriptions/', subscription_settings, name='subscription_settings'),
     path('notifications/', notifications, name='notifications'),

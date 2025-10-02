@@ -1,19 +1,21 @@
 {% extends 'base.html' %}
+{% load i18n %}
+
 {% load crispy_forms_tags %}
 
 {% block content %}
 <div class="container">
-    <h1>✅ Оформление заказа</h1>
+    <h1>✅ {% trans "Оформление заказа" %}</h1>
     
     <div class="row">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-body">
-                    <h5>Способ оплаты</h5>
+                    <h5>{% trans "Способ оплаты" %}</h5>
                     <form method="post">
                         {% csrf_token %}
                         {{ form|crispy }}
-                        <button type="submit" class="btn btn-primary">Перейти к оплате</button>
+                        <button type="submit" class="btn btn-primary">{% trans "Перейти к оплате" %}</button>
                     </form>
                 </div>
             </div>
@@ -22,7 +24,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5>Ваш заказ</h5>
+                    <h5>{% trans "Ваш заказ" %}</h5>
                     {% for item in cart.items.all %}
                     <div class="d-flex justify-content-between">
                         <span>{{ item.event.title }} x{{ item.quantity }}</span>
@@ -31,7 +33,7 @@
                     {% endfor %}
                     <hr>
                     <div class="d-flex justify-content-between">
-                        <strong>Итого:</strong>
+                        <strong>{% trans "Итого:" %}</strong>
                         <strong>{{ cart.total_price }} ₽</strong>
                     </div>
                 </div>

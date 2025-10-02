@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
+{% load i18n %}
+
 {% load static %}
 
-{% block title %}Оплата успешна - EventHub{% endblock %}
+{% block title %}{% trans "Оплата успешна" %} - EventHub{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -10,7 +12,7 @@
             <div class="card border-0 shadow-sm text-center">
                 <div class="card-header bg-success text-white py-4">
                     <i class="fas fa-check-circle fa-4x mb-3"></i>
-                    <h1 class="h3 mb-0">Оплата прошла успешно!</h1>
+                    <h1 class="h3 mb-0">{% trans "Оплата прошла успешно!" %}</h1>
                 </div>
                 
                 <div class="card-body p-5">
@@ -18,26 +20,26 @@
                         <i class="fas fa-check-circle text-success fa-5x"></i>
                     </div>
                     
-                    <h2 class="h4 mb-3">Спасибо за ваш заказ!</h2>
+                    <h2 class="h4 mb-3">{% trans "Спасибо за ваш заказ!" %}</h2>
                     
                     <div class="alert alert-success mb-4">
                         <i class="fas fa-info-circle me-2"></i>
-                        Ваш заказ успешно оплачен. Билеты отправлены на вашу электронную почту.
+                        {% trans "Ваш заказ успешно оплачен. Билеты отправлены на вашу электронную почту." %}
                     </div>
                     
                     <div class="order-details mb-4 p-3 bg-light rounded">
-                        <h5 class="mb-3">Детали заказа</h5>
+                        <h5 class="mb-3">{% trans "Детали заказа" %}</h5>
                         <div class="row text-start">
                             <div class="col-6">
-                                <strong>Статус:</strong>
+                                <strong>{% trans "Статус:" %}</strong>
                             </div>
                             <div class="col-6">
-                                <span class="badge bg-success">Оплачено</span>
+                                <span class="badge bg-success">{% trans "Оплачено" %}</span>
                             </div>
                         </div>
                         <div class="row text-start mt-2">
                             <div class="col-6">
-                                <strong>Дата оплаты:</strong>
+                                <strong>{% trans "Дата оплаты:" %}</strong>
                             </div>
                             <div class="col-6">
                                 {{ current_date }}
@@ -46,19 +48,19 @@
                     </div>
                     
                     <div class="next-steps mb-4">
-                        <h5 class="mb-3">Что дальше?</h5>
+                        <h5 class="mb-3">{% trans "Что дальше?" %}</h5>
                         <ul class="list-unstyled text-start">
                             <li class="mb-2">
                                 <i class="fas fa-envelope text-primary me-2"></i>
-                                Проверьте вашу электронную почту для получения билетов
+                                {% trans "Проверьте вашу электронную почту для получения билетов" %}
                             </li>
                             <li class="mb-2">
                                 <i class="fas fa-calendar text-primary me-2"></i>
-                                Добавьте мероприятия в ваш календарь
+                                {% trans "Добавьте мероприятия в ваш календарь" %}
                             </li>
                             <li class="mb-2">
                                 <i class="fas fa-user text-primary me-2"></i>
-                                Вы можете просмотреть свои регистрации в личном кабинете
+                                {% trans "Вы можете просмотреть свои регистрации в личном кабинете" %}
                             </li>
                         </ul>
                     </div>
@@ -68,13 +70,13 @@
                             <div class="col-md-6">
                                 <a href="{% url 'event_list' %}" class="btn btn-outline-primary w-100">
                                     <i class="fas fa-calendar me-2"></i>
-                                    Найти еще мероприятия
+                                    {% trans "Найти еще мероприятия" %}
                                 </a>
                             </div>
                             <div class="col-md-6">
                                 <a href="{% url 'user_registrations' %}" class="btn btn-primary w-100">
                                     <i class="fas fa-ticket-alt me-2"></i>
-                                    Мои регистрации
+                                    {% trans "Мои регистрации" %}
                                 </a>
                             </div>
                         </div>
@@ -85,9 +87,9 @@
             <!-- Дополнительная информация -->
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-body">
-                    <h5 class="mb-3">Нужна помощь?</h5>
+                    <h5 class="mb-3">{% trans "Нужна помощь?" %}</h5>
                     <p class="text-muted mb-3">
-                        Если у вас возникли вопросы по поводу вашего заказа, пожалуйста, свяжитесь с нашей службой поддержки.
+                        {% trans "Если у вас возникли вопросы по поводу вашего заказа, пожалуйста, свяжитесь с нашей службой поддержки." %}
                     </p>
                     <div class="row text-center">
                         <div class="col-md-4 mb-2">
@@ -100,7 +102,7 @@
                         </div>
                         <div class="col-md-4 mb-2">
                             <i class="fas fa-clock text-primary me-2"></i>
-                            <small>24/7 Поддержка</small>
+                            <small>24/7 {% trans "Поддержка" %}</small>
                         </div>
                     </div>
                 </div>

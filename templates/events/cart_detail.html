@@ -1,76 +1,123 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load static %}
 
-{% block title %}Корзина - EventHub{% endblock %}
+{% block title %}{% trans "Корзина" %} - EventHub{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <div class="row">
         <div class="col-lg-8">
-            <h1 class="h3 mb-4">Корзина покупок</h1>
+            <h1 class="h3 mb-4">{% trans "Корзина покупок" %}</h1>
             
             {% if cart_items %}
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    {% for item in cart_items %}
-                    <div class="row align-items-center border-bottom pb-3 mb-3">
-                        <div class="col-md-8">
-                            <h5 class="mb-1">{{ item.event.title }}</h5>
-                            <p class="text-muted mb-1">{{ item.event.short_description }}</p>
-                            <div class="d-flex align-items-center">
-                                <form method="post" action="{% url 'cart_update' item.event.id %}" class="me-3">
-                                    {% csrf_token %}
-                                    <div class="input-group input-group-sm" style="width: 120px;">
-                                        <button class="btn btn-outline-secondary" type="submit" name="action" value="decrease">-</button>
-                                        <input type="text" class="form-control text-center" value="{{ item.quantity }}" readonly>
-                                        <button class="btn btn-outline-secondary" type="submit" name="action" value="increase">+</button>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        {% for item in cart_items %}
+                        <div class="row align-items-center border-bottom pb-3 mb-3">
+                            <div class="col-md-2">
+                                {% if item.event.image %}
+                                    <img src="{{ item.event.image.url }}" alt="{{ item.event.title }}" class="img-fluid rounded" style="max-height: 80px;">
+                                {% else %}
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                        <i class="fas fa-calendar-alt text-muted"></i>
                                     </div>
-                                </form>
-                                <span class="fw-bold text-primary">{{ item.total_price }} ₽</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="mb-1">{{ item.event.title }}</h5>
+                                <p class="text-muted mb-1 small">
+                                    {{ item.event.date|date:"d M Y" }} • {{ item.event.time|time:"H:i" }}
+                                </p>
+                                <p class="text-muted mb-1 small">{{ item.event.organizer.username }}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <!-- Форма для изменения количества -->
+                                    <form method="post" action="{% url 'cart_update' item.event.id %}" class="d-flex align-items-center">
+                                        {% csrf_token %}
+                                        <div class="input-group input-group-sm" style="width: 120px;">
+                                            <button class="btn btn-outline-secondary" type="submit" name="action" value="decrease" 
+                                                    {% if item.quantity <= 1 %}disabled{% endif %}>-</button>
+                                            <span class="form-control text-center bg-white">{{ item.quantity }}</span>
+                                            <button class="btn btn-outline-secondary" type="submit" name="action" value="increase">+</button>
+                                        </div>
+                                    </form>
+                                    
+                                    <span class="fw-bold text-primary ms-3">{{ item.total_price }} ₽</span>
+                                    
+                                    <!-- Форма для удаления -->
+                                    <form method="post" action="{% url 'cart_remove' item.event.id %}" class="ms-2">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="text-end mt-1">
+                                    <small class="text-muted">{{ item.price }} ₽ × {{ item.quantity }}</small>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4 text-end">
-                            <form method="post" action="{% url 'cart_remove' item.event.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-danger btn-sm">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
-            </div>
             {% else %}
-            <div class="text-center py-5">
-                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                <h3 class="text-muted">Корзина пуста</h3>
-                <p class="text-muted">Добавьте мероприятия в корзину для оформления заказа</p>
-                <a href="{% url 'event_list' %}" class="btn btn-primary">
-                    Найти мероприятия
-                </a>
-            </div>
+                <!-- Блок для пустой корзины -->
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                    <h3 class="text-muted">{% trans "Корзина пуста" %}</h3>
+                    <p class="text-muted mb-4">{% trans "Добавьте мероприятия в корзину для оформления заказа" %}</p>
+                    <a href="{% url 'event_list' %}" class="btn btn-primary">
+                        {% trans "Найти мероприятия" %}
+                    </a>
+                </div>
             {% endif %}
         </div>
         
+        <!-- Блок с итогами - показываем только если есть товары -->
         {% if cart_items %}
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Итого</h5>
+                    <h5 class="mb-0">{% trans "Итого" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
-                        <span>Количество билетов:</span>
+                        <span>{% trans "Количество билетов:" %}</span>
                         <span>{{ total_quantity }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
-                        <span>Общая сумма:</span>
+                        <span>{% trans "Общая сумма:" %}</span>
                         <span class="fw-bold text-primary h5">{{ total_amount }} ₽</span>
                     </div>
-                    <a href="{% url 'payment' %}" class="btn btn-primary w-100 btn-lg">
-                        Перейти к оплате
-                    </a>
+                    
+                    <!-- Кнопка перехода к оплате -->
+                    <form method="post" action="{% url 'checkout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                            <i class="fas fa-credit-card me-2"></i>{% trans "Перейти к оплате" %}
+                        </button>
+                    </form>
+                    
+                    <div class="mt-2 text-center">
+                        <small class="text-muted">
+                            {% trans "После нажатия кнопки будет создан заказ и вы перейдете к оплате" %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Дополнительная информация -->
+            <div class="card border-0 shadow-sm mt-3">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans "Преимущества" %}</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Безопасная оплата" %}</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Мгновенное подтверждение" %}</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Электронные билеты" %}</li>
+                        <li><i class="fas fa-check text-success me-2"></i>{% trans "Поддержка 24/7" %}</li>
+                    </ul>
                 </div>
             </div>
         </div>

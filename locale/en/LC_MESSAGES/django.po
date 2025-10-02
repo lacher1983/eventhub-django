@@ -1,0 +1,1309 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-01 19:50+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\accounts\models.py:7
+msgid "Обычный пользователь"
+msgstr "Regular user"
+
+#: .\accounts\models.py:8 .\events\forms.py:142 .\events\models.py:164
+msgid "Организатор"
+msgstr "Organizer"
+
+#: .\accounts\models.py:9
+msgid "Администратор"
+msgstr "Administrator"
+
+#: .\accounts\models.py:12
+msgid "роль"
+msgstr "role"
+
+#: .\accounts\models.py:13
+msgid "телефон"
+msgstr "phone"
+
+#: .\accounts\models.py:14
+msgid "аватар"
+msgstr "avatar"
+
+#: .\accounts\models.py:17
+msgid "пользователь"
+msgstr "user"
+
+#: .\accounts\models.py:18
+msgid "пользователи"
+msgstr "users"
+
+#: .\events\forms.py:17 .\events\forms.py:527
+msgid "Email"
+msgstr "Email"
+
+#: .\events\forms.py:20 .\events\forms.py:341 .\events\forms.py:525
+msgid "your@email.com"
+msgstr "your@email.com"
+
+#: .\events\forms.py:32 .\events\forms.py:36
+msgid "Имя пользователя"
+msgstr "Username"
+
+#: .\events\forms.py:37
+msgid "Пароль"
+msgstr "Password"
+
+#: .\events\forms.py:38
+msgid "Подтверждение пароля"
+msgstr "Password confirmation"
+
+#: .\events\forms.py:75
+msgid "Введите название мероприятия"
+msgstr "Enter event name"
+
+#: .\events\forms.py:79
+msgid "Краткое описание (до 300 символов)"
+msgstr "Short description (up to 300 characters)"
+
+#: .\events\forms.py:84
+msgid "Полное описание мероприятия"
+msgstr "Full event description"
+
+#: .\events\forms.py:96
+msgid "Место проведения или ссылка"
+msgstr "Venue or link"
+
+#: .\events\forms.py:101
+msgid "Что участникам нужно взять с собой..."
+msgstr "What participants need to bring..."
+
+#: .\events\forms.py:105
+msgid "Выберите теги"
+msgstr "Select tags"
+
+#: .\events\forms.py:130 .\events\models.py:145
+msgid "Название мероприятия"
+msgstr "Event name"
+
+#: .\events\forms.py:131 .\events\models.py:147
+msgid "Краткое описание"
+msgstr "Short description"
+
+#: .\events\forms.py:132
+msgid "Полное описание"
+msgstr "Full description"
+
+#: .\events\forms.py:133 .\events\models.py:34
+msgid "Изображение"
+msgstr "Image"
+
+#: .\events\forms.py:134 .\events\models.py:151
+msgid "Категория"
+msgstr "Category"
+
+#: .\events\forms.py:135 .\events\models.py:152
+msgid "Тип мероприятия"
+msgstr "Event type"
+
+#: .\events\forms.py:136
+msgid "Формат"
+msgstr "Format"
+
+#: .\events\forms.py:137 .\events\models.py:159
+msgid "Уровень сложности"
+msgstr "Difficulty level"
+
+#: .\events\forms.py:138 .\events\models.py:149
+msgid "Дата и время"
+msgstr "Date and time"
+
+#: .\events\forms.py:139 .\events\models.py:150
+msgid "Место проведения"
+msgstr "Venue"
+
+#: .\events\forms.py:140
+msgid "Требования к участникам"
+msgstr "Participant requirements"
+
+#: .\events\forms.py:141 .\events\models.py:176 .\events\models.py:270
+msgid "Теги"
+msgstr "Tags"
+
+#: .\events\forms.py:143 .\events\models.py:169
+msgid "Вместимость"
+msgstr "Capacity"
+
+#: .\events\forms.py:144 .\events\models.py:168
+msgid "Доступно билетов"
+msgstr "Available tickets"
+
+#: .\events\forms.py:145
+msgid "Цена (₽)"
+msgstr "Price (₽)"
+
+#: .\events\forms.py:146 .\events\models.py:167
+msgid "Бесплатное мероприятие"
+msgstr "Free event"
+
+#: .\events\forms.py:147 .\events\models.py:38 .\events\models.py:170
+msgid "Активно"
+msgstr "Active"
+
+#: .\events\forms.py:151
+msgid "Краткое описание, которое будет отображаться в списке мероприятий"
+msgstr "Short description that will be displayed in the events list"
+
+#: .\events\forms.py:152
+msgid "Количество билетов, доступных для покупки"
+msgstr "Number of tickets available for purchase"
+
+#: .\events\forms.py:153
+msgid "Если отмечено, цена будет установлена в 0"
+msgstr "If checked, price will be set to 0"
+
+#: .\events\forms.py:189
+msgid "Дата мероприятия не может быть в прошлом!"
+msgstr "Event date cannot be in the past!"
+
+#: .\events\forms.py:207
+msgid "Доступное количество билетов не может превышать вместимость"
+msgstr "Available ticket count cannot exceed capacity"
+
+#: .\events\forms.py:214
+msgid "Все категории"
+msgstr "All categories"
+
+#: .\events\forms.py:220
+msgid "Все типы"
+msgstr "All types"
+
+#: .\events\forms.py:226
+msgid "Любой формат"
+msgstr "Any format"
+
+#: .\events\forms.py:232
+msgid "Любой уровень"
+msgstr "Any level"
+
+#: .\events\forms.py:239
+msgid "Любая цена"
+msgstr "Any price"
+
+#: .\events\forms.py:240
+msgid "Бесплатные"
+msgstr "Free"
+
+#: .\events\forms.py:241
+msgid "Платные"
+msgstr "Paid"
+
+#: .\events\forms.py:251
+msgid "Поиск мероприятий..."
+msgstr "Search events..."
+
+#: .\events\forms.py:268
+msgid "Поделитесь вашими впечатлениями о мероприятии..."
+msgstr "Share your impressions about the event..."
+
+#: .\events\forms.py:272
+msgid "Ваша оценка"
+msgstr "Your rating"
+
+#: .\events\forms.py:273 .\events\models.py:360
+msgid "Комментарий"
+msgstr "Comment"
+
+#: .\events\forms.py:276
+msgid "Максимум 1000 символов"
+msgstr "Maximum 1000 characters"
+
+#: .\events\forms.py:282
+msgid "Комментарий не может превышать 1000 символов"
+msgstr "Comment cannot exceed 1000 characters"
+
+#: .\events\forms.py:294
+msgid "Дополнительная информация (необязательно)"
+msgstr "Additional information (optional)"
+
+#: .\events\forms.py:298
+msgid "Дополнительные заметки"
+msgstr "Additional notes"
+
+#: .\events\forms.py:320
+msgid "Количество"
+msgstr "Quantity"
+
+#: .\events\forms.py:326
+msgid "Количество не может быть меньше 1"
+msgstr "Quantity cannot be less than 1"
+
+#: .\events\forms.py:334
+msgid "Способ оплаты"
+msgstr "Payment method"
+
+#: .\events\forms.py:343
+msgid "Email для чека"
+msgstr "Email for receipt"
+
+#: .\events\forms.py:349
+msgid "Я согласен с условиями покупки"
+msgstr "I agree with the purchase terms"
+
+#: .\events\forms.py:369
+msgid "1234 5678 9012 3456"
+msgstr "1234 5678 9012 3456"
+
+#: .\events\forms.py:372
+msgid "Номер карты"
+msgstr "Card number"
+
+#: .\events\forms.py:379
+msgid "MM/ГГ"
+msgstr "MM/YY"
+
+#: .\events\forms.py:382
+msgid "Срок действия"
+msgstr "Expiry date"
+
+#: .\events\forms.py:389
+msgid "123"
+msgstr "123"
+
+#: .\events\forms.py:393
+msgid "CVV код"
+msgstr "CVV code"
+
+#: .\events\forms.py:400
+msgid "IVAN IVANOV"
+msgstr "IVAN IVANOV"
+
+#: .\events\forms.py:402
+msgid "Имя владельца карты"
+msgstr "Cardholder name"
+
+#: .\events\forms.py:408
+msgid "Сохранить карту для будущих платежей"
+msgstr "Save card for future payments"
+
+#: .\events\forms.py:414
+msgid "Введите корректный номер карты"
+msgstr "Enter valid card number"
+
+#: .\events\forms.py:425
+msgid "Неверный месяц"
+msgstr "Invalid month"
+
+#: .\events\forms.py:431
+msgid "Срок действия карты истек"
+msgstr "Card has expired"
+
+#: .\events\forms.py:434
+msgid "Введите дату в формате ММ/ГГ"
+msgstr "Enter date in MM/YY format"
+
+#: .\events\forms.py:441
+msgid "Введите корректный CVV код"
+msgstr "Enter valid CVV code"
+
+#: .\events\forms.py:449
+msgid "Поиск по названию, описанию..."
+msgstr "Search by name, description..."
+
+#: .\events\forms.py:451
+msgid "Поиск"
+msgstr "Search"
+
+#: .\events\forms.py:460
+msgid "С даты"
+msgstr "From date"
+
+#: .\events\forms.py:469
+msgid "По дату"
+msgstr "To date"
+
+#: .\events\forms.py:478
+msgid "От"
+msgstr "From"
+
+#: .\events\forms.py:481
+msgid "Цена от"
+msgstr "Price from"
+
+#: .\events\forms.py:490
+msgid "До"
+msgstr "To"
+
+#: .\events\forms.py:493
+msgid "Цена до"
+msgstr "Price to"
+
+#: .\events\forms.py:502
+msgid "Минимальная цена не может быть больше максимальной"
+msgstr "Minimum price cannot be greater than maximum"
+
+#: .\events\forms.py:508
+msgid "Дата \"с\" не может быть больше даты \"по\""
+msgstr "\"From\" date cannot be greater than \"to\" date"
+
+#: .\events\forms.py:517
+msgid "Ваше имя"
+msgstr "Your name"
+
+#: .\events\forms.py:519
+msgid "Имя"
+msgstr "Name"
+
+#: .\events\forms.py:534
+msgid "Ваше сообщение организатору..."
+msgstr "Your message to the organizer..."
+
+#: .\events\forms.py:536
+msgid "Сообщение"
+msgstr "Message"
+
+#: .\events\forms.py:542
+msgid "Отправить копию мне"
+msgstr "Send copy to me"
+
+#: .\events\models.py:18
+msgid "Баннер"
+msgstr "Banner"
+
+#: .\events\models.py:19
+msgid "Видео"
+msgstr "Video"
+
+#: .\events\models.py:20
+msgid "Всплывающее окно"
+msgstr "Popup"
+
+#: .\events\models.py:21 .\events\models.py:26
+msgid "Боковая панель"
+msgstr "Sidebar"
+
+#: .\events\models.py:25
+msgid "Верх страницы"
+msgstr "Top of page"
+
+#: .\events\models.py:27
+msgid "Между событиями"
+msgstr "Between events"
+
+#: .\events\models.py:28
+msgid "Низ страницы"
+msgstr "Bottom of page"
+
+#: .\events\models.py:31
+msgid "Название"
+msgstr "Name"
+
+#: .\events\models.py:32
+msgid "Тип рекламы"
+msgstr "Ad type"
+
+#: .\events\models.py:33
+msgid "Позиция"
+msgstr "Position"
+
+#: .\events\models.py:36
+msgid "Текстовое содержание"
+msgstr "Text content"
+
+#: .\events\models.py:37
+msgid "Ссылка"
+msgstr "Link"
+
+#: .\events\models.py:39
+msgid "Дата начала"
+msgstr "Start date"
+
+#: .\events\models.py:40
+msgid "Дата окончания"
+msgstr "End date"
+
+#: .\events\models.py:41
+msgid "Клики"
+msgstr "Clicks"
+
+#: .\events\models.py:42
+msgid "Показы"
+msgstr "Impressions"
+
+#: .\events\models.py:45
+msgid "Рекламный баннер"
+msgstr "Ad banner"
+
+#: .\events\models.py:46
+msgid "Рекламные баннеры"
+msgstr "Ad banners"
+
+#: .\events\models.py:66
+msgid "название категории"
+msgstr "category name"
+
+#: .\events\models.py:67
+msgid "слаг"
+msgstr "slug"
+
+#: .\events\models.py:68
+msgid "описание"
+msgstr "description"
+
+#: .\events\models.py:71
+msgid "категория"
+msgstr "category"
+
+#: .\events\models.py:72
+msgid "категории"
+msgstr "categories"
+
+#: .\events\models.py:86
+msgid "Образовательные"
+msgstr "Educational"
+
+#: .\events\models.py:87
+msgid "Бизнес"
+msgstr "Business"
+
+#: .\events\models.py:88
+msgid "Развлечения"
+msgstr "Entertainment"
+
+#: .\events\models.py:89
+msgid "Культура"
+msgstr "Culture"
+
+#: .\events\models.py:90
+msgid "Спорт"
+msgstr "Sports"
+
+#: .\events\models.py:91
+msgid "Социальные"
+msgstr "Social"
+
+#: .\events\models.py:97
+msgid "Вебинар"
+msgstr "Webinar"
+
+#: .\events\models.py:98
+msgid "Мастер-класс"
+msgstr "Master class"
+
+#: .\events\models.py:99
+msgid "Курс"
+msgstr "Course"
+
+#: .\events\models.py:100
+msgid "Лекция"
+msgstr "Lecture"
+
+#: .\events\models.py:101
+msgid "Тренинг"
+msgstr "Training"
+
+#: .\events\models.py:104
+msgid "Конференция"
+msgstr "Conference"
+
+#: .\events\models.py:105
+msgid "Бизнес-встреча"
+msgstr "Business meeting"
+
+#: .\events\models.py:106
+msgid "Нетворкинг"
+msgstr "Networking"
+
+#: .\events\models.py:107
+msgid "Выставка"
+msgstr "Exhibition"
+
+#: .\events\models.py:110
+msgid "Концерт"
+msgstr "Concert"
+
+#: .\events\models.py:111
+msgid "Вечеринка"
+msgstr "Party"
+
+#: .\events\models.py:112
+msgid "Фестиваль"
+msgstr "Festival"
+
+#: .\events\models.py:113
+msgid "Шоу"
+msgstr "Show"
+
+#: .\events\models.py:116
+msgid "Выставка (культурная)"
+msgstr "Exhibition (cultural)"
+
+#: .\events\models.py:117
+msgid "Экскурсия"
+msgstr "Excursion"
+
+#: .\events\models.py:118
+msgid "Мастер-класс (творческий)"
+msgstr "Master class (creative)"
+
+#: .\events\models.py:121
+msgid "Соревнование"
+msgstr "Competition"
+
+#: .\events\models.py:122
+msgid "Спортивное событие"
+msgstr "Sports event"
+
+#: .\events\models.py:123
+msgid "Турнир"
+msgstr "Tournament"
+
+#: .\events\models.py:126
+msgid "Благотворительное"
+msgstr "Charity"
+
+#: .\events\models.py:127
+msgid "Волонтерство"
+msgstr "Volunteering"
+
+#: .\events\models.py:128
+msgid "Сообщество"
+msgstr "Community"
+
+#: .\events\models.py:132
+msgid "Онлайн"
+msgstr "Online"
+
+#: .\events\models.py:133
+msgid "Оффлайн"
+msgstr "Offline"
+
+#: .\events\models.py:134
+msgid "Гибридный"
+msgstr "Hybrid"
+
+#: .\events\models.py:139
+msgid "Для начинающих"
+msgstr "For beginners"
+
+#: .\events\models.py:140
+msgid "Средний уровень"
+msgstr "Intermediate level"
+
+#: .\events\models.py:141
+msgid "Для продвинутых"
+msgstr "For advanced"
+
+#: .\events\models.py:142
+msgid "Для всех уровней"
+msgstr "For all levels"
+
+#: .\events\models.py:146
+msgid "Описание"
+msgstr "Description"
+
+#: .\events\models.py:148
+msgid "Краткое описание мероприятия"
+msgstr "Event short description"
+
+#: .\events\models.py:153
+msgid "Формат проведения"
+msgstr "Event format"
+
+#: .\events\models.py:161
+msgid "Что нужно взять с собой"
+msgstr "What to bring"
+
+#: .\events\models.py:166
+msgid "Цена"
+msgstr "Price"
+
+#: .\events\models.py:171 .\events\models.py:364
+msgid "Дата создания"
+msgstr "Creation date"
+
+#: .\events\models.py:172 .\events\models.py:368
+msgid "Дата обновления"
+msgstr "Update date"
+
+#: .\events\models.py:173
+msgid "Средний рейтинг"
+msgstr "Average rating"
+
+#: .\events\models.py:179 .\events\models.py:316 .\events\models.py:345
+msgid "Мероприятие"
+msgstr "Event"
+
+#: .\events\models.py:180 .\templates\base.html:325 .\templates\base.html:477
+msgid "Мероприятия"
+msgstr "Events"
+
+#: .\events\models.py:264
+msgid "Название тега"
+msgstr "Tag name"
+
+#: .\events\models.py:266
+msgid "Цвет тега"
+msgstr "Tag color"
+
+#: .\events\models.py:269
+msgid "Тег"
+msgstr "Tag"
+
+#: .\events\models.py:285
+msgid "Ожидает"
+msgstr "Pending"
+
+#: .\events\models.py:286
+msgid "Подтверждена"
+msgstr "Confirmed"
+
+#: .\events\models.py:287
+msgid "Отменена"
+msgstr "Cancelled"
+
+#: .\events\models.py:295
+msgid "дополнительные заметки"
+msgstr "additional notes"
+
+#: .\events\models.py:298
+msgid "Дополнительная информация о регистрации"
+msgstr "Additional registration information"
+
+#: .\events\models.py:304 .\templates\base.html:430
+msgid "Регистрация"
+msgstr "Registration"
+
+#: .\events\models.py:305
+msgid "Регистрации"
+msgstr "Registrations"
+
+#: .\events\models.py:315 .\events\models.py:351
+msgid "Пользователь"
+msgstr "User"
+
+#: .\events\models.py:319
+msgid "Дата регистрации"
+msgstr "Registration date"
+
+#: .\events\models.py:323 .\templates\base.html:342 .\templates\base.html:400
+msgid "Избранное"
+msgstr "Favorites"
+
+#: .\events\models.py:324
+msgid "Избранные мероприятия"
+msgstr "Favorite events"
+
+#: .\events\models.py:334
+msgid "⭐ - Ужасно"
+msgstr "⭐ - Terrible"
+
+#: .\events\models.py:335
+msgid "⭐⭐ - Плохо"
+msgstr "⭐⭐ - Bad"
+
+#: .\events\models.py:336
+msgid "⭐⭐⭐ - Нормально"
+msgstr "⭐⭐⭐ - Normal"
+
+#: .\events\models.py:337
+msgid "⭐⭐⭐⭐ - Хорошо"
+msgstr "⭐⭐⭐⭐ - Good"
+
+#: .\events\models.py:338
+msgid "⭐⭐⭐⭐⭐ - Отлично"
+msgstr "⭐⭐⭐⭐⭐ - Excellent"
+
+#: .\events\models.py:355
+msgid "Рейтинг"
+msgstr "Rating"
+
+#: .\events\models.py:372
+msgid "Отзыв"
+msgstr "Review"
+
+#: .\events\models.py:373
+msgid "Отзывы"
+msgstr "Reviews"
+
+#: .\events\models.py:390
+msgid "На вершине списка"
+msgstr "Top of list"
+
+#: .\events\models.py:391
+msgid "Подсветка"
+msgstr "Highlight"
+
+#: .\events\models.py:392
+msgid "Email рассылка"
+msgstr "Email newsletter"
+
+#: .\events\models.py:446
+msgid "Ожидает оплаты"
+msgstr "Pending payment"
+
+#: .\events\models.py:447
+msgid "Оплачено"
+msgstr "Paid"
+
+#: .\events\models.py:448
+msgid "Отменено"
+msgstr "Cancelled"
+
+#: .\events\models.py:449
+msgid "Возврат"
+msgstr "Refund"
+
+#: .\events\models.py:453
+msgid "Банковская карта"
+msgstr "Bank card"
+
+#: .\events\models.py:454
+msgid "PayPal"
+msgstr "PayPal"
+
+#: .\events\models.py:455
+msgid "QIWI"
+msgstr "QIWI"
+
+#: .\events\models.py:456
+msgid "ЮMoney"
+msgstr "YooMoney"
+
+#: .\events\templatetags\admin\base_site.html:4
+msgid "Django site admin"
+msgstr "Django site admin"
+
+#: .\events\templatetags\admin\base_site.html:24
+msgid "Django administration"
+msgstr "Django administration"
+
+#: .\events\views.py:245
+msgid "Мероприятие успешно создано!"
+msgstr "Event successfully created!"
+
+#: .\templates\base.html:8
+msgid "EventHub - Платформа мероприятий"
+msgstr "EventHub - Events Platform"
+
+#: .\templates\base.html:314 .\templates\base.html:471
+msgid "EventHub"
+msgstr "EventHub"
+
+#: .\templates\base.html:332 .\templates\base.html:479
+msgid "Создать мероприятие"
+msgstr "Create event"
+
+#: .\templates\base.html:337 .\templates\base.html:395
+msgid "Мои регистрации"
+msgstr "My registrations"
+
+#: .\templates\base.html:371
+msgid "Корзина"
+msgstr "Cart"
+
+#: .\templates\base.html:375
+msgid "товаров в корзине"
+msgstr "items in cart"
+
+#: .\templates\base.html:389
+msgid "Вошел как"
+msgstr "Logged in as"
+
+#: .\templates\base.html:406
+msgid "Админка"
+msgstr "Admin"
+
+#: .\templates\base.html:415
+msgid "Выйти"
+msgstr "Logout"
+
+#: .\templates\base.html:425
+msgid "Войти"
+msgstr "Login"
+
+#: .\templates\base.html:472
+msgid "Лучшая платформа для поиска и организации мероприятий"
+msgstr "Best platform for finding and organizing events"
+
+#: .\templates\base.html:475
+msgid "Навигация"
+msgstr "Navigation"
+
+#: .\templates\base.html:484
+msgid "Контакты"
+msgstr "Contacts"
+
+#: .\templates\base.html:494
+msgid "Все права защищены."
+msgstr "All rights reserved."
+
+#: .\templates\base.html:498
+msgid "Сделано с"
+msgstr "Made with"
+
+#: .\templates\base.html:498
+msgid "для сообщества"
+msgstr "for community"
+
+#: .\templates\emails\confirmation_email.html
+msgid "Добро пожаловать в EventHub!"
+msgstr "Welcome to EventHub!"
+
+#: .\templates\emails\confirmation_email.html
+msgid "Здравствуйте,"
+msgstr "Hello,"
+
+#: .\templates\emails\confirmation_email.html
+msgid "Благодарим вас за регистрацию на нашей платформе мероприятий. Для завершения регистрации подтвердите ваш email адрес."
+msgstr "Thank you for registering on our event platform. To complete your registration, please confirm your email address."
+
+#: .\templates\emails\confirmation_email.html
+msgid "Если кнопка не работает, скопируйте и вставьте в браузер следующую ссылку:"
+msgstr "If the button doesn't work, copy and paste the following link into your browser:"
+
+#: .\templates\emails\confirmation_email.html
+msgid "Ссылка действительна в течение 24 часов."
+msgstr "The link is valid for 24 hours."
+
+#: .\templates\emails\confirmation_email.html
+msgid "Если вы не регистрировались на нашем сайте, просто проигнорируйте это письмо."
+msgstr "If you did not register on our site, please ignore this email."
+
+#: .\templates\events\ads\banner.html
+msgid "Нажмите для перехода"
+msgstr "Click to proceed"
+
+#: .\templates\events\ads\banner.html:29
+msgid "Рекламный баннер"
+msgstr "Advertisement banner"
+
+#: .\templates\events\ads\banner.html:46
+msgid "Рекламный баннер"
+msgstr "Advertisement banner"
+
+#: .\templates\events\event_list.html
+msgid "Узнать больше"
+msgstr "Learn more"
+
+#: .\templates\events\ads\video.html
+msgid "Узнать больше"
+msgstr "Learn more"
+
+#: .\templates\events\payment.html
+msgid "Перейти к оплате"
+msgstr "Proceed to payment"
+
+
+#: .\templates\events\checkout.html
+msgid "Перейти к оплате"
+msgstr "Proceed to payment"
+
+#: .\templates\events\cart.html
+msgid "Перейти к оплате"
+msgstr "Proceed to payment"
+
+
+#: .\templates\events\cart_detail.html
+msgid "Перейти к оплате"
+msgstr "Proceed to payment"
+
+#: .\templates\events\cart_detail.html
+msgid "После нажатия кнопки будет создан заказ и вы перейдете к оплате"
+msgstr "After clicking the button, an order will be created and you will proceed to payment"
+
+#: .\templates\events\cart.html
+msgid "Ваша корзина"
+msgstr "Your cart"
+
+#: .\templates\events\cart.html
+msgid "Общая стоимость"
+msgstr "Total cost"
+
+#: .\templates\events\cart.html
+msgid "Действия"
+msgstr "Actions"
+
+#: .\templates\events\cart.html
+msgid "Нет фото"
+msgstr "No photo"
+
+#: .\templates\events\cart.html
+msgid "Удалить"
+msgstr "Delete"
+
+#: .\templates\events\cart.html
+msgid "Сумма заказа"
+msgstr "Order total"
+
+#: .\templates\events\cart.html
+msgid "Продолжить покупки"
+msgstr "Continue shopping"
+
+#: .\templates\events\cart_detail.html
+msgid "Корзина пуста"
+msgstr "Cart is empty"
+
+#: .\templates\events\cart.html
+msgid "Добавьте мероприятия из каталога"
+msgstr "Add events from the catalog"
+
+#: .\templates\events\payment.html
+msgid "Оформление заказа"
+msgstr "Checkout"
+
+#: .\templates\events\checkout.html
+msgid "Ваш заказ"
+msgstr "Your order"
+
+#: .\templates\events\payment.html
+msgid "Итого:"
+msgstr "Total:"
+
+#: .\templates\events\event_detail.html
+msgid "Дата и время:"
+msgstr "Date and time:"
+
+#: .\templates\events\event_detail.html
+msgid "Место:"
+msgstr "Location:"
+
+#: .\templates\events\event_detail.html
+msgid "Организатор:"
+msgstr "Organizer:"
+
+#: .\templates\events\event_detail.html
+msgid "Категория:"
+msgstr "Category:"
+
+#: .\templates\events\event_detail.html
+msgid "В избранном"
+msgstr "In favorites"
+
+#: .\templates\events\event_detail.html
+msgid "В избранное"
+msgstr "Add to favorites"
+
+#: .\templates\events\event_detail.html
+msgid "Вы зарегистрированы"
+msgstr "You are registered"
+
+#: .\templates\events\event_detail.html
+msgid "В корзину"
+msgstr "Add to cart"
+
+#: .\templates\events\event_detail.html
+msgid "Войти для регистрации"
+msgstr "Log in to register"
+
+#: .\templates\events\event_detail.html
+msgid "Описание мероприятия"
+msgstr "Event description"
+
+#: .\templates\events\event_detail.html
+msgid "Детали"
+msgstr "Details"
+
+#: .\templates\events\event_detail.html
+msgid "Участников:"
+msgstr "Participants:"
+
+#: .\templates\events\event_detail.html
+msgid "Формат:"
+msgstr "Format:"
+
+#: .\templates\events\event_detail.html
+msgid "Сложность:"
+msgstr "Difficulty:"
+
+#: .\templates\events\event_detail.html
+msgid "Отзывы о мероприятии"
+msgstr "Event reviews"
+
+#: .\templates\events\event_detail.html
+msgid "Оставить отзыв"
+msgstr "Leave a review"
+
+#: .\templates\events\event_detail.html
+msgid "Оценка"
+msgstr "Rating"
+
+#: .\templates\events\event_detail.html
+msgid "Отправить отзыв"
+msgstr "Submit review"
+
+#: .\templates\events\event_detail.html
+msgid "Ваш отзыв"
+msgstr "Your review"
+
+#: .\templates\events\event_detail.html
+msgid "Чтобы оставить отзыв, необходимо зарегистрироваться на мероприятие."
+msgstr "You need to be registered for the event to leave a review."
+
+#: .\templates\events\event_detail.html
+msgid "Войдите"
+msgstr "Log in"
+
+#: .\templates\events\event_detail.html
+msgid "чтобы оставить отзыв"
+msgstr "to leave a review"
+
+#: .\templates\events\event_detail.html
+msgid "Пока нет отзывов о этом мероприятии."
+msgstr "There are no reviews for this event yet."
+
+#: .\templates\events\event_detail.html
+msgid "Статистика мероприятия"
+msgstr "Event statistics"
+
+#: .\templates\events\event_detail.html
+msgid "Зарегистрировано:"
+msgstr "Registered:"
+
+#: .\templates\events\event_detail.html
+msgid "Свободных мест:"
+msgstr "Available spots:"
+
+#: .\templates\events\event_detail.html
+msgid "Рейтинг:"
+msgstr "Rating:"
+
+#: .\templates\events\event_detail.html
+msgid "Организатор мероприятия"
+msgstr "Event organizer"
+
+#: .\templates\events\event_detail.html
+msgid "Написать сообщение"
+msgstr "Send message"
+
+#: .\templates\events\event_form.html
+msgid "Редактирование"
+msgstr "Editing"
+
+#: .\templates\events\event_form.html
+msgid "Создание мероприятия"
+msgstr "Event creation"
+
+#: .\templates\events\event_form.html
+msgid "Редактировать мероприятие"
+msgstr "Edit event"
+
+#: .\templates\events\event_form.html
+msgid "Создать новое мероприятие"
+msgstr "Create new event"
+
+#: .\templates\events\event_form.html
+msgid "Основная информация"
+msgstr "Basic information"
+
+#: .\templates\events\event_form.html
+msgid "Краткое описание для карточек мероприятий"
+msgstr "Brief description for event cards"
+
+#: .\templates\events\event_form.html
+msgid "Классификация"
+msgstr "Classification"
+
+#: .\templates\events\event_form.html
+msgid "Дата и место проведения"
+msgstr "Date and venue"
+
+#: .\templates\events\event_form.html
+msgid "Для онлайн мероприятий - укажите платформу"
+msgstr "For online events - specify the platform"
+
+#: .\templates\events\event_form.html
+msgid "Что участникам нужно взять с собой или подготовить"
+msgstr "What participants need to bring or prepare"
+
+#: .\templates\events\event_form.html
+msgid "Организация"
+msgstr "Organization"
+
+#: .\templates\events\event_form.html
+msgid "Стоимость участия"
+msgstr "Participation cost"
+
+#: .\templates\events\event_form.html
+msgid "Визуал и теги"
+msgstr "Visuals and tags"
+
+#: .\templates\events\event_form.html
+msgid "Статус мероприятия"
+msgstr "Event status"
+
+#: .\templates\events\event_form.html
+msgid "Если снять галочку, мероприятие не будет отображаться в каталоге"
+msgstr "If unchecked, the event will not be displayed in the catalog"
+
+#: .\templates\events\event_form.html
+msgid "Отмена"
+msgstr "Cancel"
+
+#: .\templates\events\event_form.html
+msgid "Сохранить изменения"
+msgstr "Save changes"
+
+#: .\templates\events\event_list.html
+msgid "Специальное предложение!"
+msgstr "Special offer!"
+
+#: .\templates\events\event_list.html
+msgid "Получите скидку 25% на первый заказ"
+msgstr "Get 25% discount on your first order"
+
+#: .\templates\events\event_list.html
+msgid "Получить скидку"
+msgstr "Get discount"
+
+#: .\templates\events\event_list.html
+msgid "Найдите своё следующее приключение"
+msgstr "Find your next adventure"
+
+#: .\templates\events\event_list.html
+msgid "Откройте для себя уникальные мероприятия в вашем городе"
+msgstr "Discover unique events in your city"
+
+#: .\templates\events\event_list.html
+msgid "Найти"
+msgstr "Find"
+
+#: .\templates\events\event_list.html
+msgid "Фильтры"
+msgstr "Filters"
+
+#: .\templates\events\event_list.html
+msgid "Сортировка"
+msgstr "Sorting"
+
+#: .\templates\events\event_list.html
+msgid "По дате (сначала новые)"
+msgstr "By date (newest first)"
+
+#: .\templates\events\event_list.html
+msgid "По цене (дешевые first)"
+msgstr "By price (cheap first)"
+
+#: .\templates\events\event_list.html
+msgid "По цене (дорогие first)"
+msgstr "By price (expensive first)"
+
+#: .\templates\events\event_list.html
+msgid "Бесплатно"
+msgstr "Free"
+
+#: .\templates\events\event_list.html
+msgid "участников"
+msgstr "participants"
+
+#: .\templates\events\event_list.html
+msgid "Подробнее"
+msgstr "Details"
+
+#: . \templates\events\event_list.html
+msgid "Горящее предложение"
+msgstr "Hot offer"
+
+#: .\templates\events\event_list.html
+msgid "Скидка 20% на все услуги до конца недели"
+msgstr "20% discount on all services until the end of the week"
+
+#: .\templates\events\event_list.html
+msgid "Успеть получить"
+msgstr "Get it now"
+
+#: .\templates\events\event_list.html
+msgid "Мероприятий не найдено"
+msgstr "No events found"
+
+#: .\templates\events\event_list.html
+msgid "Попробуйте изменить параметры поиска или выбрать другую категорию"
+msgstr "Try changing search parameters or select a different category"
+
+#: .\templates\events\event_list.html
+msgid "Сбросить фильтры"
+msgstr "Reset filters"
+
+#: .\templates\events\event_list.html
+msgid "Скидка 20% на все товары"
+msgstr "20% discount on all items"
+
+#: .\templates\events\favorite_list.html
+msgid "Избранные мероприятия"
+msgstr "Favorite events"
+
+#: .\templates\events\favorite_list.html
+msgid "Удалить из избранного"
+msgstr "Remove from favorites"
+
+#: .\templates\events\favorite_list.html
+msgid "У вас нет избранных мероприятий"
+msgstr "You have no favorite events"
+
+#: .\templates\events\favorite_list.html
+msgid "Добавляйте мероприятия в избранное, чтобы не потерять их"
+msgstr "Add events to favorites so you don't lose them"
+
+#: .\templates\events\login.html
+msgid "Вход в систему"
+msgstr "System login"
+
+#: .\templates\events\login.html
+msgid "Неверное имя пользователя или пароль."
+msgstr "Invalid username or password."
+
+#: .\templates\events\login.html
+msgid "Войти"
+msgstr "Log in"
+
+#: .\templates\events\login.html
+msgid "Нет аккаунта?"
+msgstr "No account?"
+
+#: .\templates\events\login.html
+msgid "Зарегистрируйтесь здесь"
+msgstr "Register here"
+
+#: .\templates\events\login.html
+msgid "Забыли пароль?"
+msgstr "Forgot password?"
+
+#: .\templates\events\order_success.html
+msgid "Заказ оформлен"
+msgstr "Order placed"
+
+#: .\templates\events\order_success.html
+msgid "Заказ успешно оформлен!"
+msgstr "Order successfully placed!"
+
+#: .\templates\events\order_success.html
+msgid "Ваш заказ принят в обработку. Мы свяжемся с вами в ближайшее время."
+msgstr "Your order has been received. We will contact you shortly."
+
+#: .\templates\events\password_reset_done.html
+msgid "Инструкции отправлены"
+msgstr "Instructions sent"
+
+#: .\templates\events\password_reset_done.html
+msgid "Проверьте вашу почту"
+msgstr "Check your email"
+
+#: .\templates\events\password_reset_done.html
+msgid "Мы отправили вам инструкции по восстановлению пароля на указанный email адрес."
+msgstr "We have sent password recovery instructions to the provided email address."
+
+#: .\templates\events\password_reset_done.html
+msgid "Вы получите письмо в течение нескольких минут."
+msgstr "You will receive the email within a few minutes."

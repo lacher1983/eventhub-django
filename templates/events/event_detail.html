@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load i18n %}
+
 {% load static %}
 
 {% block title %}{{ event.title }} - EventHub{% endblock %}
@@ -8,7 +10,7 @@
     <!-- Хлебные крошки -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'event_list' %}">Мероприятия</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'event_list' %}">{% trans "Мероприятия" %}</a></li>
             <li class="breadcrumb-item active">{{ event.title }}</li>
         </ol>
     </nav>
@@ -34,24 +36,24 @@
                         <div class="col-md-6">
                             <p class="mb-2">
                                 <i class="fas fa-calendar text-primary me-2"></i>
-                                <strong>Дата и время:</strong><br>
+                                <strong>{% trans "Дата и время:" %}</strong><br>
                                 {{ event.date|date:"d.m.Y H:i" }}
                             </p>
                             <p class="mb-2">
                                 <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                                <strong>Место:</strong><br>
+                                <strong>{% trans "Место:" %}</strong><br>
                                 {{ event.location }}
                             </p>
                         </div>
                         <div class="col-md-6">
                             <p class="mb-2">
                                 <i class="fas fa-user-tie text-primary me-2"></i>
-                                <strong>Организатор:</strong><br>
+                                <strong>{% trans "Организатор:" %}</strong><br>
                                 {{ event.organizer.username }}
                             </p>
                             <p class="mb-2">
                                 <i class="fas fa-tag text-primary me-2"></i>
-                                <strong>Категория:</strong><br>
+                                <strong>{% trans "Категория:" %}</strong><br>
                                 {{ event.get_category_display }}
                             </p>
                         </div>
@@ -65,21 +67,21 @@
                                 {% csrf_token %}
                                 <button type="submit" class="btn {% if is_favorite %}btn-warning{% else %}btn-outline-warning{% endif %}">
                                     <i class="fas {% if is_favorite %}fa-star{% else %}fa-star{% endif %} me-1"></i>
-                                    {% if is_favorite %}В избранном{% else %}В избранное{% endif %}
+                                    {% if is_favorite %}{% trans "В избранном" %}{% else %}{% trans "В избранное" %}{% endif %}
                                 </button>
                             </form>
 
                             <!-- Кнопка регистрации/корзины -->
                             {% if is_registered %}
                                 <button class="btn btn-success" disabled>
-                                    <i class="fas fa-check-circle me-1"></i>Вы зарегистрированы
+                                    <i class="fas fa-check-circle me-1"></i>{% trans "Вы зарегистрированы" %}
                                 </button>
                             {% else %}
                                 {% if event.is_free or event.price == 0 %}
                                     <form method="post" action="{% url 'event_register' event.id %}">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-user-plus me-1"></i>Зарегистрироваться
+                                            <i class="fas fa-user-plus me-1"></i>{% trans "Зарегистрироваться" %}
                                         </button>
                                     </form>
                                 {% else %}
@@ -89,7 +91,7 @@
                                             <input type="number" name="quantity" value="1" min="1" max="10" 
                                                    class="form-control" style="max-width: 80px;">
                                             <button type="submit" class="btn btn-success">
-                                                <i class="fas fa-shopping-cart me-1"></i>В корзину
+                                                <i class="fas fa-shopping-cart me-1"></i>{% trans "В корзину" %}
                                             </button>
                                         </div>
                                     </form>
@@ -97,7 +99,7 @@
                             {% endif %}
                         {% else %}
                             <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-primary">
-                                <i class="fas fa-sign-in-alt me-1"></i>Войти для регистрации
+                                <i class="fas fa-sign-in-alt me-1"></i>{% trans "Войти для регистрации" %}
                             </a>
                         {% endif %}
                     </div>
@@ -105,7 +107,7 @@
                     <!-- Цена -->
                     <div class="mb-4">
                         {% if event.is_free or event.price == 0 %}
-                            <span class="badge bg-success fs-6 p-2">Бесплатное мероприятие</span>
+                            <span class="badge bg-success fs-6 p-2">{% trans "Бесплатное мероприятие" %}</span>
                         {% else %}
                             <h4 class="text-primary">{{ event.price }} ₽</h4>
                         {% endif %}
@@ -113,26 +115,26 @@
 
                     <!-- Описание -->
                     <div class="mb-4">
-                        <h3 class="h5">Описание мероприятия</h3>
+                        <h3 class="h5">{% trans "Описание мероприятия" %}</h3>
                         <p class="text-muted">{{ event.description|linebreaks }}</p>
                     </div>
 
                     <!-- Дополнительная информация -->
                     <div class="row">
                         <div class="col-md-6">
-                            <h3 class="h5">Детали</h3>
+                            <h3 class="h5">{% trans "Детали" %}</h3>
                             <ul class="list-unstyled">
                                 <li class="mb-2">
                                     <i class="fas fa-users me-2"></i>
-                                    <strong>Участников:</strong> {{ event.registrations.count }}/{{ event.capacity }}
+                                    <strong>{% trans "Участников:" %}</strong> {{ event.registrations.count }}/{{ event.capacity }}
                                 </li>
                                 <li class="mb-2">
                                     <i class="fas fa-play-circle me-2"></i>
-                                    <strong>Формат:</strong> {{ event.get_event_format_display }}
+                                    <strong>{% trans "Формат:" %}</strong> {{ event.get_event_format_display }}
                                 </li>
                                 <li class="mb-2">
                                     <i class="fas fa-chart-bar me-2"></i>
-                                    <strong>Сложность:</strong> {{ event.get_difficulty_level_display }}
+                                    <strong>{% trans "Сложность:" %}</strong> {{ event.get_difficulty_level_display }}
                                 </li>
                             </ul>
                         </div>
@@ -145,7 +147,7 @@
                 <div class="card-header">
                     <h3 class="h5 mb-0">
                         <i class="fas fa-comments me-2"></i>
-                        Отзывы о мероприятии
+                        {% trans "Отзывы о мероприятии" %}
                         {% if reviews %}
                             <span class="badge bg-primary ms-2">{{ reviews.count }}</span>
                         {% endif %}
@@ -155,11 +157,11 @@
                     {% if user.is_authenticated and is_registered and not user_review %}
                         <!-- Форма добавления отзыва -->
                         <div class="mb-4 p-3 bg-light rounded">
-                            <h4 class="h6">Оставить отзыв</h4>
+                            <h4 class="h6">{% trans "Оставить отзыв" %}</h4>
                             <form method="post" action="{% url 'add_review' event.id %}">
                                 {% csrf_token %}
                                 <div class="mb-3">
-                                    <label class="form-label">Оценка</label>
+                                    <label class="form-label">{% trans "Оценка" %}</label>
                                     <div>
                                         {% for i in "54321" %}
                                             <div class="form-check form-check-inline">
@@ -178,18 +180,18 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="comment" class="form-label">Комментарий</label>
+                                    <label for="comment" class="form-label">{% trans "Комментарий" %}</label>
                                     <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Поделитесь вашими впечатлениями..." required></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+                                <button type="submit" class="btn btn-primary">{% trans "Отправить отзыв" %}</button>
                             </form>
                         </div>
                     {% elif user_review %}
                         <!-- Отзыв текущего пользователя -->
                         <div class="alert alert-info">
                             <div class="d-flex justify-content-between align-items-start">
-                                <h5 class="alert-heading mb-2">Ваш отзыв</h5>
-                                <a href="{% url 'edit_review' user_review.id %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                                <h5 class="alert-heading mb-2">{% trans "Ваш отзыв" %}</h5>
+                                <a href="{% url 'edit_review' user_review.id %}" class="btn btn-sm btn-outline-primary">{% trans "Редактировать" %}</a>
                             </div>
                             <div class="d-flex align-items-center mb-2">
                                 <div class="rating">
@@ -208,12 +210,12 @@
                     {% elif user.is_authenticated and not is_registered %}
                         <div class="alert alert-warning">
                             <i class="fas fa-info-circle me-2"></i>
-                            Чтобы оставить отзыв, необходимо зарегистрироваться на мероприятие.
+                            {% trans "Чтобы оставить отзыв, необходимо зарегистрироваться на мероприятие." %}"
                         </div>
                     {% elif not user.is_authenticated %}
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            <a href="{% url 'login' %}?next={{ request.path }}" class="alert-link">Войдите</a>, чтобы оставить отзыв.
+                            <a href="{% url 'login' %}?next={{ request.path }}" class="alert-link">{% trans "Войдите" %}</a>, {% trans "чтобы оставить отзыв" %}.
                         </div>
                     {% endif %}
 
@@ -246,7 +248,7 @@
                     {% else %}
                         <div class="text-center py-4">
                             <i class="fas fa-comments fa-2x text-muted mb-3"></i>
-                            <p class="text-muted mb-0">Пока нет отзывов о этом мероприятии.</p>
+                            <p class="text-muted mb-0">{% trans "Пока нет отзывов о этом мероприятии." %}</p>
                         </div>
                     {% endif %}
                 </div>
@@ -258,26 +260,26 @@
             <!-- Статистика -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h3 class="h6 mb-0">Статистика мероприятия</h3>
+                    <h3 class="h6 mb-0">{% trans "Статистика мероприятия" %}</h3>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span>Зарегистрировано:</span>
+                        <span>{% trans "Зарегистрировано:" %}</span>
                         <strong>{{ event.registrations.count }}/{{ event.capacity }}</strong>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span>Свободных мест:</span>
+                        <span>{% trans "Свободных мест:" %}</span>
                         <strong class="{% if available_seats <= 0 %}text-danger{% else %}text-success{% endif %}">
                             {{ available_seats }}
                         </strong>
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
-                        <span>Рейтинг:</span>
+                        <span>{% trans "Рейтинг:" %}</span>
                         <strong>
                             {% if average_rating %}
                                 {{ average_rating|floatformat:1 }}/5.0
                             {% else %}
-                                Нет оценок
+                                {% trans "Нет оценок" %}
                             {% endif %}
                         </strong>
                     </div>
@@ -287,16 +289,16 @@
             <!-- Организатор -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="h6 mb-0">Организатор</h3>
+                    <h3 class="h6 mb-0">{% trans "Организатор" %}</h3>
                 </div>
                 <div class="card-body text-center">
                     <div class="mb-3">
                         <i class="fas fa-user-circle fa-3x text-muted"></i>
                     </div>
                     <h5 class="card-title">{{ event.organizer.username }}</h5>
-                    <p class="text-muted small">Организатор мероприятия</p>
+                    <p class="text-muted small">{% trans "Организатор мероприятия" %}</p>
                     {% if user.is_authenticated and user != event.organizer %}
-                        <button class="btn btn-outline-primary btn-sm" disabled>Написать сообщение</button>
+                        <button class="btn btn-outline-primary btn-sm" disabled>{% trans "Написать сообщение" %}</button>
                     {% endif %}
                 </div>
             </div>

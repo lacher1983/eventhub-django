@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
+{% load i18n %}
+
 {% load static %}
 
 {% block title %}
-    {% if object %}Редактирование {{ object.title }}{% else %}Создание мероприятия{% endif %}
+    {% if object %}{% trans "Редактирование" %} {{ object.title }}{% else %}{% trans "Создание мероприятия" %}{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -13,9 +15,9 @@
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
                         {% if object %}
-                            <i class="bi bi-pencil-square"></i> Редактировать мероприятие
+                            <i class="bi bi-pencil-square"></i> {% trans "Редактировать мероприятие" %}
                         {% else %}
-                            <i class="bi bi-plus-circle"></i> Создать новое мероприятие
+                            <i class="bi bi-plus-circle"></i> {% trans "Создать новое мероприятие" %}
                         {% endif %}
                     </h4>
                 </div>
@@ -35,7 +37,7 @@
                         <!-- Основная информация -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2">Основная информация</h5>
+                                <h5 class="border-bottom pb-2">{% trans "Основная информация" %}</h5>
                             </div>
                             
                             <div class="col-md-12 mb-3">
@@ -53,7 +55,7 @@
                                     {{ form.short_description.label }} *
                                 </label>
                                 {{ form.short_description }}
-                                <div class="form-text">Краткое описание для карточек мероприятий</div>
+                                <div class="form-text">{% trans "Краткое описание для карточек мероприятий" %}</div>
                                 {% if form.short_description.errors %}
                                     <div class="text-danger small">{{ form.short_description.errors }}</div>
                                 {% endif %}
@@ -73,7 +75,7 @@
                         <!-- Классификация мероприятия -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2">Классификация</h5>
+                                <h5 class="border-bottom pb-2">{% trans "Классификация" %}</h5>
                             </div>
                             
                             <div class="col-md-6 mb-3">
@@ -120,7 +122,7 @@
                         <!-- Дата и место -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2">Дата и место проведения</h5>
+                                <h5 class="border-bottom pb-2">{% trans "Дата и место проведения" %}</h5>
                             </div>
                             
                             <div class="col-md-6 mb-3">
@@ -138,7 +140,7 @@
                                     {{ form.location.label }} *
                                 </label>
                                 {{ form.location }}
-                                <div class="form-text">Для онлайн мероприятий - укажите платформу</div>
+                                <div class="form-text">{% trans "Для онлайн мероприятий - укажите платформу" %}</div>
                                 {% if form.location.errors %}
                                     <div class="text-danger small">{{ form.location.errors }}</div>
                                 {% endif %}
@@ -149,7 +151,7 @@
                                     {{ form.requirements.label }}
                                 </label>
                                 {{ form.requirements }}
-                                <div class="form-text">Что участникам нужно взять с собой или подготовить</div>
+                                <div class="form-text">{% trans "Что участникам нужно взять с собой или подготовить" %}</div>
                                 {% if form.requirements.errors %}
                                     <div class="text-danger small">{{ form.requirements.errors }}</div>
                                 {% endif %}
@@ -159,7 +161,7 @@
                         <!-- Организация и билеты -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2">Организация</h5>
+                                <h5 class="border-bottom pb-2">{% trans "Организация" %}</h5>
                             </div>
                             
                             <div class="col-md-6 mb-3">
@@ -186,7 +188,7 @@
                         <!-- Финансы -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2">Стоимость участия</h5>
+                                <h5 class="border-bottom pb-2">{% trans "Стоимость участия" %}</h5>
                             </div>
                             
                             <div class="col-md-6 mb-3">
@@ -215,7 +217,7 @@
                         <!-- Изображение и теги -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2">Визуал и теги</h5>
+                                <h5 class="border-bottom pb-2">{% trans "Визуал и теги" %}</h5>
                             </div>
                             
                             <div class="col-md-6 mb-3">
@@ -247,7 +249,7 @@
                         <!-- Статус -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2">Статус мероприятия</h5>
+                                <h5 class="border-bottom pb-2">{% trans "Статус мероприятия" %}</h5>
                             </div>
                             
                             <div class="col-md-12 mb-3">
@@ -257,7 +259,7 @@
                                         {{ form.is_active.label }}
                                     </label>
                                 </div>
-                                <div class="form-text">Если снять галочку, мероприятие не будет отображаться в каталоге</div>
+                                <div class="form-text">{% trans "Если снять галочку, мероприятие не будет отображаться в каталоге" %}</div>
                                 {% if form.is_active.errors %}
                                     <div class="text-danger small">{{ form.is_active.errors }}</div>
                                 {% endif %}
@@ -269,9 +271,9 @@
                             <div class="col-12">
                                 <div class="d-flex gap-2 justify-content-end">
                                     <a href="{% if object %}{% url 'event_detail' object.pk %}{% else %}{% url 'event_list' %}{% endif %}" 
-                                       class="btn btn-secondary">Отмена</a>
+                                       class="btn btn-secondary">{% trans "Отмена" %}</a>
                                     <button type="submit" class="btn btn-primary">
-                                        {% if object %}Сохранить изменения{% else %}Создать мероприятие{% endif %}
+                                        {% if object %}{% trans "Сохранить изменения" %}{% else %}{% trans "Создать мероприятие" %}{% endif %}
                                     </button>
                                 </div>
                             </div>

@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
+{% load i18n %}
+
+{% load i18n ads_tags static %}
+
 {% load ads_tags %}
 {% load static %}
 
-{% block title %}Мероприятия - EventHub{% endblock %}
+{% block title %}{% trans "Мероприятия" %} - EventHub{% endblock %}
 
 {% block content %}
 <!-- Верхний баннер -->
@@ -11,13 +15,13 @@
         <div class="card-body p-3 text-center text-white">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h5 class="mb-1">🚀 Специальное предложение!</h5>
-                    <p class="mb-0">Получите скидку 25% на первый заказ</p>
+                    <h5 class="mb-1">🚀 {% trans "Специальное предложение!" %}</h5>
+                    <p class="mb-0">{% trans "Получите скидку 25% на первый заказ" %}</p>
                 </div>
                 <div class="col-md-4 mt-2 mt-md-0">
                     <a href="https://ваш-сайт.com/promo" 
                        class="btn btn-light btn-sm fw-bold">
-                        Получить скидку
+                        {% trans "Получить скидку" %}
                     </a>
                 </div>
             </div>
@@ -30,8 +34,8 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <h1 class="display-4 mb-4 text-white fw-bold">Найдите своё следующее приключение</h1>
-                <p class="lead text-white-50 mb-4">Откройте для себя уникальные мероприятия в вашем городе</p>
+                <h1 class="display-4 mb-4 text-white fw-bold">{% trans "Найдите своё следующее приключение" %}</h1>
+                <p class="lead text-white-50 mb-4">{% trans "Откройте для себя уникальные мероприятия в вашем городе" %}</p>
                 
                 <!-- Поиск -->
                 <form method="get" class="mt-4">
@@ -41,7 +45,7 @@
                                style="border-radius: 50px 0 0 50px;">
                         <button class="btn btn-primary border-0 py-3 px-4" type="submit"
                                 style="border-radius: 0 50px 50px 0;">
-                            <i class="fas fa-search me-2"></i> Найти
+                            <i class="fas fa-search me-2"></i> {% trans "Найти" %}
                         </button>
                     </div>
                 </form>
@@ -57,16 +61,16 @@
         <div class="col-lg-3 col-md-4">
             <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
                 <div class="card-header bg-white border-0 py-4">
-                    <h5 class="mb-0 fw-semibold text-dark">Фильтры</h5>
+                    <h5 class="mb-0 fw-semibold text-dark">{% trans "Фильтры" %}</h5>
                 </div>
                 <div class="card-body">
                     <!-- Форма фильтров -->
                     <form method="get" id="filter-form">
                         <!-- Категория -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Категория</label>
+                            <label class="form-label fw-semibold">{% trans "Категории" %}</label>
                             <select name="category" class="form-select rounded-3 border-1 py-2">
-                                <option value="">Все категории</option>
+                                <option value="">{% trans "Все категории" %}</option>
                                 {% for category in categories %}
                                     <option value="{{ category.slug }}" 
                                             {% if request.GET.category == category.slug %}selected{% endif %}>
@@ -78,54 +82,54 @@
 
                         <!-- Тип мероприятия -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Тип мероприятия</label>
+                            <label class="form-label fw-semibold">{% trans "Тип мероприятия" %}</label>
                             <select name="event_type" class="form-select rounded-3 border-1 py-2">
-                                <option value="">Любой тип</option>
-                                <option value="online" {% if request.GET.event_type == 'online' %}selected{% endif %}>Онлайн</option>
-                                <option value="offline" {% if request.GET.event_type == 'offline' %}selected{% endif %}>Оффлайн</option> 
-                                <option value="hybrid" {% if request.GET.event_type == 'hybrid' %}selected{% endif %}>Гибридный</option>
+                                <option value="">{% trans "Любой тип" %}</option>
+                                <option value="online" {% if request.GET.event_type == 'online' %}selected{% endif %}>{% trans "Онлайн" %}</option>
+                                <option value="offline" {% if request.GET.event_type == 'offline' %}selected{% endif %}>{% trans "Оффлайн" %}</option> 
+                                <option value="hybrid" {% if request.GET.event_type == 'hybrid' %}selected{% endif %}>{% trans "Гибридный" %}</option>
                             </select>
                         </div>
 
                         <!-- Формат мероприятия -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Формат</label>
+                            <label class="form-label fw-semibold">{% trans "Формат" %}</label>
                             <select name="event_format" class="form-select rounded-3 border-1 py-2">
-                                <option value="">Любой формат</option>
-                                <option value="conference" {% if request.GET.event_format == 'conference' %}selected{% endif %}>Конференция</option>
-                                <option value="workshop" {% if request.GET.event_format == 'workshop' %}selected{% endif %}>Воркшоп</option> 
-                                <option value="meetup" {% if request.GET.event_format == 'meetup' %}selected{% endif %}>Митап</option>
+                                <option value="">{% trans "Любой формат" %}</option>
+                                <option value="conference" {% if request.GET.event_format == 'conference' %}selected{% endif %}>{% trans "Конференция" %}</option>
+                                <option value="workshop" {% if request.GET.event_format == 'workshop' %}selected{% endif %}>{% trans "Воркшоп" %}</option> 
+                                <option value="meetup" {% if request.GET.event_format == 'meetup' %}selected{% endif %}>{% trans "Митап" %}</option>
                             </select>
                         </div>
 
                         <!-- Уровень сложности -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Уровень сложности</label>
+                            <label class="form-label fw-semibold">{% trans "Уровень сложности" %}</label>
                             <select name="difficulty_level" class="form-select rounded-3 border-1 py-2">
-                                <option value="">Любой уровень</option>
-                                <option value="beginner" {% if request.GET.difficulty_level == 'beginner' %}selected{% endif %}>Начинающий</option>
-                                <option value="intermediate" {% if request.GET.difficulty_level == 'intermediate' %}selected{% endif %}>Средний</option> 
-                                <option value="advanced" {% if request.GET.difficulty_level == 'advanced' %}selected{% endif %}>Продвинутый</option>
+                                <option value="">{% trans "Любой уровень" %}</option>
+                                <option value="beginner" {% if request.GET.difficulty_level == 'beginner' %}selected{% endif %}>{% trans "Начинающий" %}</option>
+                                <option value="intermediate" {% if request.GET.difficulty_level == 'intermediate' %}selected{% endif %}>{% trans "Средний" %}</option> 
+                                <option value="advanced" {% if request.GET.difficulty_level == 'advanced' %}selected{% endif %}>{% trans "Продвинутый" %}</option>
                             </select>
                         </div>
 
                         <!-- Тип цены -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Стоимость</label>
+                            <label class="form-label fw-semibold">{% trans "Стоимость" %}</label>
                             <select name="price_type" class="form-select rounded-3 border-1 py-2">
-                                <option value="">Любая стоимость</option>
-                                <option value="free" {% if request.GET.price_type == 'free' %}selected{% endif %}>Бесплатные</option>
-                                <option value="paid" {% if request.GET.price_type == 'paid' %}selected{% endif %}>Платные</option>
+                                <option value="">{% trans "Любая стоимость" %}</option>
+                                <option value="free" {% if request.GET.price_type == 'free' %}selected{% endif %}>{% trans "Бесплатные" %}</option>
+                                <option value="paid" {% if request.GET.price_type == 'paid' %}selected{% endif %}>{% trans "Платные" %}</option>
                             </select>
                         </div>
 
                         <!-- Кнопки фильтров -->
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary rounded-3 py-2">
-                                <i class="fas fa-filter me-2"></i>Применить фильтры
+                                <i class="fas fa-filter me-2"></i>{% trans "Применить фильтры" %}
                             </button>
                             <a href="{% url 'event_list' %}" class="btn btn-outline-secondary rounded-3 py-2">
-                                <i class="fas fa-times me-2"></i>Сбросить
+                                <i class="fas fa-times me-2"></i>{% trans "Сбросить" %}
                             </a>
                         </div>
                     </form>
@@ -134,11 +138,11 @@
                     <div class="mt-5">
                         <div class="card border-0 bg-light">
                             <div class="card-body p-3">
-                                <h6 class="card-title fw-bold">📢 Рекламный блок</h6>
-                                <p class="small mb-2">Здесь может быть ваша реклама</p>
+                                <h6 class="card-title fw-bold">📢 {% trans "Рекламный блок" %}</h6>
+                                <p class="small mb-2">{% trans "Здесь может быть ваша реклама" %}</p>
                                 <a href="mailto:ads@ваш-сайт.com" 
                                     class="btn btn-outline-primary btn-sm w-100">
-                                     Разместить рекламу
+                                     {% trans "Разместить рекламу" %}
                                 </a>
                             </div>
                         </div>
@@ -150,11 +154,11 @@
                     </div>
 
                     <!-- Сортировка -->
-                    <h6 class="fw-semibold text-muted mt-5 mb-3 small text-uppercase">Сортировка</h6>
+                    <h6 class="fw-semibold text-muted mt-5 mb-3 small text-uppercase">{% trans "Сортировка" %}</h6>
                     <select class="form-select rounded-3 border-1 py-2" onchange="updateSort(this.value)">
-                        <option value="date" {% if request.GET.sort == 'date' or not request.GET.sort %}selected{% endif %}>По дате (сначала новые)</option>
-                        <option value="price" {% if request.GET.sort == 'price' %}selected{% endif %}>По цене (дешевые first)</option>
-                        <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>По цене (дорогие first)</option>
+                        <option value="date" {% if request.GET.sort == 'date' or not request.GET.sort %}selected{% endif %}>{% trans "По дате (сначала новые)" %}</option>
+                        <option value="price" {% if request.GET.sort == 'price' %}selected{% endif %}>{% trans "По цене (дешевые first)" %}</option>
+                        <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>{% trans "По цене (дорогие first)" %}</option>
                     </select>
                 </div>
             </div>
@@ -164,9 +168,9 @@
         <div class="col-lg-9 col-md-8">
             <!-- Заголовок и количество -->
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="text-dark fw-bold">Мероприятия</h2>
+                <h2 class="text-dark fw-bold">{% trans "Мероприятия" %}</h2>
                 <span class="text-muted">
-                    Найдено: <strong>{{ events.paginator.count }}</strong>
+                    {% trans "Найдено" %}: <strong>{{ events.paginator.count }}</strong>
                 </span>
             </div>
 
@@ -202,7 +206,7 @@
                                 </span>
                                 {% else %}
                                 <span class="badge free-badge position-absolute top-0 start-0 m-2">
-                                    Бесплатно
+                                    {% trans "Бесплатно" %}
                                 </span>
                                 {% endif %}
                             </div>
@@ -244,7 +248,7 @@
                                 <div class="d-flex align-items-center mb-3">
                                     <i class="fas fa-users text-muted me-2" style="font-size: 0.8rem;"></i>
                                     <small class="text-muted" style="font-size: 0.8rem;">
-                                        <span class="fw-medium">{{ event.registrations.count }}</span>/{{ event.capacity }} участников
+                                        <span class="fw-medium">{{ event.registrations.count }}</span>/{{ event.capacity }} {% trans "участников" %}
                                     </small>
                                 </div>
                             </div>
@@ -254,7 +258,7 @@
                                 <div class="d-grid gap-2">
                                     <!-- Кнопка подробнее -->
                                     <a href="{% url 'event_detail' event.pk %}" class="btn btn-outline-primary btn-sm rounded-2 py-2">
-                                        <i class="fas fa-eye me-1"></i>Подробнее
+                                        <i class="fas fa-eye me-1"></i>{% trans "Подробнее" %}
                                     </a>
                                     
                                     <!-- Кнопка регистрации или добавления в корзину -->
@@ -262,7 +266,7 @@
                                         {% if event.id in user_registered_events %}
                                             <!-- Уже зарегистрирован -->
                                             <button class="btn btn-success btn-sm rounded-2 py-2" disabled>
-                                                <i class="fas fa-check-circle me-1"></i>Вы зарегистрированы
+                                                <i class="fas fa-check-circle me-1"></i>{% trans "Вы зарегистрированы" %}
                                             </button>
                                         {% else %}
                                             <!-- Не зарегистрирован -->
@@ -271,7 +275,7 @@
                                                 <form method="post" action="{% url 'event_register' event.pk %}" class="mb-0">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn btn-primary btn-sm rounded-2 py-2 w-100">
-                                                        <i class="fas fa-user-plus me-1"></i>Зарегистрироваться
+                                                        <i class="fas fa-user-plus me-1"></i>{% trans "Зарегистрироваться" %}
                                                     </button>
                                                 </form>
                                             {% else %}
@@ -282,7 +286,7 @@
                                                         <input type="number" name="quantity" value="1" min="1" max="10" 
                                                             class="form-control" style="max-width: 70px;">
                                                         <button type="submit" class="btn btn-success flex-grow-1">
-                                                            <i class="fas fa-shopping-cart me-1"></i>В корзину
+                                                            <i class="fas fa-shopping-cart me-1"></i>{% trans "В корзину" %}
                                                         </button>
                                                     </div>
                                                 </form>
@@ -291,7 +295,7 @@
                                     {% else %}
                                         <!-- Неавторизованный пользователь -->
                                         <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-secondary btn-sm rounded-2 py-2">
-                                            <i class="fas fa-sign-in-alt me-1"></i>Войти для регистрации
+                                            <i class="fas fa-sign-in-alt me-1"></i>{% trans "Войти для регистрации" %}
                                         </a>
                                     {% endif %}
                                 </div>
@@ -312,7 +316,7 @@
                                             <small class="text-muted" style="font-size: 0.75rem;">({{ event.reviews.count }})</small>
                                         </div>
                                     {% else %}
-                                        <small class="text-muted" style="font-size: 0.75rem;">Нет оценок</small>
+                                        <small class="text-muted" style="font-size: 0.75rem;">{% trans "Нет оценок" %}</small>
                                     {% endif %}
                                 </div>
                             </div>
@@ -329,11 +333,11 @@
                                             <span class="fs-4">🔥</span>
                                         </div>
                                         <div class="flex-grow-1 ms-3">
-                                            <h6 class="fw-bold mb-1">Горящее предложение</h6>
-                                            <p class="small mb-2">Скидка 20% на все услуги до конца недели</p>
+                                            <h6 class="fw-bold mb-1">{% trans "Горящее предложение" %}</h6>
+                                            <p class="small mb-2">{% trans "Скидка 20% на все услуги до конца недели" %}</p>
                                             <a href="https://ваш-сайт.com/hot-offer" 
                                                 class="btn btn-outline-danger btn-sm">
-                                                 Успеть получить
+                                                 {% trans "Успеть получить" %}
                                             </a>
                                         </div>
                                     </div>
@@ -345,10 +349,10 @@
                     <div class="col-12 text-center py-5">
                         <div class="empty-state">
                             <i class="fas fa-calendar-times fa-4x text-muted mb-4"></i>
-                            <h4 class="text-dark mb-3">Мероприятий не найдено</h4>
-                            <p class="text-muted mb-4">Попробуйте изменить параметры поиска или выбрать другую категорию</p>
+                            <h4 class="text-dark mb-3">{% trans "Мероприятий не найдено" %}</h4>
+                            <p class="text-muted mb-4">{% trans "Попробуйте изменить параметры поиска или выбрать другую категорию" %}</p>
                             <a href="{% url 'event_list' %}" class="btn btn-primary btn-lg rounded-3">
-                                <i class="fas fa-refresh me-2"></i>Сбросить фильтры
+                                <i class="fas fa-refresh me-2"></i>{% trans "Сбросить фильтры" %}
                             </a>
                         </div>
                     </div>
@@ -364,9 +368,9 @@
                         rel="noopener noreferrer"
                         class="text-decoration-none text-white">
                          <div class="banner-content">
-                            <h4 class="mb-2">Специальное предложение!</h4>
-                            <p class="mb-3">Скидка 20% на все товары</p>
-                            <span class="btn btn-light btn-sm">Узнать больше</span>
+                            <h4 class="mb-2">{% trans "Специальное предложение!" %}</h4>
+                            <p class="mb-3">{% trans "Скидка 20% на все товары" %}</p>
+                            <span class="btn btn-light btn-sm">{% trans "Узнать больше" %}</span>
                          </div>
                         </a>
                     </div>

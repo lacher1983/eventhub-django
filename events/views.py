@@ -14,11 +14,13 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Event, Category, Registration, Advertisement, Favorite, Review
 from .forms import EventForm, RegistrationForm, ReviewForm, EventFilterForm, CustomUserCreationForm
 import json
+from django.utils.translation import gettext as _
 from django.contrib.auth import login, logout
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth.models import User
+from django.core.serializers.json import DjangoJSONEncoder
 
 # Подтверждение email
 from django.core.mail import send_mail
@@ -240,12 +242,51 @@ class EventCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.organizer = self.request.user
-        messages.success(self.request, 'Мероприятие успешно создано!')
+        messages.success(self.request, _('Мероприятие успешно создано!'))
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['event_types_json'] = json.dumps(list(Event.EVENT_TYPES))
+        # context['event_types_json'] = json.dumps(list(Event.EVENT_TYPES))
+        # return context
+        # Создадим сериализуемый список типов мерпориятий
+        event_types = []
+        for key, value in Event.EVENT_TYPES:
+            try:
+                if hasattr(value, '_proxy____text'):
+                    label = value._proxy____text
+                elif callable(value):
+                    label = str(value())
+                else:
+                    label = str(value)
+            except:
+                label = str(value)
+            
+            event_types.append({
+                'value': key,
+                'label': label
+            })
+        
+        context['event_types_json'] = json.dumps(event_types, cls=TranslationSafeJSONEncoder)
+
+        difficulty_levels = []
+        for key, value in Event.DIFFICULTY_LEVELS:
+            try:
+                if hasattr(value, '_proxy____text'):
+                    label = value._proxy____text
+                elif callable(value):
+                    label = str(value())
+                else:
+                    label = str(value)
+            except:
+                label = str(value)
+            
+            difficulty_levels.append({
+                'value': key,
+                'label': label
+            })
+        context['difficulty_levels_json'] = json.dumps(difficulty_levels, cls=TranslationSafeJSONEncoder)
+        
         return context
 
 class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -681,3 +722,17 @@ def platform_statistics(request):
         'stats': stats,
         'popular_categories': popular_categories,
     })
+
+class TranslationSafeJSONEncoder(DjangoJSONEncoder):
+    """Кастомный JSON энкодер для обработки translation объектов"""
+    def default(self, obj):
+        try:
+            if hasattr(obj, '_proxy____text'):
+                return obj._proxy____text
+            elif hasattr(obj, '__html__'):
+                return str(obj)
+            elif callable(obj):
+                return str(obj())
+            return super().default(obj)
+        except:
+            return str(obj)

@@ -1,4 +1,6 @@
 {% for banner in banners %}
+{% load i18n %}
+
 <div class="ad-banner mb-4" data-ad-id="{{ banner.id }}">
     <a href="{{ banner.link }}?ref={{ banner.id }}" target="_blank" 
        onclick="incrementAdClick({{ banner.id }})" class="text-decoration-none ad-link">
@@ -19,12 +21,12 @@
             <div class="ad-content p-3 bg-light rounded">
                 <h6 class="mb-1">{{ banner.title }}</h6>
                 <p class="mb-0 small text-muted">{{ banner.content|truncatewords:15 }}</p>
-                <small class="text-primary">Нажмите для перехода →</small>
+                <small class="text-primary">{% trans "Нажмите для перехода" %} →</small>
             </div>
         {% else %}
             <div class="ad-content p-3 bg-primary text-white rounded text-center">
                 <h6 class="mb-0">{{ banner.title }}</h6>
-                <small>Рекламный баннер</small>
+                <small>{% trans "Рекламный баннер" %}</small>
             </div>
         {% endif %}
     </a>
@@ -41,6 +43,6 @@
 {% empty %}
 {# Опционально: можно добавить сообщение если баннеров нет #}
 <div class="text-center py-3 text-muted">
-    <small>Рекламный баннер</small>
+    <small>{% trans "Рекламный баннер" %}</small>
 </div>
 {% endfor %}

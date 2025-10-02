@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
+{% load i18n %}
+
 {% load static %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2>🛒 Ваша корзина</h2>
+    <h2>🛒 {% trans "Ваша корзина" %}</h2>
     
     {% if cart.items.all %}
     <div class="row">
@@ -13,11 +15,11 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Мероприятие</th>
-                            <th>Цена</th>
-                            <th>Количество</th>
-                            <th>Общая стоимость</th>
-                            <th>Действия</th>
+                            <th>{% trans "Мероприятие" %}</th>
+                            <th>{% trans "Цена" %}</th>
+                            <th>{% trans "Количество" %}</th>
+                            <th>{% trans "Общая стоимость" %}</th>
+                            <th>{% trans "Действия" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -31,7 +33,7 @@
                                     {% else %}
                                     <div class="bg-secondary rounded d-flex align-items-center justify-content-center me-2" 
                                          style="height: 50px; width: 50px;">
-                                        <span class="text-white">Нет фото</span>
+                                        <span class="text-white">{% trans "Нет фото" %}</span>
                                     </div>
                                     {% endif %}
                                     <div>
@@ -58,7 +60,7 @@
                             <td>
                                 <form method="post" action="{% url 'update_cart_item' item.id %}">
                                     {% csrf_token %}
-                                    <button type="submit" name="action" value="remove" class="btn btn-danger btn-sm">Удалить</button>
+                                    <button type="submit" name="action" value="remove" class="btn btn-danger btn-sm">{% trans "Удалить" %}</button>
                                 </form>
                             </td>
                         </tr>
@@ -80,7 +82,7 @@
                                 {% else %}
                                 <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
                                      style="height: 60px;">
-                                    <span class="text-white">Нет фото</span>
+                                    <span class="text-white">{% trans "Нет фото" %}</span>
                                 </div>
                                 {% endif %}
                             </div>
@@ -113,7 +115,7 @@
                                 <form method="post" action="{% url 'update_cart_item' item.id %}" class="mt-1">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="remove">
-                                    <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                                    <button type="submit" class="btn btn-sm btn-danger">{% trans "Удалить" %}</button>
                                 </form>
                             </div>
                         </div>
@@ -126,7 +128,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Сумма заказа</h5>
+                    <h5 class="card-title">{% trans "Сумма заказа" %}</h5>
                     <hr>
                     
                     {% for item in cart.items.all %}
@@ -138,16 +140,16 @@
                     
                     <hr>
                     <div class="d-flex justify-content-between fw-bold">
-                        <span>Итого:</span>
+                        <span>{% trans "Итого:" %}</span>
                         <span>{{ cart.total_price }} ₽</span>
                     </div>
                     
                     <a href="{% url 'checkout' %}" class="btn btn-primary w-100 mt-3">
-                        Перейти к оплате
+                        {% trans "Перейти к оплате" %}
                     </a>
                     
                     <a href="{% url 'event_list' %}" class="btn btn-outline-secondary w-100 mt-2">
-                        Продолжить покупки
+                        {% trans "Продолжить покупки" %}
                     </a>
                 </div>
             </div>
@@ -157,9 +159,9 @@
     {% else %}
     <div class="text-center py-5">
         <div class="display-1 text-muted">🛒</div>
-        <h3 class="text-muted">Корзина пуста</h3>
-        <p>Добавьте мероприятия из каталога</p>
-        <a href="{% url 'event_list' %}" class="btn btn-primary">Перейти к мероприятиям</a>
+        <h3 class="text-muted">{% trans "Корзина пуста" %}</h3>
+        <p>{% trans "Добавьте мероприятия из каталога" %}</p>
+        <a href="{% url 'event_list' %}" class="btn btn-primary">{% trans "Перейти к мероприятиям" %}</a>
     </div>
     {% endif %}
 </div>

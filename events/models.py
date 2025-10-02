@@ -10,39 +10,40 @@ from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from datetime import timedelta
 import uuid
+from django.utils.translation import gettext_lazy as _
 
 
 class Advertisement(models.Model):
     AD_TYPES = [
-        ('banner', 'Баннер'),
-        ('video', 'Видео'),
-        ('popup', 'Всплывающее окно'),
-        ('sidebar', 'Боковая панель'),
+        ('banner', _('Баннер')),
+        ('video', _('Видео')),
+        ('popup', _('Всплывающее окно')),
+        ('sidebar', _('Боковая панель')),
     ]
 
     POSITIONS = [
-        ('top', 'Верх страницы'),
-        ('sidebar', 'Боковая панель'),
-        ('between_events', 'Между событиями'),
-        ('bottom', 'Низ страницы'),
+        ('top', _('Верх страницы')),
+        ('sidebar', _('Боковая панель')),
+        ('between_events', _('Между событиями')),
+        ('bottom', _('Низ страницы')),
     ]
 
-    title = models.CharField(max_length=200, verbose_name="Название")
-    ad_type = models.CharField(max_length=20, choices=AD_TYPES, default='banner', verbose_name="Тип рекламы")
-    position = models.CharField(max_length=20, choices=POSITIONS, default='top', verbose_name="Позиция")
-    image = models.ImageField(upload_to='ads/', blank=True, null=True, verbose_name="Изображение")
+    title = models.CharField(max_length=200, verbose_name=_("Название"))
+    ad_type = models.CharField(max_length=20, choices=AD_TYPES, default='banner', verbose_name=_("Тип рекламы"))
+    position = models.CharField(max_length=20, choices=POSITIONS, default='top', verbose_name=_("Позиция"))
+    image = models.ImageField(upload_to='ads/', blank=True, null=True, verbose_name=_("Изображение"))
     video_url = models.URLField(blank=True, null=True, verbose_name="URL видео")
-    content = models.TextField(blank=True, null=True, verbose_name="Текстовое содержание")
-    link = models.URLField(verbose_name="Ссылка")
-    is_active = models.BooleanField(default=True, verbose_name="Активно")
-    start_date = models.DateTimeField(verbose_name="Дата начала")
-    end_date = models.DateTimeField(verbose_name="Дата окончания")
-    click_count = models.IntegerField(default=0, verbose_name="Клики")
-    impression_count = models.IntegerField(default=0, verbose_name="Показы")
+    content = models.TextField(blank=True, null=True, verbose_name=_("Текстовое содержание"))
+    link = models.URLField(verbose_name=_("Ссылка"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Активно"))
+    start_date = models.DateTimeField(verbose_name=_("Дата начала"))
+    end_date = models.DateTimeField(verbose_name=_("Дата окончания"))
+    click_count = models.IntegerField(default=0, verbose_name=_("Клики"))
+    impression_count = models.IntegerField(default=0, verbose_name=_("Показы"))
     
     class Meta:
-        verbose_name = "Рекламный баннер"
-        verbose_name_plural = "Рекламные баннеры"
+        verbose_name = _("Рекламный баннер")
+        verbose_name_plural = _("Рекламные баннеры")
         ordering = ['-start_date']
     
     def __str__(self):
@@ -62,13 +63,13 @@ class Advertisement(models.Model):
         self.save()
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, verbose_name="Название категории")
-    slug = models.SlugField(unique=True, default='default-category')
-    description = models.TextField(blank=True, verbose_name="Описание")
+    name = models.CharField(_('название категории'), max_length=100)
+    slug = models.SlugField(_('слаг'), unique=True, default='default-category')
+    description = models.TextField(_('описание'), blank=True)
 
     class Meta:
-        verbose_name = "Категория"
-        verbose_name_plural = "Категории"
+        verbose_name = _('категория')
+        verbose_name_plural = _('категории')
 
     def __str__(self):
         return self.name
@@ -82,101 +83,101 @@ class Category(models.Model):
 class Event(models.Model):
     # Группировка по категориям
     EVENT_CATEGORIES = [
-        ('education', 'Образовательные'),
-        ('business', 'Бизнес'),
-        ('entertainment', 'Развлечения'),
-        ('culture', 'Культура'),
-        ('sport', 'Спорт'),
-        ('social', 'Социальные'),
+        ('education', _('Образовательные')),
+        ('business', _('Бизнес')),
+        ('entertainment', _('Развлечения')),
+        ('culture', _('Культура')),
+        ('sport', _('Спорт')),
+        ('social', _('Социальные')),
     ]
     
     # Детальные типы мероприятий
     EVENT_TYPES = [
         # Образовательные
-        ('webinar', 'Вебинар'),
-        ('workshop', 'Мастер-класс'),
-        ('course', 'Курс'),
-        ('lecture', 'Лекция'),
-        ('training', 'Тренинг'),
+        ('webinar', _('Вебинар')),
+        ('workshop', _('Мастер-класс')),
+        ('course', _('Курс')),
+        ('lecture', _('Лекция')),
+        ('training', _('Тренинг')),
         
         # Бизнес
-        ('conference', 'Конференция'),
-        ('business_meeting', 'Бизнес-встреча'),
-        ('networking', 'Нетворкинг'),
-        ('exhibition', 'Выставка'),
+        ('conference', _('Конференция')),
+        ('business_meeting', _('Бизнес-встреча')),
+        ('networking', _('Нетворкинг')),
+        ('exhibition', _('Выставка')),
         
         # Развлечения
-        ('concert', 'Концерт'),
-        ('party', 'Вечеринка'),
-        ('festival', 'Фестиваль'),
-        ('show', 'Шоу'),
+        ('concert', _('Концерт')),
+        ('party', _('Вечеринка')),
+        ('festival', _('Фестиваль')),
+        ('show', _('Шоу')),
         
         # Культура
-        ('exhibition_culture', 'Выставка (культурная)'),
-        ('tour', 'Экскурсия'),
-        ('master_class', 'Мастер-класс (творческий)'),
+        ('exhibition_culture', _('Выставка (культурная)')),
+        ('tour', _('Экскурсия')),
+        ('master_class', _('Мастер-класс (творческий)')),
         
         # Спорт
-        ('competition', 'Соревнование'),
-        ('sport_event', 'Спортивное событие'),
-        ('tournament', 'Турнир'),
+        ('competition', _('Соревнование')),
+        ('sport_event', _('Спортивное событие')),
+        ('tournament', _('Турнир')),
         
         # Социальные
-        ('charity', 'Благотворительное'),
-        ('volunteering', 'Волонтерство'),
-        ('community', 'Сообщество'),
+        ('charity', _('Благотворительное')),
+        ('volunteering', _('Волонтерство')),
+        ('community', _('Сообщество')),
     ]
 
     EVENT_FORMATS = [
-        ('online', 'Онлайн'),
-        ('offline', 'Оффлайн'),
-        ('hybrid', 'Гибридный'),
+        ('online', _('Онлайн')),
+        ('offline', _('Оффлайн')),
+        ('hybrid', _('Гибридный')),
     ]
 
     # Уровни сложности
     DIFFICULTY_LEVELS = [
-        ('beginner', 'Для начинающих'),
-        ('intermediate', 'Средний уровень'),
-        ('advanced', 'Для продвинутых'),
-        ('all', 'Для всех уровней'),
+        ('beginner', _('Для начинающих')),
+        ('intermediate', _('Средний уровень')),
+        ('advanced', _('Для продвинутых')),
+        ('all', _('Для всех уровней')),
     ]
   
-    title = models.CharField(max_length=200, verbose_name="Название мероприятия")
-    description = models.TextField(verbose_name="Описание")
-    short_description = models.CharField(max_length=300, verbose_name="Краткое описание", 
-                                       default='Краткое описание мероприятия')
-    date = models.DateTimeField(verbose_name="Дата и время")
-    location = models.CharField(max_length=200, verbose_name="Место проведения")
-    category = models.CharField(max_length=20, choices=EVENT_CATEGORIES, verbose_name="Категория", default='education')
-    event_type = models.CharField(max_length=20, choices=EVENT_TYPES, verbose_name="Тип мероприятия", default='workshop')
-    event_format = models.CharField(max_length=10, choices=EVENT_FORMATS, verbose_name="Формат проведения", default='offline')
+    title = models.CharField(max_length=200, verbose_name=_("Название мероприятия"))
+    description = models.TextField(verbose_name=_("Описание"))
+    short_description = models.CharField(max_length=300, verbose_name=_("Краткое описание"), 
+                                       default=_('Краткое описание мероприятия'))
+    date = models.DateTimeField(verbose_name=_("Дата и время"))
+    location = models.CharField(max_length=200, verbose_name=_("Место проведения"))
+    category = models.CharField(max_length=20, choices=EVENT_CATEGORIES, verbose_name=_("Категория"), default='education')
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPES, verbose_name=_("Тип мероприятия"), default='workshop')
+    event_format = models.CharField(max_length=10, choices=EVENT_FORMATS, verbose_name=_("Формат проведения"), default='offline')
     # Поля для сложности и требований
     difficulty_level = models.CharField(
         max_length=20, 
         choices=DIFFICULTY_LEVELS, 
         default='all',
-        verbose_name="Уровень сложности"
+        verbose_name=_("Уровень сложности")
     )
-    requirements = models.TextField(blank=True, verbose_name="Что нужно взять с собой")
+    requirements = models.TextField(blank=True, verbose_name=_("Что нужно взять с собой"))
     image = models.ImageField(upload_to='events/', blank=True, null=True)
     organizer = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='organized_events', 
-                                verbose_name="Организатор")
+                                verbose_name=_("Организатор"))
     price = models.DecimalField(max_digits=10, decimal_places=2, 
-                              default=0, verbose_name="Цена")
-    is_free = models.BooleanField(default=False, verbose_name="Бесплатное мероприятие")
-    tickets_available = models.PositiveIntegerField(default=100, verbose_name="Доступно билетов")
-    capacity = models.PositiveIntegerField(verbose_name="Вместимость", default=50)
-    is_active = models.BooleanField(default=True, verbose_name="Активно")
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="Дата создания")
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name="Дата обновления")
-    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0, blank=True, verbose_name="Средний рейтинг")
+                              default=0, verbose_name=_("Цена"))
+    is_free = models.BooleanField(default=False, verbose_name=_("Бесплатное мероприятие"))
+    tickets_available = models.PositiveIntegerField(default=100, verbose_name=_("Доступно билетов"))
+    capacity = models.PositiveIntegerField(verbose_name=_("Вместимость"), default=50)
+    is_active = models.BooleanField(default=True, verbose_name=_("Активно"))
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name=_("Дата создания"))
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name=_("Дата обновления"))
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0, blank=True, verbose_name=_("Средний рейтинг"))
     
     # Теги
-    tags = models.ManyToManyField('Tag', blank=True, verbose_name="Теги")
+    tags = models.ManyToManyField('Tag', blank=True, verbose_name=_("Теги"))
 
     class Meta:
-        verbose_name = "Мероприятие"
-        verbose_name_plural = "Мероприятия"
+        verbose_name = _("Мероприятие")
+        verbose_name_plural = _("Мероприятия")
         ordering = ['-date']
     
     def update_average_rating(self):
@@ -260,13 +261,13 @@ class Event(models.Model):
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True, verbose_name="Название тега")
+    name = models.CharField(max_length=50, unique=True, verbose_name=_("Название тега"))
     slug = models.SlugField(unique=True)
-    color = models.CharField(max_length=7, default='#007bff', verbose_name="Цвет тега")  # HEX цвет
+    color = models.CharField(max_length=7, default='#007bff', verbose_name=_("Цвет тега"))  # HEX цвет
     
     class Meta:
-        verbose_name = "Тег"
-        verbose_name_plural = "Теги"
+        verbose_name = _("Тег")
+        verbose_name_plural = _("Теги")
         ordering = ['name']
     
     def __str__(self):
@@ -281,20 +282,27 @@ class Tag(models.Model):
 
 class Registration(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Ожидает'),
-        ('confirmed', 'Подтверждена'),
-        ('cancelled', 'Отменена'),
+        ('pending', _('Ожидает')),
+        ('confirmed', _('Подтверждена')),
+        ('cancelled', _('Отменена')),
     ]
     user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='registrations')
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='registrations')
     registration_date = models.DateTimeField(auto_now_add=True) 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
+    notes = models.TextField(
+        _('дополнительные заметки'),
+        blank=True,
+        null=True,
+        help_text=_('Дополнительная информация о регистрации')
+    )
+
     class Meta:
         unique_together = ['user', 'event']
         ordering = ['-registration_date']
-        verbose_name = "Регистрация"
-        verbose_name_plural = "Регистрации"
+        verbose_name = _("Регистрация")
+        verbose_name_plural = _("Регистрации")
 
     def __str__(self):
         return f"{self.user.username} - {self.event.title}"
@@ -304,16 +312,16 @@ User = get_user_model()
 
 class Favorite(models.Model):
     """Модель для избранных мероприятий пользователя"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites', verbose_name="Пользователь")
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='favorited_by', verbose_name="Мероприятие")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites', verbose_name=_("Пользователь"))
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='favorited_by', verbose_name=_("Мероприятие"))
     created_at = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(blank=True)  # Персональные заметки
-    registration_date = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="Дата регистрации")
+    registration_date = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name=_("Дата регистрации"))
 
     class Meta:
         unique_together = ['user', 'event']  # Один пользователь может добавить событие в избранное только один раз
-        verbose_name = "Избранное"
-        verbose_name_plural = "Избранные мероприятия"
+        verbose_name = _("Избранное")
+        verbose_name_plural = _("Избранные мероприятия")
         ordering = ['-registration_date', '-created_at']
 
     def __str__(self):
@@ -323,46 +331,46 @@ class Favorite(models.Model):
 class Review(models.Model):
     """Модель отзывов и рейтингов мероприятий"""
     RATING_CHOICES = [
-        (1, '⭐ - Ужасно'),
-        (2, '⭐⭐ - Плохо'),
-        (3, '⭐⭐⭐ - Нормально'),
-        (4, '⭐⭐⭐⭐ - Хорошо'),
-        (5, '⭐⭐⭐⭐⭐ - Отлично'),
+        (1, _('⭐ - Ужасно')),
+        (2, _('⭐⭐ - Плохо')),
+        (3, _('⭐⭐⭐ - Нормально')),
+        (4, _('⭐⭐⭐⭐ - Хорошо')),
+        (5, _('⭐⭐⭐⭐⭐ - Отлично')),
     ]
     
     event = models.ForeignKey(
         Event,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name="Мероприятие"
+        verbose_name=_("Мероприятие")
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name="Пользователь"
+        verbose_name=_("Пользователь")
     )
     rating = models.IntegerField(
         choices=RATING_CHOICES,
-        verbose_name="Рейтинг"
+        verbose_name=_("Рейтинг")
     )
     comment = models.TextField(
         max_length=1000,
         blank=True,
-        verbose_name="Комментарий"
+        verbose_name=_("Комментарий")
     )
     registration_date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name="Дата создания"
+        verbose_name=_("Дата создания")
     )
     updated_at = models.DateTimeField(
         auto_now=True,
-        verbose_name="Дата обновления"
+        verbose_name=_("Дата обновления")
     )
 
     class Meta:
-        verbose_name = "Отзыв"
-        verbose_name_plural = "Отзывы"
+        verbose_name = _("Отзыв")
+        verbose_name_plural = _("Отзывы")
         unique_together = ['event', 'user']  # Один пользователь - один отзыв на событие
         ordering = ['-registration_date']
 
@@ -379,9 +387,9 @@ class Partner(models.Model):
 # платное продвижение мероприятия 
 class Promotion(models.Model):
     PROMO_TYPES = [
-        ('top', 'На вершине списка'),
-        ('highlight', 'Подсветка'),
-        ('email', 'Email рассылка')
+        ('top', _('На вершине списка')),
+        ('highlight', _('Подсветка')),
+        ('email', _('Email рассылка'))
     ]
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     promo_type = models.CharField(max_length=20, choices=PROMO_TYPES)
@@ -400,15 +408,15 @@ class Cart(models.Model):
         return f"Корзина {self.user.username}"
 
     @property
+    def items_count(self):
+        return self.items.count()
+
+    @property
     def total_price(self):
         total = 0
         for item in self.items.all():
             total += item.total_price
         return total
-
-    @property
-    def items_count(self):
-        return self.items.count()
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
@@ -435,20 +443,20 @@ class CartItem(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Ожидает оплаты'),
-        ('paid', 'Оплачено'),
-        ('cancelled', 'Отменено'),
-        ('refunded', 'Возврат'),
+        ('pending', _('Ожидает оплаты')),
+        ('paid', _('Оплачено')),
+        ('cancelled', _('Отменено')),
+        ('refunded', _('Возврат')),
     ]
 
     PAYMENT_METHODS = [
-        ('card', 'Банковская карта'),
-        ('paypal', 'PayPal'),
-        ('qiwi', 'QIWI'),
-        ('yoomoney', 'ЮMoney'),
+        ('card', _('Банковская карта')),
+        ('paypal', _('PayPal')),
+        ('qiwi', _('QIWI')),
+        ('yoomoney', _('ЮMoney')),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
     order_number = models.CharField(max_length=20, unique=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS)

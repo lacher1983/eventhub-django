@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 import stripe
 from .models import Cart, CartItem, Order, OrderItem, Event
@@ -17,22 +18,37 @@ import json
 def cart_detail(request):
     """Детальная страница корзины"""
     try:
-        cart, created = Cart.objects.get_or_create(user=request.user)
-        cart_items = cart.items.select_related('event').all()
-        
+        # cart, created = Cart.objects.get_or_create(user=request.user)
+        cart = Cart.objects.get(user=request.user)
+        # cart_items = cart.items.select_related('event').all()
+        cart_items = cart.items.all()
         total_amount = sum(item.total_price for item in cart_items)
         total_quantity = sum(item.quantity for item in cart_items)
-        
-        context = {
-            'cart_items': cart_items,
-            'total_amount': total_amount,
-            'total_quantity': total_quantity,
-        }
-        return render(request, 'events/cart_detail.html', context)
-        
+
+    except Cart.DoesNotExist:  # изменил
+        cart = None
+        cart_items = []
+        total_quantity = 0
+        total_amount = 0
+
     except Exception as e:
         messages.error(request, f'Ошибка при загрузке корзины: {str(e)}')
-        return redirect('event_list')
+        cart = None
+        cart_items = []
+        total_quantity = 0
+        total_amount = 0
+
+    context = {
+        'cart': cart,
+        'cart_items': cart_items,
+        'total_amount': total_amount,
+        'total_quantity': total_quantity,
+    }
+    return render(request, 'events/cart_detail.html', context)
+        
+    # except Exception as e:
+    #     messages.error(request, f'Ошибка при загрузке корзины: {str(e)}')
+    #     return redirect('event_list')
     
 @login_required
 @require_POST
@@ -280,112 +296,209 @@ def update_cart_item(request, item_id):
         
 @login_required
 def checkout(request):
-    cart = get_user_cart(request.user)
+    """Оформление заказа из корзины"""
+    try:
+        cart = Cart.objects.get(user=request.user)
     
-    if cart.items_count == 0:
-        messages.warning(request, "Ваша корзина пуста")
+        if cart.items_count == 0:
+            messages.warning(request, _("Ваша корзина пуста"))
+            return redirect('cart_detail')
+    
+        # Проверка наличия всех билетов перед оформлением
+        for item in cart.items.all():
+            if item.quantity > item.event.tickets_available:
+                messages.error(request, 
+                    _("Для мероприятия '%(event_title)s' доступно только %(available)s билетов") % {
+                        'event_title': item.event.title,
+                        'available': item.event.tickets_available
+                    })
+                return redirect('cart_detail')
+        
+        # Генерация уникального номера заказа
+        import uuid
+        import time
+        
+        def generate_unique_order_number():
+            timestamp = int(time.time())
+            unique_id = uuid.uuid4().hex[:8].upper()
+            return f"ORD-{timestamp}-{unique_id}"
+        
+        # Создаем заказ с уникальным номером
+        order_number = generate_unique_order_number()
+        
+        # Проверяем, что номер действительно уникален (на всякий случай)
+        while Order.objects.filter(order_number=order_number).exists():
+            order_number = generate_unique_order_number()
+            
+        order = Order.objects.create(
+            user=request.user,
+            total_amount=cart.total_price,
+            status='pending',
+            order_number=order_number
+        )
+
+        # Создаем элементы заказа
+        for cart_item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                event=cart_item.event,
+                quantity=cart_item.quantity,
+                price=cart_item.price
+            )
+
+            # Обновляем количество доступных билетов
+            event = cart_item.event
+            event.tickets_available -= cart_item.quantity
+            event.save()
+
+        # Очищаем корзину
+        cart.items.all().delete()
+
+        # Сохраняем order_id в сессии для payment
+        request.session['order_id'] = order.id
+
+        messages.success(request, _("Заказ успешно создан! Перейдите к оплате."))
+        return redirect('payment')
+    
+    except Cart.DoesNotExist:
+        messages.error(request, _("Корзина не найдена"))
         return redirect('event_list')
+    except Exception as e:
+        messages.error(request, _("Ошибка при оформлении заказа: %(error)s") % {'error': str(e)})
+        return redirect('cart_detail')
     
-    # Проверка наличия всех билетов перед оформлением
-    for item in cart.items.all():
-        if item.quantity > item.event.tickets_available:
-            messages.error(request, 
-                f"Для мероприятия '{item.event.title}' доступно только {item.event.tickets_available} билетов.")
-            return redirect('cart_view')
-    
-    if request.method == 'POST':
-        form = CheckoutForm(request.POST)
-        if form.is_valid():
-            order = form.save(commit=False)
-            order.user = request.user
-            order.total_amount = cart.total_price
-            order.save()
+    # if request.method == 'POST':
+    #     form = CheckoutForm(request.POST)
+    #     if form.is_valid():
+    #         order = form.save(commit=False)
+    #         order.user = request.user
+    #         order.total_amount = cart.total_price
+    #         order.save()
             
-            # Создаем элементы заказа
-            for cart_item in cart.items.all():
-                OrderItem.objects.create(
-                    order=order,
-                    event=cart_item.event,
-                    quantity=cart_item.quantity,
-                    price=cart_item.price # Используем цену из корзины, а не из event
-                )
+    #         # Создаем элементы заказа
+    #         for cart_item in cart.items.all():
+    #             OrderItem.objects.create(
+    #                 order=order,
+    #                 event=cart_item.event,
+    #                 quantity=cart_item.quantity,
+    #                 price=cart_item.price # Используем цену из корзины, а не из event
+    #             )
             
-            request.session['order_id'] = order.id
-            return redirect('payment')
-    else:
-        form = CheckoutForm()
+    #         request.session['order_id'] = order.id
+    #         return redirect('payment')
+    # else:
+    #     form = CheckoutForm()
     
-    return render(request, 'events/checkout.html', {
-        'cart': cart,
-        'form': form
-    })
+    # return render(request, 'events/checkout.html', {
+    #     'cart': cart,
+    #     'form': form
+    # })
+
+# @login_required
+# def payment(request):
+#     """Страница оплаты"""
+#     try:
+#         cart = get_object_or_404(Cart, user=request.user)
+#         cart_items = cart.items.select_related('event').all()
+        
+#         if not cart_items:
+#             messages.warning(request, 'Ваша корзина пуста')
+#             return redirect('cart_detail')
+        
+#         total_amount = sum(item.total_price for item in cart_items)
+        
+#         # Обработка выбора способа оплаты
+#         selected_method = None
+#         if request.method == 'POST':
+#             selected_method = request.POST.get('payment_method')
+            
+#             # Здесь логика обработки платежа
+#             if selected_method in ['card', 'yoomoney']:
+#                 # Создаем заказ
+#                 order = Order.objects.create(
+#                     user=request.user,
+#                     total_amount=total_amount,
+#                     status='pending'
+#                 )
+                
+#                 # Добавляем items в заказ
+#                 for cart_item in cart_items:
+#                     order.items.create(
+#                         event=cart_item.event,
+#                         quantity=cart_item.quantity,
+#                         price=cart_item.event.price
+#                     )
+                
+#                 # Очищаем корзину
+#                 cart.items.all().delete()
+                
+#                 messages.success(request, 'Заказ успешно создан! Перенаправляем на оплату...')
+#                 return redirect('payment_success')
+        
+#         context = {
+#             'cart_items': cart_items,
+#             'total_amount': total_amount,
+#             'selected_method': selected_method,
+#         }
+#         return render(request, 'events/payment.html', context)
+        
+#     except Exception as e:
+#         messages.error(request, f'Ошибка при оформлении заказа: {str(e)}')
+#         return redirect('cart_detail')
 
 @login_required
 def payment(request):
     """Страница оплаты"""
-    try:
-        cart = get_object_or_404(Cart, user=request.user)
-        cart_items = cart.items.select_related('event').all()
-        
-        if not cart_items:
-            messages.warning(request, 'Ваша корзина пуста')
-            return redirect('cart_detail')
-        
-        total_amount = sum(item.total_price for item in cart_items)
-        
-        # Обработка выбора способа оплаты
-        selected_method = None
-        if request.method == 'POST':
-            selected_method = request.POST.get('payment_method')
-            
-            # Здесь должна быть логика обработки платежа
-            if selected_method in ['card', 'yoomoney']:
-                # Создаем заказ
-                order = Order.objects.create(
-                    user=request.user,
-                    total_amount=total_amount,
-                    status='pending'
-                )
-                
-                # Добавляем items в заказ
-                for cart_item in cart_items:
-                    order.items.create(
-                        event=cart_item.event,
-                        quantity=cart_item.quantity,
-                        price=cart_item.event.price
-                    )
-                
-                # Очищаем корзину
-                cart.items.all().delete()
-                
-                messages.success(request, 'Заказ успешно создан! Перенаправляем на оплату...')
-                return redirect('payment_success')
-        
-        context = {
-            'cart_items': cart_items,
-            'total_amount': total_amount,
-            'selected_method': selected_method,
-        }
-        return render(request, 'events/payment.html', context)
-        
-    except Exception as e:
-        messages.error(request, f'Ошибка при оформлении заказа: {str(e)}')
+    order_id = request.session.get('order_id')
+    
+    if not order_id:
+        messages.error(request, _("Заказ не найден. Пожалуйста, начните оформление заказа заново."))
         return redirect('cart_detail')
+    
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+    except Order.DoesNotExist:
+        messages.error(request, _("Заказ не найден"))
+        return redirect('cart_detail')
+    
+    if request.method == 'POST':
+        # Обработка оплаты
+        order.status = 'paid'
+        order.save()
+        
+        # Очищаем сессию
+        if 'order_id' in request.session:
+            del request.session['order_id']
+        
+        messages.success(request, _("Оплата прошла успешно!"))
+        return redirect('payment_success')
+    
+    context = {
+        'order': order,
+    }
+    return render(request, 'events/payment.html', context)
 
 @login_required
 def payment_success(request):
     """Страница успешной оплаты"""
-    from django.utils import timezone
-    context = {
-        'current_date': timezone.now().strftime('%d.%m.%Y %H:%M')
-    }
-    return render(request, 'events/payment_success.html', context)
+    return render(request, 'events/payment_success.html')
+# def payment_success(request):
+#     """Страница успешной оплаты"""
+#     from django.utils import timezone
+#     context = {
+#         'current_date': timezone.now().strftime('%d.%m.%Y %H:%M')
+#     }
+#     return render(request, 'events/payment_success.html', context)
 
 @login_required
 def payment_cancel(request):
     """Страница отмены оплаты"""
-    messages.info(request, 'Оплата была отменена')
-    return render(request, 'events/payment_cancel.html')
+    messages.info(request, _("Оплата была отменена."))
+    return redirect('cart_detail')
+# def payment_cancel(request):
+#     """Страница отмены оплаты"""
+#     messages.info(request, 'Оплата была отменена')
+#     return render(request, 'events/payment_cancel.html')
 
 def send_order_confirmation(order):
     subject = f"Подтверждение заказа #{order.order_number}"
