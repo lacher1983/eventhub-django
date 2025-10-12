@@ -1307,3 +1307,18 @@ msgstr "We have sent password recovery instructions to the provided email addres
 #: .\templates\events\password_reset_done.html
 msgid "Вы получите письмо в течение нескольких минут."
 msgstr "You will receive the email within a few minutes."
+
+msgid "About company EventHub"
+msgstr "О компании EventHub"
+
+msgid "EventHub - leading platform for organizing and searching events"
+msgstr "EventHub - ведущая платформа для организации и поиска мероприятий"
+
+msgid "Blog EventHub"
+msgstr "Блог EventHub"
+
+msgid "Career in EventHub"
+msgstr "Карьера в EventHub"
+
+msgid "Press center EventHub"
+msgstr "Пресс-центр EventHub"

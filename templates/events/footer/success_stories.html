@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Success Stories" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>{% trans "Success Stories" %}</h1>
+    <p>{% trans "Here are our success stories..." %}</p>
+    
+    <!-- Добавьте контент для страницы успешных кейсов -->
+    <div class="row">
+        <div class="col-md-12">
+            <h2>{% trans "Our Achievements" %}</h2>
+            <!-- Ваш контент здесь -->
+        </div>
+    </div>
+</div>
+{% endblock %}

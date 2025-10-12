@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Решения для организаторов" %} | EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Заголовок -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary mb-3">{% trans "Решения для организаторов" %}</h1>
+                <p class="lead text-muted">
+                    {% trans "Все инструменты, необходимые для успешной организации мероприятий" %}
+                </p>
+            </div>
+
+            <!-- Основной контент -->
+            <div class="row g-4">
+                <!-- Карточка 1 -->
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-calendar-plus fa-2x text-primary"></i>
+                                </div>
+                                <h3 class="h5 mb-0">{% trans "Создание мероприятий" %}</h3>
+                            </div>
+                            <p class="text-muted">
+                                {% trans "Простой и удобный конструктор мероприятий с возможностью настройки всех параметров." %}
+                            </p>
+                            <ul class="list-unstyled text-muted">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Гибкие настройки даты и времени" %}</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Множество форматов мероприятий" %}</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Категории и теги" %}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 2 -->
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-ticket-alt fa-2x text-success"></i>
+                                </div>
+                                <h3 class="h5 mb-0">{% trans "Система билетов" %}</h3>
+                            </div>
+                            <p class="text-muted">
+                                {% trans "Продажа билетов и регистрация участников с различными типами билетов." %}
+                            </p>
+                            <ul class="list-unstyled text-muted">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Несколько типов билетов" %}</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Онлайн-оплата" %}</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "QR-коды для входа" %}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 3 -->
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-info bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-chart-bar fa-2x text-info"></i>
+                                </div>
+                                <h3 class="h5 mb-0">{% trans "Аналитика и отчеты" %}</h3>
+                            </div>
+                            <p class="text-muted">
+                                {% trans "Детальная аналитика по мероприятиям и участникам для принятия взвешенных решений." %}
+                            </p>
+                            <ul class="list-unstyled text-muted">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Статистика посещаемости" %}</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Финансовые отчеты" %}</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Демография участников" %}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка 4 -->
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-bullhorn fa-2x text-warning"></i>
+                                </div>
+                                <h3 class="h5 mb-0">{% trans "Продвижение" %}</h3>
+                            </div>
+                            <p class="text-muted">
+                                {% trans "Инструменты для эффективного продвижения мероприятий и привлечения аудитории." %}
+                            </p>
+                            <ul class="list-unstyled text-muted">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Email-рассылки" %}</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Социальные сети" %}</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i> {% trans "Партнерские программы" %}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA секция -->
+            <div class="bg-primary text-white rounded-3 p-5 mt-5 text-center">
+                <h2 class="h1 fw-bold mb-3">{% trans "Готовы начать?" %}</h2>
+                <p class="lead mb-4 opacity-75">
+                    {% trans "Присоединяйтесь к тысячам организаторов, которые уже используют наши решения" %}
+                </p>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{% url 'event_create' %}" class="btn btn-light btn-lg px-4">
+                        <i class="fas fa-plus me-2"></i>{% trans "Создать мероприятие" %}
+                    </a>
+                    <a href="{% url 'contact' %}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-question-circle me-2"></i>{% trans "Получить консультацию" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

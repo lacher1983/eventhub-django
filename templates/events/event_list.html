@@ -1,14 +1,107 @@
 {% extends 'base.html' %}
-{% load i18n %}
-
 {% load i18n ads_tags static %}
-
-{% load ads_tags %}
-{% load static %}
 
 {% block title %}{% trans "Мероприятия" %} - EventHub{% endblock %}
 
 {% block content %}
+
+<!-- Прогресс-бар уровня -->
+{% if user.is_authenticated and user.game_profile %}
+<div class="container mt-3">
+    <div class="game-progress-header">
+        <div class="level-info">
+            <span class="level-badge-sm">{{ user.game_profile.current_level.badge_icon }} Уровень {{ user.game_profile.current_level.level }}</span>
+            <span class="level-name">{{ user.game_profile.current_level.level_name }}</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress" style="height: 20px;">
+                <div class="progress-bar" 
+                     style="width: {{ level_progress }}%; background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <span class="progress-text">{{ user.game_profile.total_points }} очков</span>
+                </div>
+            </div>
+            {% if next_level %}
+            <small class="text-muted">До {{ next_level.level_name }}: {{ points_remaining }} очков</small>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.game-progress-header {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.level-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+}
+
+.level-badge-sm {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.level-name {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 5px;
+}
+
+.progress-container {
+    flex: 1;
+}
+
+.progress {
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    position: relative;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 0.8em;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 768px) {
+    .game-progress-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .level-info {
+        min-width: auto;
+    }
+}
+</style>
+{% endif %}
+
 <!-- Верхний баннер -->
 <div class="mb-4">
     <div class="card border-0 shadow-sm bg-gradient-primary">
@@ -164,199 +257,283 @@
             </div>
         </div>
 
-        <!-- Список мероприятий -->
+        <!-- Основной контент с картой -->
         <div class="col-lg-9 col-md-8">
-            <!-- Заголовок и количество -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="text-dark fw-bold">{% trans "Мероприятия" %}</h2>
-                <span class="text-muted">
-                    {% trans "Найдено" %}: <strong>{{ events.paginator.count }}</strong>
-                </span>
-            </div>
+            <div class="row">
+                <!-- Список мероприятий -->
+                <div class="col-lg-8">
+                    <!-- Заголовок и количество -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="text-dark fw-bold">{% trans "Мероприятия" %}</h2>
+                        <span class="text-muted">
+                            {% trans "Найдено" %}: <strong>{{ events.paginator.count }}</strong>
+                        </span>
+                    </div>
 
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
-                {% for event in events %}
-                    <div class="col">
-                        <div class="card modern-card h-100">
-                            <!-- Верхняя часть карточки -->
-                            <div class="event-header position-relative">
-                                <div class="event-image-container">
-                                    {% if event.image %}
-                                        <img src="{{ event.image.url }}" 
-                                             alt="{{ event.title }}" 
-                                             class="event-image">
-                                    {% else %}
-                                        <!-- Генерируемое изображение по категории -->
-                                        <div class="event-category-image category-{{ event.category|default:'default' }}">
-                                            <span class="category-icon-{{ event.category|default:'default' }}"></span>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- Бейдж категории -->
-                                <span class="badge category-badge position-absolute top-0 end-0 m-2">
-                                    <i class="fas fa-tag me-1"></i>
-                                    <span class="category-text">{{ event.get_category_display }}</span>
-                                </span>
-                                
-                                <!-- Цена поверх изображения -->
-                                {% if event.price > 0 %}
-                                <span class="badge price-badge position-absolute top-0 start-0 m-2">
-                                    {{ event.price }} ₽
-                                </span>
-                                {% else %}
-                                <span class="badge free-badge position-absolute top-0 start-0 m-2">
-                                    {% trans "Бесплатно" %}
-                                </span>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="card-body p-3">
-                                <!-- Заголовок -->
-                                <h5 class="card-title fw-bold text-dark mb-2 line-clamp-2" style="font-size: 1rem;">
-                                    {{ event.title }}
-                                </h5>
-                                
-                                <!-- Описание -->
-                                <p class="card-text text-muted mb-3 small line-clamp-2" style="font-size: 0.85rem;">
-                                    {{ event.short_description }}
-                                </p>
-                                
-                                <!-- Информация о дате и типе -->
-                                <div class="event-meta mb-3">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <i class="fas fa-calendar text-primary me-2" style="font-size: 0.8rem;"></i>
-                                        <small class="text-dark fw-medium" style="font-size: 0.8rem;">
-                                            {{ event.date|date:"d M Y, H:i" }}
-                                        </small>
-                                    </div>
-                                    <div class="d-flex align-items-center mb-2">
-                                        <i class="fas fa-{% if event.event_format == 'online' %}video{% else %}map-marker-alt{% endif %} text-primary me-2" style="font-size: 0.8rem;"></i>
-                                        <small class="text-dark fw-medium" style="font-size: 0.8rem;">
-                                            {{ event.get_event_format_display }}
-                                        </small>
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-chart-line text-primary me-2" style="font-size: 0.8rem;"></i>
-                                        <small class="text-dark fw-medium" style="font-size: 0.8rem;">
-                                            {{ event.get_difficulty_level_display }}
-                                        </small>
-                                    </div>
-                                </div>
-                                
-                                <!-- Участники -->
-                                <div class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-users text-muted me-2" style="font-size: 0.8rem;"></i>
-                                    <small class="text-muted" style="font-size: 0.8rem;">
-                                        <span class="fw-medium">{{ event.registrations.count }}</span>/{{ event.capacity }} {% trans "участников" %}
-                                    </small>
-                                </div>
-                            </div>
-                            
-                            <!-- Футер с кнопками -->
-                            <div class="card-footer bg-transparent border-0 p-3 pt-0">
-                                <div class="d-grid gap-2">
-                                    <!-- Кнопка подробнее -->
-                                    <a href="{% url 'event_detail' event.pk %}" class="btn btn-outline-primary btn-sm rounded-2 py-2">
-                                        <i class="fas fa-eye me-1"></i>{% trans "Подробнее" %}
-                                    </a>
-                                    
-                                    <!-- Кнопка регистрации или добавления в корзину -->
-                                    {% if user.is_authenticated %}
-                                        {% if event.id in user_registered_events %}
-                                            <!-- Уже зарегистрирован -->
-                                            <button class="btn btn-success btn-sm rounded-2 py-2" disabled>
-                                                <i class="fas fa-check-circle me-1"></i>{% trans "Вы зарегистрированы" %}
-                                            </button>
-                                        {% else %}
-                                            <!-- Не зарегистрирован -->
-                                            {% if event.is_free or event.price == 0 %}
-                                                <!-- Бесплатное мероприятие - прямая регистрация -->
-                                                <form method="post" action="{% url 'event_register' event.pk %}" class="mb-0">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-primary btn-sm rounded-2 py-2 w-100">
-                                                        <i class="fas fa-user-plus me-1"></i>{% trans "Зарегистрироваться" %}
-                                                    </button>
-                                                </form>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 row-cols-xl-3 g-4">
+                        {% for event in events %}
+                            <div class="col">
+                                <div class="card modern-card h-100">
+                                    <!-- Верхняя часть карточки -->
+                                    <div class="event-header position-relative">
+                                        <div class="event-image-container">
+                                            {% if event.image %}
+                                                <img src="{{ event.image.url }}" 
+                                                     alt="{{ event.title }}" 
+                                                     class="event-image">
                                             {% else %}
-                                                <!-- Платное мероприятие - добавление в корзину -->
-                                                <form method="post" action="{% url 'cart_add' event.pk %}" class="mb-0">
-                                                    {% csrf_token %}
-                                                    <div class="input-group input-group-sm">
-                                                        <input type="number" name="quantity" value="1" min="1" max="10" 
-                                                            class="form-control" style="max-width: 70px;">
-                                                        <button type="submit" class="btn btn-success flex-grow-1">
-                                                            <i class="fas fa-shopping-cart me-1"></i>{% trans "В корзину" %}
-                                                        </button>
-                                                    </div>
-                                                </form>
+                                                <!-- Генерируемое изображение по категории -->
+                                                <div class="event-category-image category-{{ event.category.slug|default:'default' }}">
+                                                    <span class="category-icon-{{ event.category|default:'default' }}"></span>
+                                                </div>
                                             {% endif %}
+                                        </div>
+                                        
+                                        <!-- Бейдж категории -->
+                                        <span class="badge category-badge position-absolute top-0 end-0 m-2">
+                                            <i class="fas fa-tag me-1"></i>
+                                            <span class="category-text">
+                                                {% if event.category %}
+                                                    {{ event.category.name }}
+                                                {% else %}
+                                                    {% trans "Без категории" %}
+                                                {% endif %}
+                                            </span>
+                                        </span>
+                                        
+                                        <!-- Цена поверх изображения -->
+                                        {% if event.price > 0 %}
+                                        <span class="badge price-badge position-absolute top-0 start-0 m-2">
+                                            {{ event.price }} ₽
+                                        </span>
+                                        {% else %}
+                                        <span class="badge free-badge position-absolute top-0 start-0 m-2">
+                                            {% trans "Бесплатно" %}
+                                        </span>
                                         {% endif %}
-                                    {% else %}
-                                        <!-- Неавторизованный пользователь -->
-                                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-secondary btn-sm rounded-2 py-2">
-                                            <i class="fas fa-sign-in-alt me-1"></i>{% trans "Войти для регистрации" %}
-                                        </a>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- Рейтинг -->
-                                <div class="text-center mt-2">
-                                    {% if event.average_rating %}
-                                        <div class="d-flex justify-content-center align-items-center">
-                                            <div class="text-warning me-1" style="font-size: 0.8rem;">
-                                                {% for i in "12345" %}
-                                                    {% if forloop.counter <= event.average_rating %}
-                                                        <i class="fas fa-star"></i>
-                                                    {% else %}
-                                                        <i class="far fa-star"></i>
-                                                    {% endif %}
-                                                {% endfor %}
+                                    </div>
+                                    
+                                    <div class="card-body p-3">
+                                        <!-- Заголовок -->
+                                        <h5 class="card-title fw-bold text-dark mb-2 line-clamp-2" style="font-size: 1rem;">
+                                            {{ event.title }}
+                                        </h5>
+                                        
+                                        <!-- Описание -->
+                                        <p class="card-text text-muted mb-3 small line-clamp-2" style="font-size: 0.85rem;">
+                                            {{ event.short_description }}
+                                        </p>
+                                        
+                                        <!-- Информация о дате и типе -->
+                                        <div class="event-meta mb-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-calendar text-primary me-2" style="font-size: 0.8rem;"></i>
+                                                <small class="text-dark fw-medium" style="font-size: 0.8rem;">
+                                                    {{ event.date|date:"d M Y, H:i" }}
+                                                </small>
                                             </div>
-                                            <small class="text-muted" style="font-size: 0.75rem;">({{ event.reviews.count }})</small>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="fas fa-{% if event.event_format == 'online' %}video{% else %}map-marker-alt{% endif %} text-primary me-2" style="font-size: 0.8rem;"></i>
+                                                <small class="text-dark fw-medium" style="font-size: 0.8rem;">
+                                                    {{ event.get_event_format_display }}
+                                                </small>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-chart-line text-primary me-2" style="font-size: 0.8rem;"></i>
+                                                <small class="text-dark fw-medium" style="font-size: 0.8rem;">
+                                                    {{ event.get_difficulty_level_display }}
+                                                </small>
+                                            </div>
                                         </div>
-                                    {% else %}
-                                        <small class="text-muted" style="font-size: 0.75rem;">{% trans "Нет оценок" %}</small>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Рекламка между каждыми 3-мя событиями -->
-                    {% if forloop.counter0|divisibleby:3 and forloop.counter0 > 0 %}
-                        <div class="col-12 mb-4">
-                            <div class="card border-0 bg-light">
-                                <div class="card-body p-3">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-shrink-0">
-                                            <span class="fs-4">🔥</span>
+                                        
+                                        <!-- Участники -->
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="fas fa-users text-muted me-2" style="font-size: 0.8rem;"></i>
+                                            <small class="text-muted" style="font-size: 0.8rem;">
+                                                <span class="fw-medium">{{ event.registrations.count }}</span>/{{ event.capacity }} {% trans "участников" %}
+                                            </small>
                                         </div>
-                                        <div class="flex-grow-1 ms-3">
-                                            <h6 class="fw-bold mb-1">{% trans "Горящее предложение" %}</h6>
-                                            <p class="small mb-2">{% trans "Скидка 20% на все услуги до конца недели" %}</p>
-                                            <a href="https://ваш-сайт.com/hot-offer" 
-                                                class="btn btn-outline-danger btn-sm">
-                                                 {% trans "Успеть получить" %}
+                                    </div>
+                                    
+                                    <!-- Футер с кнопками -->
+                                    <div class="card-footer bg-transparent border-0 p-3 pt-0">
+                                        <div class="d-grid gap-2">
+                                            <!-- Кнопка подробнее -->
+                                            <a href="{% url 'event_detail' event.pk %}" class="btn btn-outline-primary btn-sm rounded-2 py-2">
+                                                <i class="fas fa-eye me-1"></i>{% trans "Подробнее" %}
                                             </a>
+                                            
+                                            <!-- Кнопка регистрации или добавления в корзину -->
+                                            {% if user.is_authenticated %}
+                                                {% if event.id in user_registered_events %}
+                                                    <!-- Уже зарегистрирован -->
+                                                    <button class="btn btn-success btn-sm rounded-2 py-2" disabled>
+                                                        <i class="fas fa-check-circle me-1"></i>{% trans "Вы зарегистрированы" %}
+                                                    </button>
+                                                {% else %}
+                                                    <!-- Не зарегистрирован -->
+                                                    {% if event.is_free or event.price == 0 %}
+                                                        <!-- Бесплатное мероприятие - прямая регистрация -->
+                                                        <form method="post" action="{% url 'event_register' event.pk %}" id="register-form-{{ event.pk }}">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-primary btn-sm rounded-2 py-2 w-100">
+                                                                <i class="fas fa-user-plus me-1"></i>{% trans "Зарегистрироваться" %}
+                                                            </button>
+                                                        </form>
+                                                    {% else %}
+                                                        <!-- Платное мероприятие - добавление в корзину -->
+                                                        <form method="post" action="{% url 'cart_add' event.pk %}" class="mb-0">
+                                                            {% csrf_token %}
+                                                            <div class="input-group input-group-sm">
+                                                                <input type="number" name="quantity" value="1" min="1" max="10" 
+                                                                    class="form-control" style="max-width: 70px;">
+                                                                <button type="submit" class="btn btn-success flex-grow-1">
+                                                                    <i class="fas fa-shopping-cart me-1"></i>{% trans "В корзину" %}
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% else %}
+                                                <!-- Неавторизованный пользователь -->
+                                                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-secondary btn-sm rounded-2 py-2">
+                                                    <i class="fas fa-sign-in-alt me-1"></i>{% trans "Войти для регистрации" %}
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Рейтинг -->
+                                        <div class="text-center mt-2">
+                                            {% if event.average_rating %}
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    <div class="text-warning me-1" style="font-size: 0.8rem;">
+                                                        {% for i in "12345" %}
+                                                            {% if forloop.counter <= event.average_rating %}
+                                                                <i class="fas fa-star"></i>
+                                                            {% else %}
+                                                                <i class="far fa-star"></i>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                    <small class="text-muted" style="font-size: 0.75rem;">({{ event.reviews.count }})</small>
+                                                </div>
+                                            {% else %}
+                                                <small class="text-muted" style="font-size: 0.75rem;">{% trans "Нет оценок" %}</small>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+
+                            <!-- Рекламка между каждыми 3-мя событиями -->
+                            {% if forloop.counter0|divisibleby:3 and forloop.counter0 > 0 %}
+                                <div class="col-12 mb-4">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-shrink-0">
+                                                    <span class="fs-4">🔥</span>
+                                                </div>
+                                                <div class="flex-grow-1 ms-3">
+                                                    <h6 class="fw-bold mb-1">{% trans "Горящее предложение" %}</h6>
+                                                    <p class="small mb-2">{% trans "Скидка 20% на все услуги до конца недели" %}</p>
+                                                    <a href="https://ваш-сайт.com/hot-offer" 
+                                                        class="btn btn-outline-danger btn-sm">
+                                                         {% trans "Успеть получить" %}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% empty %}
+                            <div class="col-12 text-center py-5">
+                                <div class="empty-state">
+                                    <i class="fas fa-calendar-times fa-4x text-muted mb-4"></i>
+                                    <h4 class="text-dark mb-3">{% trans "Мероприятий не найдено" %}</h4>
+                                    <p class="text-muted mb-4">{% trans "Попробуйте изменить параметры поиска или выбрать другую категорию" %}</p>
+                                    <a href="{% url 'event_list' %}" class="btn btn-primary btn-lg rounded-3">
+                                        <i class="fas fa-refresh me-2"></i>{% trans "Сбросить фильтры" %}
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Пагинация -->
+                    {% if is_paginated %}
+                        <nav class="mt-5">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link border-0 rounded-2 mx-1 shadow-sm" href="?page=1">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link border-0 rounded-2 mx-1 shadow-sm" href="?page={{ page_obj.previous_page_number }}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if num == page_obj.number %}
+                                        <li class="page-item active">
+                                            <span class="page-link border-0 rounded-2 mx-1 bg-primary shadow-sm">{{ num }}</span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link border-0 rounded-2 mx-1 shadow-sm" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link border-0 rounded-2 mx-1 shadow-sm" href="?page={{ page_obj.next_page_number }}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link border-0 rounded-2 mx-1 shadow-sm" href="?page={{ page_obj.paginator.num_pages }}">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
                     {% endif %}
-                {% empty %}
-                    <div class="col-12 text-center py-5">
-                        <div class="empty-state">
-                            <i class="fas fa-calendar-times fa-4x text-muted mb-4"></i>
-                            <h4 class="text-dark mb-3">{% trans "Мероприятий не найдено" %}</h4>
-                            <p class="text-muted mb-4">{% trans "Попробуйте изменить параметры поиска или выбрать другую категорию" %}</p>
-                            <a href="{% url 'event_list' %}" class="btn btn-primary btn-lg rounded-3">
-                                <i class="fas fa-refresh me-2"></i>{% trans "Сбросить фильтры" %}
-                            </a>
+                </div>
+
+                <!-- Миникарта мероприятий -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Мероприятия на карте</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="mini-events-map">
+                                <!-- Здесь будет карта -->
+                            </div>
                         </div>
                     </div>
-                {% endfor %}
+
+                    <!-- Дополнительный рекламный блок рядом с картой -->
+                    <div class="mt-4">
+                        <div class="card border-0 bg-gradient-info text-white">
+                            <div class="card-body p-3 text-center">
+                                <h6 class="fw-bold mb-2">🎯 {% trans "Рекомендуем" %}</h6>
+                                <p class="small mb-3">{% trans "Лучшие события этой недели" %}</p>
+                                <a href="https://ваш-сайт.com/top-events" 
+                                   class="btn btn-light btn-sm rounded-3">
+                                    {% trans "Смотреть все" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Нижний баннер -->
@@ -376,51 +553,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Пагинация -->
-            {% if is_paginated %}
-                <nav class="mt-5">
-                    <ul class="pagination justify-content-center">
-                        {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link border-0 rounded-2 mx-1 shadow-sm" href="?page=1">
-                                    <i class="fas fa-angle-double-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link border-0 rounded-2 mx-1 shadow-sm" href="?page={{ page_obj.previous_page_number }}">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                        {% endif %}
-
-                        {% for num in page_obj.paginator.page_range %}
-                            {% if num == page_obj.number %}
-                                <li class="page-item active">
-                                    <span class="page-link border-0 rounded-2 mx-1 bg-primary shadow-sm">{{ num }}</span>
-                                </li>
-                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                <li class="page-item">
-                                    <a class="page-link border-0 rounded-2 mx-1 shadow-sm" href="?page={{ num }}">{{ num }}</a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link border-0 rounded-2 mx-1 shadow-sm" href="?page={{ page_obj.next_page_number }}">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link border-0 rounded-2 mx-1 shadow-sm" href="?page={{ page_obj.paginator.num_pages }}">
-                                    <i class="fas fa-angle-double-right"></i>
-                                </a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            {% endif %}
         </div>
     </div>
 </div>
@@ -433,6 +565,10 @@ body {
 
 .bg-gradient-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
 }
 
 .card {
@@ -618,7 +754,22 @@ body {
     margin-bottom: 0.5rem;
 }
 
+/* Стили для карты */
+#mini-events-map {
+    border-radius: 0 0 12px 12px;
+}
+
 /* Адаптивность */
+@media (max-width: 992px) {
+    .col-lg-8, .col-lg-4 {
+        margin-bottom: 2rem;
+    }
+    
+    #mini-events-map {
+        height: 300px !important;
+    }
+}
+
 @media (max-width: 768px) {
     .hero-section {
         padding: 2rem 0 !important;
@@ -647,6 +798,11 @@ body {
         font-size: 0.7rem !important;
         padding: 0.45em 0.8em !important;
     }
+    
+    .row-cols-md-2 .col {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
 }
 
 @media (max-width: 576px) {
@@ -668,6 +824,11 @@ body {
     .free-badge {
         font-size: 0.65rem !important;
         padding: 0.4em 0.7em !important;
+    }
+    
+    .row-cols-md-2 .col {
+        flex: 0 0 100%;
+        max-width: 100%;
     }
 }
 
@@ -710,6 +871,32 @@ body {
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #mini-events-map {
+        height: 400px;
+        width: 100%;
+        border-radius: 8px;
+    }
+    
+    .custom-marker {
+        background: #007bff;
+        font-size: 14px !important;
+    }
+    
+    .category-conference { background: #28a745; }
+    .category-workshop { background: #ffc107; }
+    .category-meetup { background: #dc3545; }
+    .category-default { background: #6c757d; }
+    
+    .leaflet-popup-content {
+        margin: 8px 12px;
+    }
+</style>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 // Функция для обновления сортировки
 function updateSort(sortValue) {
@@ -718,8 +905,159 @@ function updateSort(sortValue) {
     window.location.href = url.toString();
 }
 
-// Функция для динамического обновления типов мероприятий при выборе категории
+// Функция для инициализации карты
+function initMiniMap() {
+    // Проверяем наличие карты на странице
+    const mapElement = document.getElementById('mini-events-map');
+    if (!mapElement) {
+        console.log('Element mini-events-map not found');
+        return;
+    }
+
+    // Ждем загрузки DOM и Leaflet
+    if (typeof L === 'undefined') {
+        console.error('Leaflet library not loaded');
+        return;
+    }
+
+    try {
+        console.log('Initializing map...');
+        
+        // Инициализация карты
+        const map = L.map('mini-events-map').setView([55.7558, 37.6173], 10);
+        
+        // Добавляем слой карты
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(map);
+
+        // Массив для хранения маркеров
+        const markers = [];
+        let hasOfflineEvents = false;
+
+        // Добавляем маркеры мероприятий
+        {% for event in events %}
+            {% if event.latitude and event.longitude and event.event_type != 'online' %}
+                hasOfflineEvents = true;
+                
+                console.log('Adding event:', '{{ event.title }}', {{ event.latitude }}, {{ event.longitude }});
+                
+                // Создаем кастомную иконку
+                const eventIcon = L.divIcon({
+                    html: `
+                        <div class="custom-marker category-{{ event.category|default:'default' }}" 
+                             style="width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                            <i class="fas fa-{% if event.event_format == 'conference' %}users{% elif event.event_format == 'workshop' %}tools{% elif event.event_format == 'meetup' %}handshake{% else %}calendar{% endif %}"></i>
+                        </div>
+                    `,
+                    className: 'custom-div-icon',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+
+                const marker = L.marker([{{ event.latitude }}, {{ event.longitude }}], {icon: eventIcon}).addTo(map);
+                
+                // Создаем попап с информацией
+                const popupContent = `
+                    <div class="event-popup" style="min-width: 200px;">
+                        <h6 class="fw-bold mb-1">{% autoescape off %}{{ event.title }}{% endautoescape %}</h6>
+                        <p class="small mb-2 text-muted">{{ event.date|date:"d M Y, H:i" }}</p>
+                        <div class="mb-2">
+                            <span class="badge bg-primary me-1">{{ event.get_event_format_display }}</span>
+                            {% if event.price > 0 %}
+                                <span class="badge bg-success">{{ event.price }} ₽</span>
+                            {% else %}
+                                <span class="badge bg-danger">Бесплатно</span>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary btn-sm w-100">
+                            <i class="fas fa-eye me-1"></i>Подробнее
+                        </a>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markers.push(marker);
+            {% endif %}
+        {% endfor %}
+
+        // Подгоняем карту под маркеры если они есть
+        if (hasOfflineEvents && markers.length > 0) {
+            const group = L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+            console.log('Map fitted to bounds with', markers.length, 'markers');
+        } else {
+            // Если нет оффлайн мероприятий
+            mapElement.innerHTML = `
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                    <i class="fas fa-map-marked-alt fa-3x mb-3"></i>
+                    <h6>Нет мероприятий на карте</h6>
+                    <p class="small text-center">Все текущие мероприятия проводятся онлайн или не имеют указанного местоположения</p>
+                </div>
+            `;
+            console.log('No offline events found');
+        }
+
+        // Добавляем кнопку определения местоположения
+        const locateControl = L.control({position: 'topright'});
+        locateControl.onAdd = function(map) {
+            const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+            div.innerHTML = `
+                <a href="#" title="Определить мое местоположение" 
+                   style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 4px; text-decoration: none; border: 2px solid rgba(0,0,0,0.2);">
+                    <i class="fas fa-location-arrow text-primary"></i>
+                </a>
+            `;
+            
+            div.querySelector('a').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const userLat = position.coords.latitude;
+                            const userLng = position.coords.longitude;
+                            map.setView([userLat, userLng], 13);
+                            
+                            L.marker([userLat, userLng])
+                                .addTo(map)
+                                .bindPopup('Ваше местоположение')
+                                .openPopup();
+                        },
+                        function(error) {
+                            console.error('Error getting location:', error);
+                            alert('Не удалось определить ваше местоположение');
+                        }
+                    );
+                }
+            });
+            
+            return div;
+        };
+        locateControl.addTo(map);
+
+        console.log('Map initialized successfully');
+
+    } catch (error) {
+        console.error('Error initializing map:', error);
+        mapElement.innerHTML = `
+            <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+                <h6>Ошибка загрузки карты</h6>
+                <p class="small text-center">Не удалось загрузить карту мероприятий</p>
+                <button onclick="initMiniMap()" class="btn btn-sm btn-primary mt-2">Попробовать снова</button>
+            </div>
+        `;
+    }
+}
+
+// Инициализируем карту после загрузки страницы
 document.addEventListener('DOMContentLoaded', function() {
+    initMiniMap();
+});
+
+// Функция для динамического обновления типов мероприятий при выборе категории
+function setupCategoryTypeFiltering() {
     const categorySelect = document.querySelector('select[name="category"]');
     const typeSelect = document.querySelector('select[name="event_type"]');
     
@@ -767,6 +1105,371 @@ document.addEventListener('DOMContentLoaded', function() {
         // Инициализация при загрузке
         updateEventTypes();
     }
+}
+
+// Функция для добавления анимаций при скролле
+function setupScrollAnimations() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Анимируем карточки мероприятий
+    document.querySelectorAll('.modern-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        observer.observe(card);
+    });
+}
+
+// Функция для быстрой регистрации на мероприятия
+function setupQuickRegistration() {
+    document.addEventListener('submit', function(e) {
+        if (e.target.matches('form[action*="event_register"]')) {
+            e.preventDefault();
+            const form = e.target;
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button.innerHTML;
+            
+            // Показываем индикатор загрузки
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{% trans "Регистрация..." %}';
+            button.disabled = true;
+            
+            // Отправляем форму
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    button.innerHTML = '<i class="fas fa-check-circle me-1"></i>{% trans "Зарегистрирован" %}';
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-success');
+                    button.disabled = true;
+                    
+                    // Показываем уведомление
+                    showNotification('{% trans "Вы успешно зарегистрированы на мероприятие!" %}', 'success');
+                } else {
+                    throw new Error(data.message || '{% trans "Ошибка регистрации" %}');
+                }
+            })
+            .catch(error => {
+                console.error('Registration error:', error);
+                button.innerHTML = originalText;
+                button.disabled = false;
+                showNotification(error.message, 'error');
+            });
+        }
+    });
+}
+
+// Функция для показа уведомлений
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 1060;
+        min-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Автоматически скрываем через 5 секунд
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Функция для добавления в корзину
+function setupAddToCart() {
+    document.addEventListener('submit', function(e) {
+        if (e.target.matches('form[action*="cart_add"]')) {
+            e.preventDefault();
+            const form = e.target;
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button.innerHTML;
+            
+            // Показываем индикатор загрузки
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{% trans "Добавление..." %}';
+            button.disabled = true;
+            
+            // Отправляем форму
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    button.innerHTML = '<i class="fas fa-check-circle me-1"></i>{% trans "Добавлено" %}';
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-success');
+                    button.disabled = true;
+                    
+                    // Обновляем счетчик корзины в навигации
+                    updateCartCounter(data.cart_count);
+                    
+                    // Показываем уведомление
+                    showNotification('{% trans "Мероприятие добавлено в корзину!" %}', 'success');
+                } else {
+                    throw new Error(data.message || '{% trans "Ошибка добавления в корзину" %}');
+                }
+            })
+            .catch(error => {
+                console.error('Add to cart error:', error);
+                button.innerHTML = originalText;
+                button.disabled = false;
+                showNotification(error.message, 'error');
+            });
+        }
+    });
+}
+
+// Функция для обновления счетчика корзины
+function updateCartCounter(count) {
+    const cartCounter = document.querySelector('.cart-counter');
+    if (cartCounter) {
+        cartCounter.textContent = count;
+        cartCounter.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+}
+
+// Функция для фильтрации в реальном времени
+function setupLiveFiltering() {
+    const searchInput = document.querySelector('input[name="q"]');
+    const filterForm = document.getElementById('filter-form');
+    
+    if (searchInput && filterForm) {
+        let timeoutId;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                filterForm.submit();
+            }, 500);
+        });
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализируем карту
+    initMiniMap();
+    
+    // Настраиваем фильтрацию по категориям
+    setupCategoryTypeFiltering();
+    
+    // Настраиваем анимации
+    setupScrollAnimations();
+    
+    // Настраиваем быструю регистрацию
+    setupQuickRegistration();
+    
+    // Настраиваем добавление в корзину
+    setupAddToCart();
+    
+    // Настраиваем живую фильтрацию
+    setupLiveFiltering();
+    
+    // Добавляем обработчики для лайков/избранного
+    setupFavorites();
 });
+
+// Функция для работы с избранным
+function setupFavorites() {
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.favorite-btn')) {
+            e.preventDefault();
+            const button = e.target.closest('.favorite-btn');
+            const eventId = button.dataset.eventId;
+            
+            if (!eventId) return;
+            
+            toggleFavorite(eventId, button);
+        }
+    });
+}
+
+function toggleFavorite(eventId, button) {
+    const isCurrentlyFavorite = button.classList.contains('active');
+    const url = isCurrentlyFavorite ? 
+        `/events/${eventId}/unfavorite/` : 
+        `/events/${eventId}/favorite/`;
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            button.classList.toggle('active');
+            button.classList.toggle('text-danger');
+            button.querySelector('i').classList.toggle('fas');
+            button.querySelector('i').classList.toggle('far');
+            
+            const message = isCurrentlyFavorite ? 
+                '{% trans "Убрано из избранного" %}' : 
+                '{% trans "Добавлено в избранное" %}';
+            showNotification(message, 'success');
+        }
+    })
+    .catch(error => {
+        console.error('Favorite error:', error);
+        showNotification('{% trans "Ошибка при обновлении избранного" %}', 'error');
+    });
+}
+
+// Вспомогательная функция для получения CSRF токена
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 </script>
+
+<style>
+/* Дополнительные стили для карты */
+.custom-marker {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custom-marker:hover {
+    transform: scale(1.1);
+}
+
+.leaflet-popup-content {
+    margin: 8px 12px;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.event-category-image-small {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+/* Анимации для карточек */
+.modern-card {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
+}
+
+/* Стили для уведомлений */
+.alert {
+    border: none;
+    border-radius: 8px;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.alert-error {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    color: white;
+}
+
+/* Адаптивность для карты */
+@media (max-width: 768px) {
+    #mini-events-map {
+        height: 300px !important;
+    }
+    
+    .leaflet-control {
+        transform: scale(0.9);
+    }
+}
+
+/* Стили для кнопки избранного */
+.favorite-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.favorite-btn:hover {
+    transform: scale(1.1);
+}
+
+.favorite-btn.active {
+    color: #dc3545;
+}
+
+/* Индикатор загрузки */
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Плавный скролл для пагинации */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Улучшенные стили для фильтров на мобильных устройствах */
+@media (max-width: 576px) {
+    .sticky-top {
+        position: relative !important;
+        top: 0 !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+}
+</style>
 {% endblock %}

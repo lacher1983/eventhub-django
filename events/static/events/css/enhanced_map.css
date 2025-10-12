@@ -1,0 +1,255 @@
+/* Стили для улучшенной карты */
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.map-controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    min-width: 250px;
+}
+
+.map-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.map-filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.map-filter-group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+    font-size: 0.9em;
+}
+
+.map-stats {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(255,255,255,0.95);
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 999;
+}
+
+.stat-item {
+    margin-right: 15px;
+    font-size: 0.85em;
+    color: #666;
+}
+
+/* Стили для балунов мероприятий */
+.event-balloon {
+    max-width: 300px;
+    padding: 0;
+}
+
+.event-balloon-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 15px;
+    border-radius: 8px 8px 0 0;
+}
+
+.event-balloon-header h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.1em;
+    line-height: 1.3;
+}
+
+.event-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7em;
+    font-weight: 600;
+}
+
+.badge-trending { background: #ff6b6b; color: white; }
+.badge-new { background: #4ecdc4; color: white; }
+.badge-featured { background: #45b7d1; color: white; }
+.badge-early_bird { background: #96ceb4; color: white; }
+.badge-last_chance { background: #ffeaa7; color: #333; }
+.badge-sold_out { background: #d63031; color: white; }
+.badge-exclusive { background: #a29bfe; color: white; }
+.badge-discount { background: #fd79a8; color: white; }
+.badge-online { background: #74b9ff; color: white; }
+.badge-free { background: #00b894; color: white; }
+
+.event-balloon-content {
+    padding: 15px;
+    background: white;
+}
+
+.event-balloon-content p {
+    margin: 5px 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.event-balloon-actions {
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid #eee;
+}
+
+.event-balloon-actions .btn {
+    flex: 1;
+    font-size: 0.8em;
+    padding: 6px 12px;
+}
+
+/* Сайдбар с деталями события */
+.event-sidebar {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background: white;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+    z-index: 1001;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+}
+
+.event-sidebar.active {
+    right: 0;
+}
+
+.event-sidebar-content {
+    padding: 20px;
+    position: relative;
+}
+
+.close-sidebar {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #666;
+}
+
+.event-sidebar-content h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    padding-right: 30px;
+}
+
+.event-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.event-category, .event-type {
+    padding: 4px 8px;
+    background: #f1f3f4;
+    border-radius: 6px;
+    font-size: 0.8em;
+    color: #666;
+}
+
+.event-description {
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.event-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .map-controls {
+        position: relative;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .map-container {
+        height: 400px;
+    }
+    
+    .event-sidebar {
+        width: 100%;
+        right: -100%;
+    }
+}
+
+/* Анимации */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.highlighted-marker {
+    animation: pulse 1s ease-in-out;
+}
+
+/* Кастомные иконки для кластеров */
+.cluster-balloon {
+    max-width: 300px;
+}
+
+.cluster-events {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.cluster-event-item {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.cluster-event-item:hover {
+    background: #f8f9fa;
+}
+
+.cluster-event-item:last-child {
+    border-bottom: none;
+}
+
+.cluster-event-item strong {
+    font-size: 0.9em;
+    color: #333;
+}
+
+.cluster-event-item small {
+    color: #666;
+    font-size: 0.8em;
+}

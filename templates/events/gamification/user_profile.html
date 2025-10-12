@@ -1,0 +1,283 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Основная информация -->
+        <div class="col-md-4">
+            <div class="card profile-card">
+                <div class="card-body text-center">
+                    <div class="level-badge" style="background: {{ progress.level.current.color }};">
+                        <span class="level-icon">{{ progress.level.current.icon }}</span>
+                        <span class="level-number">Уровень {{ progress.level.current.level }}</span>
+                    </div>
+                    <h3 class="mt-3">{{ user.username }}</h3>
+                    <p class="text-muted">{{ progress.level.current.name }}</p>
+                    
+                    <div class="points-display">
+                        <span class="points">{{ progress.level.total_points }}</span>
+                        <span class="points-label">очков</span>
+                    </div>
+                    
+                    {% if progress.leaderboard.position %}
+                    <div class="leaderboard-position">
+                        <i class="fas fa-trophy"></i>
+                        Позиция в рейтинге: #{{ progress.leaderboard.position }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Прогресс уровня -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5>Прогресс до следующего уровня</h5>
+                    <div class="progress level-progress">
+                        <div class="progress-bar" 
+                             style="width: {{ progress.level.progress|default:0|floatformat:2 }}%">
+                            {{ progress.level.progress|default:0|floatformat:1 }}%
+                        </div>
+                    </div>
+                    {% if progress.level.next %}
+                    <small class="text-muted">
+                        До уровня {{ progress.level.next.level }}: {{ progress.level.next.points_required }} очков
+                    </small>
+                    {% else %}
+                    <small class="text-muted">Вы достигли максимального уровня! 🎉</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Достижения -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>🏆 Достижения</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for achievement in progress.achievements %}
+                        <div class="col-md-6 mb-3">
+                            <div class="achievement-card {% if achievement.unlocked %}unlocked{% else %}locked{% endif %}">
+                                <div class="achievement-icon">
+                                    {{ achievement.icon }}
+                                </div>
+                                <div class="achievement-info">
+                                    <h6>{{ achievement.name }}</h6>
+                                    <p class="mb-1">{{ achievement.description }}</p>
+                                    <div class="achievement-meta">
+                                        <span class="points">+{{ achievement.points }}</span>
+                                        {% if not achievement.unlocked %}
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width: {{ achievement.progress|default:0|floatformat:2 }}%"></div>
+                                        </div>
+                                        {% else %}
+                                        <small class="text-success">
+                                            Получено {{ achievement.unlocked_at|date:"d.m.Y" }}
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Задания -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>🎯 Активные задания</h4>
+                </div>
+                <div class="card-body">
+                    {% if progress.quests.active %}
+                    <div class="quests-list">
+                        {% for quest in progress.quests.active %}
+                        <div class="quest-item">
+                            <div class="quest-info">
+                                <h6>{{ quest.name }}</h6>
+                                <p class="mb-1">{{ quest.description }}</p>
+                                <div class="quest-progress">
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {{ quest.progress|default:0|floatformat:2 }}%">
+                                            {{ quest.progress|default:0|floatformat:1 }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="quest-reward">
+                                <span class="reward-points">+{{ quest.points_reward }}</span>
+                                {% if quest.expires_at %}
+                                <small class="text-muted d-block">
+                                    До: {{ quest.expires_at|date:"H:i" }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Нет активных заданий. Новые появятся завтра!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Статистика -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>📊 Статистика</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ progress.stats.events_created|default:0 }}</div>
+                                <div class="stat-label">Создано мероприятий</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ progress.stats.events_attended|default:0 }}</div>
+                                <div class="stat-label">Посещено мероприятий</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ progress.stats.reviews_written|default:0 }}</div>
+                                <div class="stat-label">Написано отзывов</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ progress.stats.favorites_added|default:0 }}</div>
+                                <div class="stat-label">В избранном</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ progress.stats.days_active|default:0 }}</div>
+                                <div class="stat-label">Активных дней</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">{{ progress.stats.categories_explored|default:0 }}</div>
+                                <div class="stat-label">Исследовано категорий</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.level-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 25px;
+    color: white;
+    font-weight: bold;
+}
+
+.level-icon {
+    font-size: 1.5em;
+    margin-right: 10px;
+}
+
+.points-display {
+    margin: 20px 0;
+}
+
+.points {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.points-label {
+    display: block;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.achievement-card {
+    display: flex;
+    padding: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.achievement-card.unlocked {
+    border-color: #4CAF50;
+    background: #f8fff8;
+}
+
+.achievement-card.locked {
+    opacity: 0.7;
+}
+
+.achievement-icon {
+    font-size: 2em;
+    margin-right: 15px;
+}
+
+.achievement-info {
+    flex: 1;
+}
+
+.achievement-meta .points {
+    color: #FF9800;
+    font-weight: bold;
+}
+
+.quest-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.quest-item:last-child {
+    border-bottom: none;
+}
+
+.reward-points {
+    background: #FF9800;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-weight: bold;
+}
+
+.stat-item {
+    padding: 15px;
+}
+
+.stat-number {
+    font-size: 2em;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.level-progress .progress-bar {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+</style>
+{% endblock %}

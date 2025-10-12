@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Решения для организаторов" %} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold text-primary mb-4">{% trans "Профессиональные решения для организаторов" %}</h1>
+            <p class="lead mb-4">
+                {% trans "Мощные инструменты для создания, продвижения и управления успешными мероприятиями любого масштаба." %}
+            </p>
+            <div class="d-flex gap-3 flex-wrap">
+                <span class="badge bg-primary fs-6 p-2">📊 {% trans "Аналитика" %}</span>
+                <span class="badge bg-success fs-6 p-2">🎯 {% trans "Маркетинг" %}</span>
+                <span class="badge bg-info fs-6 p-2">💼 {% trans "Управление" %}</span>
+                <span class="badge bg-warning fs-6 p-2">💰 {% trans "Монетизация" %}</span>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <img src="{% static 'images/organizer-solutions.jpg' %}" alt="{% trans 'Решения для организаторов' %}" class="img-fluid rounded-3 shadow">
+        </div>
+    </div>
+
+    <!-- Solutions Grid -->
+    <div class="row mb-5">
+        {% for solution in solutions %}
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="{{ solution.icon }} fa-2x text-primary me-3 mt-1"></i>
+                        <div>
+                            <h3 class="h5 mb-2">{{ solution.title }}</h3>
+                            <p class="text-muted mb-3">{{ solution.description }}</p>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled mb-0">
+                        {% for feature in solution.features %}
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>{{ feature }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <a href="#" class="btn btn-outline-primary btn-sm">{% trans "Узнать больше" %}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pricing Tiers -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "Тарифы для организаторов" %}</h2>
+            <p class="lead text-muted">{% trans "Выберите подходящий тариф для ваших нужд" %}</p>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <h3 class="h4">{% trans "Базовый" %}</h3>
+                    <div class="display-4 fw-bold text-primary mb-3">0₽</div>
+                    <p class="text-muted mb-4">{% trans "Для начинающих организаторов" %}</p>
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "До 100 участников" %}</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Базовая аналитика" %}</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Email поддержка" %}</li>
+                        <li class="mb-2 text-muted"><i class="fas fa-times me-2"></i>{% trans "Продвинутые инструменты" %}</li>
+                    </ul>
+                    <a href="{% url 'event_create' %}" class="btn btn-outline-primary w-100">{% trans "Начать" %}</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow text-center h-100">
+                <div class="card-body p-4">
+                    <span class="badge bg-primary position-absolute top-0 start-50 translate-middle px-3">{% trans "Популярный" %}</span>
+                    <h3 class="h4">{% trans "Профессиональный" %}</h3>
+                    <div class="display-4 fw-bold text-primary mb-3">990₽<small class="fs-6 text-muted">/мес</small></div>
+                    <p class="text-muted mb-4">{% trans "Для растущих проектов" %}</p>
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "До 1000 участников" %}</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Продвинутая аналитика" %}</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Маркетинг инструменты" %}</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Приоритетная поддержка" %}</li>
+                    </ul>
+                    <a href="#" class="btn btn-primary w-100">{% trans "Выбрать тариф" %}</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <h3 class="h4">{% trans "Премиум" %}</h3>
+                    <div class="display-4 fw-bold text-primary mb-3">2990₽<small class="fs-6 text-muted">/мес</small></div>
+                    <p class="text-muted mb-4">{% trans "Для крупных мероприятий" %}</p>
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Неограниченно участников" %}</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "AI рекомендации" %}</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Кастомные решения" %}</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{% trans "Персональный менеджер" %}</li>
+                    </ul>
+                    <a href="#" class="btn btn-outline-primary w-100">{% trans "Связаться" %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "EventHub в цифрах" %}</h2>
+            <p class="lead text-muted">{% trans "Присоединяйтесь к успешным организаторам" %}</p>
+        </div>
+        
+        <div class="col-md-3 col-6 text-center mb-4">
+            <div class="card border-0 bg-light">
+                <div class="card-body py-4">
+                    <div class="display-4 fw-bold text-primary mb-2">10K+</div>
+                    <p class="text-muted mb-0">{% trans "организаторов" %}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-6 text-center mb-4">
+            <div class="card border-0 bg-light">
+                <div class="card-body py-4">
+                    <div class="display-4 fw-bold text-success mb-2">50K+</div>
+                    <p class="text-muted mb-0">{% trans "мероприятий" %}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-6 text-center mb-4">
+            <div class="card border-0 bg-light">
+                <div class="card-body py-4">
+                    <div class="display-4 fw-bold text-info mb-2">2M+</div>
+                    <p class="text-muted mb-0">{% trans "участников" %}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-6 text-center mb-4">
+            <div class="card border-0 bg-light">
+                <div class="card-body py-4">
+                    <div class="display-4 fw-bold text-warning mb-2">95%</div>
+                    <p class="text-muted mb-0">{% trans "удовлетворенности" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Comparison -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h3 class="h4 mb-0">{% trans "Сравнение возможностей" %}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Функция" %}</th>
+                                    <th class="text-center">{% trans "Базовый" %}</th>
+                                    <th class="text-center">{% trans "Профессиональный" %}</th>
+                                    <th class="text-center">{% trans "Премиум" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{% trans "Количество мероприятий" %}</td>
+                                    <td class="text-center">{% trans "До 5" %}</td>
+                                    <td class="text-center">{% trans "Неограниченно" %}</td>
+                                    <td class="text-center">{% trans "Неограниченно" %}</td>
+                                </tr>
+                                <tr>
+                                    <td>{% trans "Участников на мероприятие" %}</td>
+                                    <td class="text-center">100</td>
+                                    <td class="text-center">1,000</td>
+                                    <td class="text-center">{% trans "Неограниченно" %}</td>
+                                </tr>
+                                <tr>
+                                    <td>{% trans "Продвижение в поиске" %}</td>
+                                    <td class="text-center"><i class="fas fa-times text-muted"></i></td>
+                                    <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                                    <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>{% trans "AI рекомендации" %}</td>
+                                    <td class="text-center"><i class="fas fa-times text-muted"></i></td>
+                                    <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                                    <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>{% trans "Приоритетная поддержка" %}</td>
+                                    <td class="text-center"><i class="fas fa-times text-muted"></i></td>
+                                    <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                                    <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>{% trans "Кастомный брендинг" %}</td>
+                                    <td class="text-center"><i class="fas fa-times text-muted"></i></td>
+                                    <td class="text-center"><i class="fas fa-times text-muted"></i></td>
+                                    <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "Отзывы организаторов" %}</h2>
+            <p class="lead text-muted">{% trans "Что говорят наши клиенты" %}</p>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-warning mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="mb-4">"{% trans "EventHub полностью изменил подход к организации наших конференций. В 3 раза больше участников и в 2 раза меньше времени на администрирование!" %}"</p>
+                    <div class="d-flex align-items-center">
+                        <img src="{% static 'images/avatar1.jpg' %}" alt="Анна Петрова" class="rounded-circle me-3" width="50" height="50">
+                        <div>
+                            <h6 class="mb-0">Анна Петрова</h6>
+                            <small class="text-muted">{% trans "Организатор TechConf" %}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-warning mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="mb-4">"{% trans "Система продажи билетов и аналитика просто потрясающие. Теперь мы точно знаем, какие маркетинговые каналы работают лучше всего." %}"</p>
+                    <div class="d-flex align-items-center">
+                        <img src="{% static 'images/avatar2.jpg' %}" alt="Михаил Иванов" class="rounded-circle me-3" width="50" height="50">
+                        <div>
+                            <h6 class="mb-0">Михаил Иванов</h6>
+                            <small class="text-muted">{% trans "Основатель StartupWeekend" %}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-warning mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="mb-4">"{% trans "Перешли с другой платформы и не пожалели. Поддержка отвечает мгновенно, интерфейс интуитивный, а функционал покрывает все наши потребности." %}"</p>
+                    <div class="d-flex align-items-center">
+                        <img src="{% static 'images/avatar3.jpg' %}" alt="Елена Сидорова" class="rounded-circle me-3" width="50" height="50">
+                        <div>
+                            <h6 class="mb-0">Елена Сидорова</h6>
+                            <small class="text-muted">{% trans "Директор ArtGallery" %}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final CTA Section -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <div class="card border-0 bg-gradient-primary text-white">
+                <div class="card-body p-5">
+                    <h2 class="h1 fw-bold mb-3">{% trans "Готовы начать?" %}</h2>
+                    <p class="lead mb-4 opacity-75">
+                        {% trans "Присоединяйтесь к тысячам организаторов, которые уже используют EventHub для создания успешных мероприятий" %}
+                    </p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{% url 'event_create' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-plus-circle me-2"></i>{% trans "Создать первое мероприятие" %}
+                        </a>
+                        <a href="{% url 'contact' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-comments me-2"></i>{% trans "Консультация эксперта" %}
+                        </a>
+                    </div>
+                    <p class="mt-4 mb-0 opacity-75">
+                        <small>{% trans "Попробуйте бесплатно 14 дней. Без кредитной карты." %}</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.table td {
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem 0.5rem;
+}
+</style>
+{% endblock %}

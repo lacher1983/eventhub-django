@@ -1,0 +1,8 @@
+pytest==7.4.3
+pytest-django==4.5.2
+pytest-cov==4.1.0
+model_bakery==1.11.0
+freezegun==1.2.2
+factory-boy==3.3.0
+coverage==7.3.2
+httmock==1.4.0

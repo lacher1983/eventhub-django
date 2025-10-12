@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ page_title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold text-primary mb-4">{% trans "Карьера в EventHub" %}</h1>
+            <p class="lead mb-4">
+                {% trans "Присоединяйтесь к команде, которая меняет то, как люди находят и организуют мероприятия. Создавайте технологии будущего вместе с нами." %}
+            </p>
+            <div class="d-flex gap-3 flex-wrap">
+                <span class="badge bg-primary fs-6 p-2">🚀 {% trans "Быстрый рост" %}</span>
+                <span class="badge bg-success fs-6 p-2">💻 {% trans "Удаленная работа" %}</span>
+                <span class="badge bg-info fs-6 p-2">🎯 {% trans "Опытная команда" %}</span>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <img src="{% static 'images/careers-hero.jpg' %}" alt="{% trans 'Команда EventHub' %}" class="img-fluid rounded-3 shadow">
+        </div>
+    </div>
+
+    <!-- Why Work With Us -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "Почему выбирают EventHub?" %}</h2>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <i class="fas fa-rocket fa-3x text-primary mb-3"></i>
+                    <h4 class="h5">{% trans "Быстрый рост" %}</h4>
+                    <p class="text-muted">
+                        {% trans "Работайте в быстрорастущем стартапе с амбициозными целями и реальным impact." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <i class="fas fa-graduation-cap fa-3x text-success mb-3"></i>
+                    <h4 class="h5">{% trans "Обучение и развитие" %}</h4>
+                    <p class="text-muted">
+                        {% trans "Бюджет на обучение, конференции и постоянное профессиональное развитие." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+                    <h4 class="h5">{% trans "Баланс работы и жизни" %}</h4>
+                    <p class="text-muted">
+                        {% trans "Гибкий график, удаленная работа и забота о wellbeing сотрудников." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Openings -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "Открытые вакансии" %}</h2>
+            <p class="lead text-muted">{% trans "Присоединяйтесь к нашей команде прямо сейчас" %}</p>
+        </div>
+        
+        {% for job in job_openings %}
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h3 class="h4 mb-2">{{ job.title }}</h3>
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <span class="badge bg-light text-dark">
+                                    <i class="fas fa-building me-1"></i>{{ job.department }}
+                                </span>
+                                <span class="badge bg-light text-dark">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ job.location }}
+                                </span>
+                                <span class="badge bg-light text-dark">
+                                    <i class="fas fa-clock me-1"></i>{{ job.type }}
+                                </span>
+                            </div>
+                            <p class="text-muted mb-0">{{ job.description }}</p>
+                        </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <a href="#apply-{{ forloop.counter }}" class="btn btn-primary btn-lg">{% trans "Откликнуться" %}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Application Form -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow">
+                <div class="card-body p-5">
+                    <h2 class="h3 fw-bold text-center mb-4">{% trans "Отправьте свое резюме" %}</h2>
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Имя" %} *</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Фамилия" %} *</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Телефон" %}</label>
+                                <input type="tel" class="form-control">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "На какую вакансию?" %} *</label>
+                                <select class="form-select" required>
+                                    <option value="">{% trans "Выберите вакансию" %}</option>
+                                    {% for job in job_openings %}
+                                    <option value="{{ job.title }}">{{ job.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Сопроводительное письмо" %}</label>
+                                <textarea class="form-control" rows="4" placeholder="{% trans 'Расскажите о себе и почему вы хотите работать в EventHub...' %}"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Резюме" %} *</label>
+                                <input type="file" class="form-control" accept=".pdf,.doc,.docx" required>
+                                <div class="form-text">{% trans "Поддерживаемые форматы: PDF, DOC, DOCX" %}</div>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    {% trans "Отправить заявку" %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

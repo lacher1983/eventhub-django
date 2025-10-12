@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ page_title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary mb-4">{% trans "Условия использования" %}</h1>
+                <p class="lead text-muted">
+                    {% trans "Пожалуйста, внимательно ознакомьтесь с условиями перед использованием платформы" %}
+                </p>
+            </div>
+
+            <!-- Terms Content -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% trans "Используя EventHub, вы соглашаетесь с этими условиями. Если вы не согласны, пожалуйста, не используйте нашу платформу." %}
+                    </div>
+
+                    {% for section in terms_sections %}
+                    <div class="mb-5">
+                        <h3 class="h4 text-primary mb-3">{{ section.title }}</h3>
+                        <p class="text-muted">{{ section.content }}</p>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Prohibited Activities -->
+                    <div class="mb-5">
+                        <h3 class="h4 text-primary mb-3">{% trans "Запрещенные действия" %}</h3>
+                        <ul class="text-muted">
+                            <li>{% trans "Создание мероприятий, нарушающих законодательство" %}</li>
+                            <li>{% trans "Мошенничество и обман участников" %}</li>
+                            <li>{% trans "Нарушение интеллектуальных прав" %}</li>
+                            <li>{% trans "Распространение спама и вредоносного контента" %}</li>
+                            <li>{% trans "Любые действия, мешающие работе платформы" %}</li>
+                        </ul>
+                    </div>
+
+                    <!-- Changes to Terms -->
+                    <div class="p-4 bg-light rounded">
+                        <h4 class="h5 mb-3">{% trans "Изменения условий" %}</h4>
+                        <p class="text-muted mb-0">
+                            {% trans "Мы оставляем за собой право изменять эти условия в любое время. Продолжение использования платформы после изменений означает ваше согласие с новыми условиями." %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acceptance -->
+            <div class="text-center mt-4">
+                <div class="form-check d-inline-block">
+                    <input class="form-check-input" type="checkbox" id="termsAccept">
+                    <label class="form-check-label" for="termsAccept">
+                        {% trans "Я принимаю Условия использования EventHub" %}
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

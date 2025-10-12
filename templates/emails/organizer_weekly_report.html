@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 10px 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+        .stat-card { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 24px; font-weight: bold; color: #667eea; }
+        .stat-label { font-size: 14px; color: #666; }
+        .recommendation { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0; border-radius: 4px; }
+        .priority-high { border-left-color: #dc3545; }
+        .priority-medium { border-left-color: #fd7e14; }
+        .footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Ваш еженедельный отчет</h1>
+            <p>Статистика за период: {{ report.generated_at }}</p>
+        </div>
+        
+        <div class="content">
+            <h2>Привет, {{ organizer.username }}! 👋</h2>
+            <p>Вот как прошла ваша неделя на EventHub:</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ report.summary.total_events }}</div>
+                    <div class="stat-label">Мероприятий</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ report.summary.total_registrations }}</div>
+                    <div class="stat-label">Регистраций</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ report.summary.total_revenue }} ₽</div>
+                    <div class="stat-label">Доход</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ report.summary.average_rating }}/5</div>
+                    <div class="stat-label">Средний рейтинг</div>
+                </div>
+            </div>
+            
+            {% if report.chart_url %}
+            <div style="text-align: center; margin: 20px 0;">
+                <img src="{{ report.chart_url }}" alt="Статистика" style="max-width: 100%; border-radius: 8px;">
+            </div>
+            {% endif %}
+            
+            <h3>🎯 Рекомендации для улучшения</h3>
+            {% for rec in report.recommendations %}
+            <div class="recommendation priority-{{ rec.priority }}">
+                <strong>{{ rec.title }}</strong>
+                <p>{{ rec.description }}</p>
+            </div>
+            {% endfor %}
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="http://127.0.0.1:8000/dashboard/" style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    📈 Перейти в панель управления
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Это автоматическое письмо от EventHub. Пожалуйста, не отвечайте на него.</p>
+            <p>© 2025 EventHub. Все права защищены.</p>
+        </div>
+    </div>
+</body>
+</html>

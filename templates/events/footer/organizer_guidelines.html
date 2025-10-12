@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Руководство для организаторов" %} | EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Заголовок -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary mb-3">{% trans "Руководство для организаторов" %}</h1>
+                <p class="lead text-muted">
+                    {% trans "Лучшие практики и рекомендации по организации успешных мероприятий" %}
+                </p>
+            </div>
+
+            <!-- Навигация по разделам -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <nav class="nav nav-pills nav-fill">
+                                <a class="nav-link active" href="#planning">{% trans "Планирование" %}</a>
+                                <a class="nav-link" href="#promotion">{% trans "Продвижение" %}</a>
+                                <a class="nav-link" href="#execution">{% trans "Проведение" %}</a>
+                                <a class="nav-link" href="#after">{% trans "После мероприятия" %}</a>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Раздел планирования -->
+            <section id="planning" class="mb-5">
+                <h2 class="h3 fw-bold text-primary mb-4">{% trans "1. Планирование мероприятия" %}</h2>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                                        <i class="fas fa-bullseye fa-lg text-primary"></i>
+                                    </div>
+                                    <h4 class="h5 mb-0">{% trans "Определение целей" %}</h4>
+                                </div>
+                                <ul class="text-muted">
+                                    <li>{% trans "Четко сформулируйте цели мероприятия" %}</li>
+                                    <li>{% trans "Определите целевую аудиторию" %}</li>
+                                    <li>{% trans "Установите KPI для измерения успеха" %}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-success bg-opacity-10 p-2 rounded-circle me-3">
+                                        <i class="fas fa-calendar-alt fa-lg text-success"></i>
+                                    </div>
+                                    <h4 class="h5 mb-0">{% trans "Бюджет и сроки" %}</h4>
+                                </div>
+                                <ul class="text-muted">
+                                    <li>{% trans "Составьте детальный бюджет" %}</li>
+                                    <li>{% trans "Определите реалистичные сроки" %}</li>
+                                    <li>{% trans "Планируйте с запасом времени" %}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Раздел продвижения -->
+            <section id="promotion" class="mb-5">
+                <h2 class="h3 fw-bold text-primary mb-4">{% trans "2. Продвижение мероприятия" %}</h2>
+                
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h5><i class="fas fa-envelope text-primary me-2"></i>{% trans "Email-рассылки" %}</h5>
+                                <p class="small text-muted">{% trans "Создайте серию писем с напоминаниями и полезной информацией" %}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h5><i class="fab fa-facebook text-primary me-2"></i>{% trans "Социальные сети" %}</h5>
+                                <p class="small text-muted">{% trans "Используйте все relevant платформы для привлечения аудитории" %}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h5><i class="fas fa-partnership text-primary me-2"></i>{% trans "Партнерства" %}</h5>
+                                <p class="small text-muted">{% trans "Сотрудничайте с influencers и relevant сообществами" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Дополнительные разделы... -->
+
+            <!-- CTA секция -->
+            <div class="bg-light rounded-3 p-5 text-center mt-5">
+                <h3 class="fw-bold mb-3">{% trans "Нужна помощь?" %}</h3>
+                <p class="text-muted mb-4">
+                    {% trans "Наша команда готова помочь вам организовать успешное мероприятие" %}
+                </p>
+                <a href="{% url 'contact' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-headset me-2"></i>{% trans "Связаться с поддержкой" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Плавная прокрутка к разделам
+document.addEventListener('DOMContentLoaded', function() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Убираем активный класс у всех ссылок
+            navLinks.forEach(l => l.classList.remove('active'));
+            // Добавляем активный класс текущей ссылке
+            this.classList.add('active');
+            
+            // Прокручиваем к разделу
+            const targetId = this.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            if (targetSection) {
+                targetSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

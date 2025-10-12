@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ page_title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold text-primary mb-4">{% trans "О компании EventHub" %}</h1>
+            <p class="lead mb-4">
+                {% trans "EventHub — это инновационная платформа, которая меняет способ организации и поиска мероприятий. Мы создаем сообщество, где каждый может найти вдохновение, знания и новые возможности." %}
+            </p>
+            <div class="d-flex gap-3">
+                <span class="badge bg-primary fs-6 p-2">🎯 {% trans "С 2023 года" %}</span>
+                <span class="badge bg-success fs-6 p-2">🚀 {% trans "5000+ мероприятий" %}</span>
+                <span class="badge bg-info fs-6 p-2">🌟 {% trans "100000+ пользователей" %}</span>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <img src="{% static 'images/about-hero.jpg' %}" alt="{% trans 'Команда EventHub' %}" class="img-fluid rounded-3 shadow">
+        </div>
+    </div>
+
+    <!-- Mission & Vision -->
+    <div class="row mb-5">
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 bg-light h-100">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-bullseye fa-3x text-primary mb-3"></i>
+                        <h3 class="h4">{% trans "Наша миссия" %}</h3>
+                    </div>
+                    <p class="card-text">
+                        {% trans "Делать мир мероприятий доступным для каждого. Мы стремимся создать платформу, где организаторы могут легко делиться своими идеями, а участники — находить мероприятия, которые меняют их жизнь." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 bg-light h-100">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-eye fa-3x text-success mb-3"></i>
+                        <h3 class="h4">{% trans "Наше видение" %}</h3>
+                    </div>
+                    <p class="card-text">
+                        {% trans "Стать ведущей глобальной платформой для мероприятий, объединяющей людей через общие интересы и создающей возможности для личного и профессионального роста." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Values -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "Наши ценности" %}</h2>
+            <p class="lead text-muted">{% trans "Принципы, которые направляют нашу работу каждый день" %}</p>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-users fa-2x text-primary mb-3"></i>
+                    <h4 class="h5">{% trans "Сообщество" %}</h4>
+                    <p class="text-muted">
+                        {% trans "Мы верим в силу сообщества и создаем пространство для настоящих connections." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-lightbulb fa-2x text-warning mb-3"></i>
+                    <h4 class="h5">{% trans "Инновации" %}</h4>
+                    <p class="text-muted">
+                        {% trans "Постоянно улучшаем платформу, внедряя AI-рекомендации и новые технологии." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-shield-alt fa-2x text-success mb-3"></i>
+                    <h4 class="h5">{% trans "Надежность" %}</h4>
+                    <p class="text-muted">
+                        {% trans "Обеспечиваем безопасность и стабильность работы платформы для всех пользователей." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-heart fa-2x text-danger mb-3"></i>
+                    <h4 class="h5">{% trans "Страсть" %}</h4>
+                    <p class="text-muted">
+                        {% trans "Мы страстно относимся к тому, что делаем, и верим в силу мероприятий." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold">{% trans "Команда основателей" %}</h2>
+            <p class="lead text-muted">{% trans "Люди, стоящие за успехом EventHub" %}</p>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 text-center">
+                <div class="card-body p-4">
+                    <img src="{% static 'images/team-ceo.jpg' %}" alt="Алексей Петров" class="rounded-circle mb-3" width="120" height="120">
+                    <h4 class="h5">Алексей Петров</h4>
+                    <p class="text-primary mb-2">{% trans "CEO & Сооснователь" %}</p>
+                    <p class="text-muted small">
+                        {% trans "Более 10 лет в event-индустрии. Основал 3 успешных стартапа в сфере технологий." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 text-center">
+                <div class="card-body p-4">
+                    <img src="{% static 'images/team-cto.jpg' %}" alt="Мария Сидорова" class="rounded-circle mb-3" width="120" height="120">
+                    <h4 class="h5">Мария Сидорова</h4>
+                    <p class="text-primary mb-2">{% trans "CTO & Сооснователь" %}</p>
+                    <p class="text-muted small">
+                        {% trans "Эксперт в машинном обучении и больших данных. Ранее работала в Yandex и Google." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 text-center">
+                <div class="card-body p-4">
+                    <img src="{% static 'images/team-cmo.jpg' %}" alt="Дмитрий Иванов" class="rounded-circle mb-3" width="120" height="120">
+                    <h4 class="h5">Дмитрий Иванов</h4>
+                    <p class="text-primary mb-2">{% trans "CMO & Сооснователь" %}</p>
+                    <p class="text-muted small">
+                        {% trans "Специалист по маркетингу с 8-летним опытом. Создавал маркетинговые стратегии для Fortune 500 компаний." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row bg-primary text-white rounded-3 p-5 mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2 class="display-5 fw-bold">{% trans "EventHub в цифрах" %}</h2>
+        </div>
+        <div class="col-lg-3 col-6 text-center mb-3">
+            <div class="display-4 fw-bold">5000+</div>
+            <p class="mb-0">{% trans "Мероприятий" %}</p>
+        </div>
+        <div class="col-lg-3 col-6 text-center mb-3">
+            <div class="display-4 fw-bold">100K+</div>
+            <p class="mb-0">{% trans "Пользователей" %}</p>
+        </div>
+        <div class="col-lg-3 col-6 text-center mb-3">
+            <div class="display-4 fw-bold">50+</div>
+            <p class="mb-0">{% trans "Городов" %}</p>
+        </div>
+        <div class="col-lg-3 col-6 text-center mb-3">
+            <div class="display-4 fw-bold">95%</div>
+            <p class="mb-0">{% trans "Довольных клиентов" %}</p>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="row text-center">
+        <div class="col-12">
+            <h2 class="display-6 fw-bold mb-4">{% trans "Присоединяйтесь к нашему сообществу" %}</h2>
+            <p class="lead mb-4">
+                {% trans "Начните создавать или находить мероприятия, которые вдохновляют." %}
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'event_create' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle me-2"></i>{% trans "Создать мероприятие" %}
+                </a>
+                <a href="{% url 'event_list' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-search me-2"></i>{% trans "Найти мероприятия" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

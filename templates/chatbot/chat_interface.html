@@ -1,0 +1,672 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid chat-interface-container">
+    <div class="row h-100">
+        <!-- Боковая панель с быстрыми командами -->
+        <div class="col-md-3 col-lg-2 sidebar-chat-commands">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">🚀 Быстрые команды</h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="quick-commands">
+                        <h6 class="text-muted mb-2">🔍 Поиск мероприятий</h6>
+                        <button class="btn btn-outline-primary btn-sm w-100 mb-2 text-start" 
+                                data-quick-message="Найди бесплатные вебинары на этой неделе">
+                            🎓 Бесплатные вебинары
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm w-100 mb-2 text-start"
+                                data-quick-message="Какие IT мероприятия есть в Москве?">
+                            💻 IT мероприятия
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm w-100 mb-2 text-start"
+                                data-quick-message="Покажи концерты на выходные">
+                            🎵 Концерты
+                        </button>
+                        
+                        <h6 class="text-muted mb-2 mt-3">📅 Расписание</h6>
+                        <button class="btn btn-outline-info btn-sm w-100 mb-2 text-start"
+                                data-quick-message="Что сегодня интересного?">
+                            📍 Сегодня
+                        </button>
+                        <button class="btn btn-outline-info btn-sm w-100 mb-2 text-start"
+                                data-quick-message="Какие мероприятия на завтра?">
+                            🗓️ Завтра
+                        </button>
+                        
+                        <h6 class="text-muted mb-2 mt-3">❓ Помощь</h6>
+                        <button class="btn btn-outline-secondary btn-sm w-100 mb-2 text-start"
+                                data-quick-message="Что ты умеешь?">
+                            ❓ Возможности
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm w-100 mb-2 text-start"
+                                data-quick-message="Как зарегистрироваться на мероприятие?">
+                            🎫 Регистрация
+                        </button>
+                    </div>
+                    
+                    <!-- Статистика чата -->
+                    <div class="chat-stats mt-4 p-3 bg-light rounded">
+                        <h6 class="text-muted">📊 Статистика</h6>
+                        <div class="stats-item">
+                            <small>Сообщений сегодня: <span id="messages-today">0</span></small>
+                        </div>
+                        <div class="stats-item">
+                            <small>Найдено мероприятий: <span id="events-found">0</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Основная область чата -->
+        <div class="col-md-9 col-lg-10 main-chat-area">
+            <div class="card h-100">
+                <!-- Заголовок чата -->
+                <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="chatbot-avatar me-3">
+                            <span>🤖</span>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">EventHub AI Помощник</h5>
+                            <small class="opacity-75">Готов помочь с поиском мероприятий!</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-success me-2" id="connection-status">
+                            <i class="fas fa-circle me-1"></i>Online
+                        </span>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-light" id="clear-chat-btn" title="Очистить чат">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light" id="export-chat-btn" title="Экспорт чата">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Область сообщений -->
+                <div class="card-body p-0 d-flex flex-column">
+                    <div id="chat-messages" class="chat-messages-container flex-grow-1 p-3">
+                        <!-- Приветственное сообщение -->
+                        <div class="welcome-message alert alert-info border-0">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <div class="avatar-circle bg-primary text-white">🤖</div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="alert-heading">Добро пожаловать в EventHub AI!</h5>
+                                    <p class="mb-2">Я ваш умный помощник для поиска мероприятий. Вот что я могу:</p>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <ul class="mb-2">
+                                                <li>🎯 <strong>Поиск событий</strong> по категориям</li>
+                                                <li>📅 <strong>Фильтрация</strong> по дате и местоположению</li>
+                                                <li>💰 <strong>Бесплатные</strong> мероприятия</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <ul class="mb-2">
+                                                <li>👥 <strong>Рекомендации</strong> по интересам</li>
+                                                <li>🎫 <strong>Помощь</strong> с регистрацией</li>
+                                                <li>📱 <strong>Уведомления</strong> о новых событиях</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Просто напишите ваш вопрос, например: <em>"Найди музыкальные фестивали в этом месяце"</em></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Быстрые предложения -->
+                    <div class="quick-suggestions border-top bg-light p-3" id="quick-suggestions">
+                        <small class="text-muted d-block mb-2">💡 Попробуйте спросить:</small>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-sm btn-outline-primary" data-quick-message="Какие мероприятия сегодня?">
+                                📍 Сегодняшние события
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" data-quick-message="Покажи ближайшие конференции">
+                                🎤 Конференции
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" data-quick-message="Бесплатные мастер-классы">
+                                🎨 Мастер-классы
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Панель ввода -->
+                    <div class="chat-input-container border-top bg-white p-3">
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary" type="button" id="attach-btn" title="Прикрепить файл (скоро)">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <input type="text" 
+                                   id="message-input" 
+                                   class="form-control border-0" 
+                                   placeholder="Напишите сообщение... (Enter для отправки)"
+                                   aria-label="Сообщение">
+                            <button class="btn btn-outline-secondary" type="button" id="voice-btn" title="Голосовой ввод (скоро)">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button class="btn btn-primary" type="button" id="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2 d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <span id="typing-indicator" class="d-none">
+                                    <i class="fas fa-typing"></i> Ассистент печатает...
+                                </span>
+                            </small>
+                            <small class="text-muted">
+                                Сообщение: <span id="char-count">0</span>/1000
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно экспорта -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">📤 Экспорт чата</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Выберите формат экспорта:</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" id="export-text-btn">
+                        <i class="fas fa-file-text me-2"></i>Текстовый файл (.txt)
+                    </button>
+                    <button class="btn btn-outline-success" id="export-pdf-btn">
+                        <i class="fas fa-file-pdf me-2"></i>PDF документ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* СТИЛИ ДЛЯ СООБЩЕНИЙ ЧАТА - ДОБАВИТЬ ЭТОТ БЛОК */
+.message {
+    margin-bottom: 1rem;
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+.message-user {
+    justify-content: flex-end;
+}
+
+.message-bot {
+    justify-content: flex-start;
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.message-bubble.user {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.message-bubble.bot {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.message-text {
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    text-align: right;
+}
+
+.typing-animation {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    background: #999;
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+}
+
+.chat-messages-container {
+    background: #f8f9fa;
+    min-height: 400px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Глобальные переменные
+
+let messagesToday = 0;
+let eventsFound = 0;
+
+// Инициализация чата
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Chat initialized');
+    
+    // Генерация session_id
+    currentSessionId = 'chat_session_' + Date.now();
+    console.log('🆔 Session ID:', currentSessionId);
+    
+    // Настройка обработчиков событий
+    setupEventListeners();
+    
+    // Фокус на поле ввода
+    const input = document.getElementById('message-input');
+    if (input) {
+        input.focus();
+        console.log('✅ Input focused');
+    }
+});
+
+function setupEventListeners() {
+    const sendBtn = document.getElementById('send-btn');
+    const voiceBtn = document.getElementById('voice-btn');
+    const messageInput = document.getElementById('message-input');
+    const clearChatBtn = document.getElementById('clear-chat-btn');
+    const exportChatBtn = document.getElementById('export-chat-btn');
+    const attachBtn = document.getElementById('attach-btn');
+    const exportTextBtn = document.getElementById('export-text-btn');
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    
+    // Кнопка отправки
+    if (sendBtn) {
+        sendBtn.addEventListener('click', sendMessage);
+        console.log('✅ Send button handler added');
+    }
+    
+    // Кнопка голосового ввода
+    if (voiceBtn) {
+        voiceBtn.addEventListener('click', function() {
+            alert('🎤 Голосовой ввод будет доступен в следующем обновлении!');
+        });
+    }
+    
+    // Кнопка прикрепления файла
+    if (attachBtn) {
+        attachBtn.addEventListener('click', function() {
+            alert('📎 Прикрепление файлов будет доступно в следующем обновлении!');
+        });
+    }
+    
+    // Кнопка очистки чата
+    if (clearChatBtn) {
+        clearChatBtn.addEventListener('click', clearChat);
+    }
+    
+    // Кнопка экспорта чата
+    if (exportChatBtn) {
+        exportChatBtn.addEventListener('click', function() {
+            const exportModal = new bootstrap.Modal(document.getElementById('exportModal'));
+            exportModal.show();
+        });
+    }
+    
+    // Кнопки экспорта в модальном окне
+    if (exportTextBtn) {
+        exportTextBtn.addEventListener('click', exportChatAsText);
+    }
+    
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', exportChatAsPDF);
+    }
+    
+    // Обработчики для быстрых сообщений
+    const quickMessageBtns = document.querySelectorAll('[data-quick-message]');
+    quickMessageBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const message = this.getAttribute('data-quick-message');
+            quickMessage(message);
+        });
+    });
+    console.log(`✅ ${quickMessageBtns.length} quick message buttons handlers added`);
+    
+    // Поле ввода - обработка Enter
+    if (messageInput) {
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // Счетчик символов
+        messageInput.addEventListener('input', function() {
+            document.getElementById('char-count').textContent = this.value.length;
+        });
+    }
+    
+    console.log('✅ All event listeners setup complete');
+}
+
+// Основная функция отправки сообщения
+async function sendMessage() {
+    console.log('🚀 === SEND MESSAGE STARTED ===');
+    
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+    const sendBtn = document.getElementById('send-btn');
+    
+    if (!message) {
+        console.log('❌ Empty message, skipping');
+        return;
+    }
+    
+    console.log('📝 Message to send:', message);
+    console.log('🆔 Session ID:', currentSessionId);
+    
+    // Добавляем сообщение пользователя в чат
+    addMessageToChat(message, 'user');
+    input.value = '';
+    document.getElementById('char-count').textContent = '0';
+    sendBtn.disabled = true;
+    
+    // Показываем индикатор набора
+    showTypingIndicator();
+    
+    try {
+        console.log('📡 Making API request to /chatbot/api/chat/');
+
+        const csrfToken = getCSRFToken();
+        console.log('🔐 CSRF token:', csrfToken ? 'Found' : 'NOT FOUND!');
+
+        const requestBody = {
+            message: message,
+            session_id: currentSessionId
+        };
+
+        console.log('📦 Request body:', requestBody);
+        
+        const response = await fetch('/chatbot/api/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        console.log('📨 Response received');
+        console.log('📊 Status:', response.status);
+        console.log('✅ OK:', response.ok);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Response error:', errorText);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('📋 Response data:', data);
+        
+        // Скрываем индикатор набора
+        hideTypingIndicator();
+        
+        // Добавляем ответ бота
+        addMessageToChat(data.response, 'bot', data);
+        
+        // Обновляем статистику
+        messagesToday++;
+        document.getElementById('messages-today').textContent = messagesToday;
+        
+        if (data.events && data.events.length > 0) {
+            eventsFound += data.events.length;
+            document.getElementById('events-found').textContent = eventsFound;
+        }
+        
+        if (data.suggestions && data.suggestions.length > 0) {
+            showQuickSuggestions(data.suggestions);
+        }
+        
+        console.log('✅ Message processed successfully');
+        
+    } catch (error) {
+        console.error('💥 Chat error:', error);
+        console.error('💥 Error details:', error.message);
+        console.error('💥 Stack:', error.stack);
+        
+        hideTypingIndicator();
+        addMessageToChat('❌ Ошибка соединения: ' + error.message, 'bot');
+    } finally {
+        sendBtn.disabled = false;
+        input.focus();
+        console.log('🔄 Send button re-enabled');
+    }
+}
+
+// Функция для быстрых сообщений
+function quickMessage(message) {
+    console.log('⚡ Quick message:', message);
+    const input = document.getElementById('message-input');
+    if (input) {
+        input.value = message;
+        sendMessage();
+    }
+}
+
+// Функция очистки чата
+function clearChat() {
+    console.log('🗑️ Clearing chat...');
+    
+    if (confirm('Вы уверены, что хотите очистить историю чата?')) {
+        const messagesContainer = document.getElementById('chat-messages');
+        if (messagesContainer) {
+            messagesContainer.innerHTML = '';
+            
+            // Показываем приветственное сообщение
+            messagesContainer.innerHTML = `
+                <div class="welcome-message alert alert-info border-0">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-circle bg-primary text-white">🤖</div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="alert-heading">Чат очищен!</h5>
+                            <p>Чем могу помочь?</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Сбрасываем статистику
+            messagesToday = 0;
+            eventsFound = 0;
+            document.getElementById('messages-today').textContent = '0';
+            document.getElementById('events-found').textContent = '0';
+            
+            console.log('✅ Chat cleared');
+        }
+    }
+}
+
+// Функция экспорта в текст
+function exportChatAsText() {
+    console.log('📄 Exporting chat as text...');
+    alert('📄 Экспорт в текст будет доступен в следующем обновлении!');
+}
+
+// Функция экспорта в PDF
+function exportChatAsPDF() {
+    console.log('📊 Exporting chat as PDF...');
+    alert('📊 PDF экспорт будет доступен в следующем обновлении!');
+}
+
+// Функция добавления сообщения в чат
+function addMessageToChat(content, type, data = null) {
+    const messagesContainer = document.getElementById('chat-messages');
+    if (!messagesContainer) {
+        console.error('❌ Messages container not found!');
+        return;
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message message-${type}`;
+    
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = `message-bubble ${type}`;
+    
+    const time = new Date().toLocaleTimeString('ru-RU', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+    
+    let messageContent = content;
+    
+    // Форматирование сообщения бота
+    if (type === 'bot') {
+        messageContent = content
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    }
+    
+    bubbleDiv.innerHTML = `
+        <div class="message-text">${messageContent}</div>
+        <div class="message-time">${time}</div>
+    `;
+    
+    messageDiv.appendChild(bubbleDiv);
+    messagesContainer.appendChild(messageDiv);
+    
+    // Прокрутка к последнему сообщению
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    console.log('✅ Message added to chat:', type);
+}
+
+// Индикатор набора
+function showTypingIndicator() {
+    const messagesContainer = document.getElementById('chat-messages');
+    if (!messagesContainer) return;
+    
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message message-bot';
+    typingDiv.id = 'typing-indicator';
+    
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'message-bubble bot';
+    
+    bubbleDiv.innerHTML = `
+        <div class="typing-animation">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    `;
+    
+    typingDiv.appendChild(bubbleDiv);
+    messagesContainer.appendChild(typingDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    console.log('⌨️ Typing indicator shown');
+}
+
+function hideTypingIndicator() {
+    const typingIndicator = document.getElementById('typing-indicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
+        console.log('⌨️ Typing indicator hidden');
+    }
+}
+
+// Функция показа быстрых предложений
+function showQuickSuggestions(suggestions) {
+    console.log('💡 Showing suggestions:', suggestions);
+    const suggestionsContainer = document.getElementById('quick-suggestions');
+    
+    if (suggestionsContainer) {
+        let html = '<small class="text-muted d-block mb-2">💡 Попробуйте спросить:</small>';
+        html += '<div class="d-flex flex-wrap gap-2">';
+        
+        suggestions.forEach(suggestion => {
+            html += `<button class="btn btn-sm btn-outline-primary" data-quick-message="${suggestion}">${suggestion}</button>`;
+        });
+        
+        html += '</div>';
+        suggestionsContainer.innerHTML = html;
+        
+        // Обновляем обработчики для новых кнопок
+        const newBtns = document.querySelectorAll('#quick-suggestions [data-quick-message]');
+        newBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const message = this.getAttribute('data-quick-message');
+                quickMessage(message);
+            });
+        });
+    }
+}
+
+// Вспомогательная функция для CSRF токена
+function getCSRFToken() {
+    const token = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (token) {
+        return token.value;
+    }
+    console.warn('⚠️ CSRF token not found!');
+    return '';
+}
+
+// Сделаем функции глобальными
+window.quickMessage = quickMessage;
+window.clearChat = clearChat;
+window.sendMessage = sendMessage;
+
+console.log('✅ All JavaScript functions loaded successfully');
+</script>
+{% endblock %}

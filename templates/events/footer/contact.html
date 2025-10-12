@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ page_title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold text-primary mb-4">{% trans "Свяжитесь с нами" %}</h1>
+            <p class="lead text-muted mb-4">
+                {% trans "Мы всегда рады помочь и ответить на ваши вопросы. Выберите подходящий способ связи." %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Contact Methods -->
+    <div class="row mb-5">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
+                    <h4 class="h5">{% trans "Email" %}</h4>
+                    <p class="text-muted mb-2">{% trans "Общие вопросы" %}</p>
+                    <a href="mailto:{{ contact_info.general_email }}" class="text-decoration-none h5">
+                        {{ contact_info.general_email }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <i class="fas fa-phone fa-3x text-success mb-3"></i>
+                    <h4 class="h5">{% trans "Телефон" %}</h4>
+                    <p class="text-muted mb-2">{% trans "Телефонный звонок" %}</p>
+                    <a href="tel:{{ contact_info.phone }}" class="text-decoration-none h5">
+                        {{ contact_info.phone }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <i class="fas fa-map-marker-alt fa-3x text-danger mb-3"></i>
+                    <h4 class="h5">{% trans "Адрес" %}</h4>
+                    <p class="text-muted mb-2">{% trans "Наш офис" %}</p>
+                    <p class="mb-0 h6">{{ contact_info.address }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Form & Map -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="h3 fw-bold mb-4">{% trans "Напишите нам" %}</h2>
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Имя" %} *</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Фамилия" %} *</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Телефон" %}</label>
+                                <input type="tel" class="form-control">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Отдел" %}</label>
+                                <select class="form-select">
+                                    <option value="">{% trans "Выберите отдел" %}</option>
+                                    <option value="support">{% trans "Техническая поддержка" %}</option>
+                                    <option value="events">{% trans "Отдел мероприятий" %}</option>
+                                    <option value="partners">{% trans "Партнерства" %}</option>
+                                    <option value="general">{% trans "Общие вопросы" %}</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Тема" %} *</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Сообщение" %} *</label>
+                                <textarea class="form-control" rows="5" placeholder="{% trans 'Опишите ваш вопрос подробно...' %}" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="newsletter">
+                                    <label class="form-check-label" for="newsletter">
+                                        {% trans "Подписаться на рассылку новостей и мероприятий" %}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-paper-plane me-2"></i>{% trans "Отправить сообщение" %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Office Info -->
+            <div class="card border-0 bg-light mb-4">
+                <div class="card-body p-4">
+                    <h4 class="h5 mb-3">{% trans "Информация об офисе" %}</h4>
+                    <div class="mb-3">
+                        <strong>{% trans "Адрес:" %}</strong><br>
+                        {{ contact_info.address }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>{% trans "Часы работы:" %}</strong><br>
+                        {{ contact_info.work_hours }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>{% trans "Экскурсии:" %}</strong><br>
+                        {% trans "По предварительной записи" %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Contacts -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="h5 mb-3">{% trans "Быстрые контакты" %}</h4>
+                    {% for department in departments %}
+                    <div class="mb-3 pb-3 border-bottom">
+                        <h6 class="fw-bold mb-1">{{ department.name }}</h6>
+                        <div class="small">
+                            <div><i class="fas fa-envelope me-2 text-muted"></i>{{ department.email }}</div>
+                            <div><i class="fas fa-phone me-2 text-muted"></i>{{ department.phone }}</div>
+                        </div>
+                        <small class="text-muted">{{ department.description }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0">
+                <div class="card-body p-5">
+                    <h2 class="h3 fw-bold text-center mb-5">{% trans "Часто задаваемые вопросы" %}</h2>
+                    
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    {% trans "Как создать мероприятие на платформе?" %}
+                                </button>
+                            </h3>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    {% trans "Для создания мероприятия необходимо зарегистрироваться как организатор, нажать кнопку 'Создать мероприятие' в личном кабинете и заполнить все обязательные поля. Наша команда модераторов проверит мероприятие в течение 24 часов." %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    {% trans "Какие комиссии берет платформа?" %}
+                                </button>
+                            </h3>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    {% trans "EventHub берет комиссию 5% от стоимости каждого проданного билета. Для бесплатных мероприятий и мероприятий с благотворительными целями комиссия не взимается." %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    {% trans "Как стать партнером EventHub?" %}
+                                </button>
+                            </h3>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    {% trans "Для партнерства отправьте запрос на partners@eventhub.ru с описанием вашей компании и предложения о сотрудничестве. Наш отдел партнерств свяжется с вами в течение 2 рабочих дней." %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -4,33 +4,6 @@ import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
-def migrate_event_types(apps, schema_editor):
-    Event = apps.get_model('events', 'Event')
-
-    # Маппинг старых типов к новым категориям и типам
-    TYPE_MAPPING = {
-        'conference': ('business', 'conference'),
-        'workshop': ('education', 'workshop'),
-        'webinar': ('education', 'webinar'),
-        'festival': ('entertainment', 'festival'),
-        'exhibition': ('business', 'exhibition'),
-        'concert': ('entertainment', 'concert'),
-        'sport': ('sport', 'sport_event'),
-        'networking': ('business', 'networking'),
-        'charity': ('social', 'charity'),
-        'competition': ('sport', 'competition'),
-        'tour': ('culture', 'tour'),
-        'party': ('entertainment', 'party'),
-        'business': ('business', 'business_meeting'),
-        'education': ('education', 'lecture'),
-    }
-    
-    for event in Event.objects.all():
-        if event.old_event_type in TYPE_MAPPING:  # old_event_type - старое поле
-            category, new_type = TYPE_MAPPING[event.old_event_type]
-            event.category = category
-            event.event_type = new_type
-            event.save()
 
 class Migration(migrations.Migration):
 

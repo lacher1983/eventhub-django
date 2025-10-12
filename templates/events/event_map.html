@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Events on Map" %} - EventsHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center my-4">{% trans "Events on Map" %}</h1>
+            
+            <!-- Контейнер для карты -->
+            <div id="map" style="width: 100%; height: 70vh;"></div>
+            
+            <!-- Список мероприятий для мобильных устройств -->
+            <div class="container mt-4 d-block d-md-none">
+                <h3>{% trans "Events List" %}</h3>
+                <div class="list-group">
+                    {% for event in events %}
+                    <div class="list-group-item">
+                        <h5>{{ event.title }}</h5>
+                        <p class="mb-1">{{ event.date|date:"d.m.Y H:i" }}</p>
+                        <p class="mb-1 text-muted">{{ event.address }}</p>
+                        <a href="{{ event.get_absolute_url }}" class="btn btn-sm btn-primary mt-2">
+                            {% trans "Details" %}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Подключаем Яндекс.Карты -->
+<script src="https://api-maps.yandex.ru/2.1/?apikey=ВАШ_API_КЛЮЧ&lang=ru_RU" type="text/javascript"></script>
+<script type="text/javascript">
+    // Данные мероприятий из Django
+    const eventsData = [
+        {% for event in events %}
+        {
+            id: {{ event.id }},
+            title: "{{ event.title|escapejs }}",
+            description: "{{ event.description|truncatewords:20|escapejs }}",
+            date: "{{ event.date|date:'d.m.Y H:i' }}",
+            address: "{{ event.address|escapejs }}",
+            coords: [{{ event.latitude }}, {{ event.longitude }}],
+            url: "{{ event.get_absolute_url }}"
+        },
+        {% endfor %}
+    ];
+
+    // Инициализация карты
+    ymaps.ready(initMap);
+
+    function initMap() {
+        // Создаем карту
+        var myMap = new ymaps.Map("map", {
+            center: [55.76, 37.64], // Центр по умолчанию (Москва)
+            zoom: 10,
+            controls: ['zoomControl', 'fullscreenControl']
+        });
+
+        // Добавляем метки мероприятий
+        eventsData.forEach(function(event) {
+            var placemark = new ymaps.Placemark(event.coords, {
+                balloonContentHeader: `<a href="${event.url}">${event.title}</a>`,
+                balloonContentBody: `
+                    <p><strong>Дата:</strong> ${event.date}</p>
+                    <p><strong>Адрес:</strong> ${event.address}</p>
+                    <p>${event.description}</p>
+                    <a href="${event.url}" class="btn btn-primary btn-sm">Подробнее</a>
+                `,
+                hintContent: event.title
+            }, {
+                preset: 'islands#blueEventIcon', // Своя иконка для мероприятий
+                balloonCloseButton: true,
+                hideIconOnBalloonOpen: false
+            });
+
+            // Добавляем метку на карту
+            myMap.geoObjects.add(placemark);
+        });
+
+        // Если есть мероприятия, устанавливаем границы карты чтобы все метки были видны
+        if (eventsData.length > 0) {
+            myMap.setBounds(myMap.geoObjects.getBounds(), {
+                checkZoomRange: true
+            });
+        }
+    }
+</script>
+{% endblock %}

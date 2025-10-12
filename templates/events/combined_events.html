@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Все мероприятия" %} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Заголовок и статистика -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">{% trans "Все мероприятия" %}</h1>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h4>{{ total_count }}</h4>
+                            <p class="mb-0">{% trans "Всего мероприятий" %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h4>{{ internal_count }}</h4>
+                            <p class="mb-0">{% trans "Наших мероприятий" %}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h4>{{ external_count }}</h4>
+                            <p class="mb-0">{% trans "С внешних платформ" %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фильтры -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{% url 'event_list' %}" class="btn btn-outline-primary me-2">
+                                {% trans "Только наши мероприятия" %}
+                            </a>
+                            <a href="{% url 'external_events' %}" class="btn btn-outline-info me-2">
+                                {% trans "Только внешние" %}
+                            </a>
+                            <a href="{% url 'archive' %}" class="btn btn-outline-secondary">
+                                {% trans "Архив" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список мероприятий -->
+    <div class="row">
+        {% for event in events %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card event-card h-100">
+                {% if event.image_url %}
+                <img src="{{ event.image_url }}" class="card-img-top event-image" alt="{{ event.title }}" 
+                     style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top event-image d-flex align-items-center justify-content-center bg-light" 
+                     style="height: 200px;">
+                    <i class="fas fa-calendar-alt fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    <!-- Бейдж источника -->
+                    <div class="mb-2">
+                        {% if event.type == 'external' %}
+                        <span class="badge bg-info">
+                            <i class="fas fa-external-link-alt me-1"></i>{{ event.source_name }}
+                        </span>
+                        {% else %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-home me-1"></i>{% trans "EventHub" %}
+                        </span>
+                        {% endif %}
+                        
+                        <span class="badge bg-secondary ms-1">{{ event.category }}</span>
+                    </div>
+                    
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text flex-grow-1">{{ event.short_description|default:event.description|truncatewords:20 }}</p>
+                    
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ event.location }}
+                            </small>
+                            {% if event.is_free %}
+                            <span class="badge bg-success">{% trans "Бесплатно" %}</span>
+                            {% else %}
+                            <span class="text-primary fw-bold">{{ event.price }} ₽</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ event.date|date:"d.m.Y H:i" }}
+                            </small>
+                            <a href="{{ event.url }}" class="btn btn-sm btn-primary" 
+                               {% if event.type == 'external' %}target="_blank"{% endif %}>
+                                {% trans "Подробнее" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                <h3>{% trans "Мероприятий не найдено" %}</h3>
+                <p class="text-muted">{% trans "Попробуйте изменить параметры поиска или зайдите позже." %}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans "Назад" %}</a>
+            </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans "Вперед" %}</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<style>
+.event-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.event-image {
+    border-bottom: 1px solid #e0e0e0;
+}
+</style>
+{% endblock %}

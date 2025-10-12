@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ page_title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold text-primary mb-4">{% trans "Пресс-центр EventHub" %}</h1>
+            <p class="lead text-muted mb-4">
+                {% trans "Официальные новости, пресс-релизы и медиа-материалы компании EventHub" %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Press Contacts -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 bg-light">
+                <div class="card-body p-5 text-center">
+                    <h2 class="h3 fw-bold mb-4">{% trans "Контакты для прессы" %}</h2>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                            <h5>{% trans "Email" %}</h5>
+                            <a href="mailto:{{ press_contacts.press_email }}" class="text-decoration-none">
+                                {{ press_contacts.press_email }}
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <i class="fas fa-phone fa-2x text-success mb-2"></i>
+                            <h5>{% trans "Телефон" %}</h5>
+                            <a href="tel:{{ press_contacts.press_phone }}" class="text-decoration-none">
+                                {{ press_contacts.press_phone }}
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <i class="fas fa-user fa-2x text-info mb-2"></i>
+                            <h5>{% trans "Контактное лицо" %}</h5>
+                            <p class="mb-0">{{ press_contacts.press_contact }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="#media-kit" class="btn btn-primary me-3">
+                            <i class="fas fa-download me-2"></i>{% trans "Медиа-кит" %}
+                        </a>
+                        <a href="#press-inquiry" class="btn btn-outline-primary">
+                            <i class="fas fa-envelope me-2"></i>{% trans "Запрос для СМИ" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Press Releases -->
+    <div class="row mb-5">
+        <div class="col-12 mb-4">
+            <h2 class="display-5 fw-bold">{% trans "Последние пресс-релизы" %}</h2>
+            <p class="text-muted">{% trans "Официальные announcements и новости компании" %}</p>
+        </div>
+        
+        {% for release in press_releases %}
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-primary">{{ release.source }}</span>
+                        <small class="text-muted">{{ release.date }}</small>
+                    </div>
+                    <h3 class="h5 mb-3">{{ release.title }}</h3>
+                    <p class="text-muted mb-4">{{ release.summary }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="#" class="btn btn-outline-primary btn-sm">{% trans "Читать полностью" %}</a>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">PDF</a></li>
+                                <li><a class="dropdown-item" href="#">DOCX</a></li>
+                                <li><a class="dropdown-item" href="#">Текст</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Media Kit -->
+    <div class="row mb-5" id="media-kit">
+        <div class="col-12">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body p-5">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h2 class="h2 fw-bold mb-3">{% trans "Медиа-кит EventHub" %}</h2>
+                            <p class="mb-4 opacity-75">
+                                {% trans "Все необходимые материалы для публикаций: логотипы, бренд-гайд, фотографии и официальная информация о компании." %}
+                            </p>
+                        </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <a href="#" class="btn btn-light btn-lg">
+                                <i class="fas fa-download me-2"></i>{% trans "Скачать медиа-кит" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- In the News -->
+    <div class="row mb-5">
+        <div class="col-12 mb-4">
+            <h2 class="display-5 fw-bold">{% trans "EventHub в СМИ" %}</h2>
+            <p class="text-muted">{% trans "Публикации о нас в ведущих медиа" %}</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <img src="{% static 'images/logo-techcrunch.png' %}" alt="TechCrunch" class="img-fluid mb-3" style="max-height: 40px;">
+                    <h4 class="h6">{% trans "EventHub привлекает $5M для развития AI-платформы" %}</h4>
+                    <p class="text-muted small">TechCrunch • 20 января 2025</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">{% trans "Читать" %}</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <img src="{% static 'images/logo-vc.png' %}" alt="VC.ru" class="img-fluid mb-3" style="max-height: 40px;">
+                    <h4 class="h6">{% trans "Российский стартап EventHub завоевывает мировую арену" %}</h4>
+                    <p class="text-muted small">VC.ru • 15 декабря 2024</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">{% trans "Читать" %}</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 text-center h-100">
+                <div class="card-body p-4">
+                    <img src="{% static 'images/logo-rb.png' %}" alt="RB.ru" class="img-fluid mb-3" style="max-height: 40px;">
+                    <h4 class="h6">{% trans "Как EventHub меняет индустрию мероприятий" %}</h4>
+                    <p class="text-muted small">RB.ru • 1 декабря 2024</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">{% trans "Читать" %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Press Inquiry Form -->
+    <div class="row" id="press-inquiry">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow">
+                <div class="card-body p-5">
+                    <h2 class="h3 fw-bold text-center mb-4">{% trans "Запрос для СМИ" %}</h2>
+                    <p class="text-muted text-center mb-4">
+                        {% trans "Заполните форму для запроса интервью, комментариев или дополнительной информации" %}
+                    </p>
+                    
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Имя" %} *</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Фамилия" %} *</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Медиа-издание" %} *</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Должность" %} *</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Телефон" %}</label>
+                                <input type="tel" class="form-control">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Тип запроса" %} *</label>
+                                <select class="form-select" required>
+                                    <option value="">{% trans "Выберите тип запроса" %}</option>
+                                    <option value="interview">{% trans "Интервью" %}</option>
+                                    <option value="comment">{% trans "Комментарий" %}</option>
+                                    <option value="info">{% trans "Информация" %}</option>
+                                    <option value="other">{% trans "Другое" %}</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Описание запроса" %} *</label>
+                                <textarea class="form-control" rows="4" placeholder="{% trans 'Опишите ваш запрос подробно...' %}" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Сроки" %}</label>
+                                <input type="text" class="form-control" placeholder="{% trans 'Укажите желаемые сроки ответа' %}">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    {% trans "Отправить запрос" %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

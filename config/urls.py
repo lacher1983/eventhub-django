@@ -37,6 +37,7 @@ urlpatterns = [
     path('accounts/login/', 
          auth_views.LoginView.as_view(template_name='events/login.html'), 
          name='login'),
+    
     # Путь для выхода (CustomLogoutView)
     path('accounts/logout/', CustomLogoutView.as_view(), name='logout'),
 
@@ -45,6 +46,9 @@ urlpatterns = [
 
     # API
     path('api/', include('events.api.urls')),
+
+    # Chatbot
+    path('chatbot/', include('chatbot.urls')),
 
     # Перенаправление с корня на мероприятия
     path('', RedirectView.as_view(pattern_name='event_list'), name='home'),
@@ -58,8 +62,7 @@ urlpatterns = [
              template_name='events/password_reset.html',
              email_template_name='events/emails/password_reset_email.html',
              subject_template_name='events/emails/password_reset_subject.txt'
-         ), 
-         name='password_reset'),
+         ), name='password_reset'),
 
     path('accounts/password-reset/done/', 
          auth_views.PasswordResetDoneView.as_view(
@@ -78,7 +81,7 @@ urlpatterns = [
              template_name='events/password_reset_complete.html'
          ), 
          name='password_reset_complete'),
-    path('accounts/logout/', CustomLogoutView.as_view(), name='logout'),
+    
     path('accounts/login/', auth_views.LoginView.as_view(template_name='events/login.html'), name='login'),
   
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

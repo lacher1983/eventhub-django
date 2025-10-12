@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ page_title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold text-primary mb-4">{% trans "Блог EventHub" %}</h1>
+            <p class="lead text-muted mb-4">
+                {% trans "Советы, тренды и insights из мира мероприятий от нашей команды экспертов" %}
+            </p>
+            
+            <!-- Categories -->
+            <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                <a href="#" class="btn btn-outline-primary active">{% trans "Все статьи" %}</a>
+                <a href="#" class="btn btn-outline-primary">{% trans "Тренды" %}</a>
+                <a href="#" class="btn btn-outline-primary">{% trans "Советы" %}</a>
+                <a href="#" class="btn btn-outline-primary">{% trans "Кейсы" %}</a>
+                <a href="#" class="btn btn-outline-primary">{% trans "Новости" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Post -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 bg-light overflow-hidden">
+                <div class="row g-0">
+                    <div class="col-lg-6">
+                        <img src="{% static 'images/blog-featured.jpg' %}" class="img-fluid h-100 object-fit-cover" alt="{% trans 'Тренды мероприятий 2025' %}">
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card-body p-5 d-flex flex-column h-100">
+                            <span class="badge bg-primary mb-3 align-self-start">{% trans "Тренды" %}</span>
+                            <h2 class="card-title h1 fw-bold mb-3">{% trans "Топ 10 трендов мероприятий в 2025 году" %}</h2>
+                            <p class="card-text flex-grow-1">
+                                {% trans "Исследуем основные тренды в организации мероприятий, которые будут доминировать в 2025 году. От гибридных форматов до AI-ассистентов." %}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <img src="{% static 'images/author-anna.jpg' %}" alt="Анна Петрова" class="rounded-circle me-2" width="40" height="40">
+                                    <div>
+                                        <div class="fw-bold">Анна Петрова</div>
+                                        <small class="text-muted">15 января 2025 • 5 мин</small>
+                                    </div>
+                                </div>
+                                <a href="#" class="btn btn-primary">{% trans "Читать статью" %}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Posts Grid -->
+    <div class="row">
+        {% for post in blog_posts %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <img src="{% static 'images/blog-' %}{{ forloop.counter }}.jpg" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-secondary">{{ post.category }}</span>
+                        <small class="text-muted">{{ post.read_time }}</small>
+                    </div>
+                    <h3 class="card-title h5">{{ post.title }}</h3>
+                    <p class="card-text flex-grow-1 text-muted">{{ post.excerpt }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <div class="d-flex align-items-center">
+                            <img src="{% static 'images/author-' %}{{ forloop.counter }}.jpg" alt="{{ post.author }}" class="rounded-circle me-2" width="32" height="32">
+                            <div>
+                                <small class="fw-bold d-block">{{ post.author }}</small>
+                                <small class="text-muted">{{ post.date }}</small>
+                            </div>
+                        </div>
+                        <a href="#" class="btn btn-outline-primary btn-sm">{% trans "Читать" %}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Newsletter -->
+    <div class="row mt-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 bg-primary text-white text-center">
+                <div class="card-body p-5">
+                    <h3 class="h2 fw-bold mb-3">{% trans "Подпишитесь на нашу рассылку" %}</h3>
+                    <p class="mb-4 opacity-75">
+                        {% trans "Получайте самые свежие статьи и анонсы мероприятий прямо на почту" %}
+                    </p>
+                    <form class="row g-2 justify-content-center">
+                        <div class="col-md-6">
+                            <input type="email" class="form-control form-control-lg" placeholder="{% trans 'Ваш email' %}">
+                        </div>
+                        <div class="col-md-auto">
+                            <button type="submit" class="btn btn-light btn-lg">
+                                {% trans "Подписаться" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

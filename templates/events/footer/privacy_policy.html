@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{{ page_title }} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary mb-4">{% trans "Политика конфиденциальности" %}</h1>
+                <p class="lead text-muted">
+                    {% trans "Последнее обновление: 15 января 2025 года" %}
+                </p>
+            </div>
+
+            <!-- Policy Content -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {% trans "Эта политика описывает, как мы собираем, используем и защищаем вашу информацию при использовании платформы EventHub." %}
+                    </div>
+
+                    {% for section in policy_sections %}
+                    <div class="mb-5">
+                        <h3 class="h4 text-primary mb-3">{{ section.title }}</h3>
+                        <p class="text-muted">{{ section.content }}</p>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Additional Info -->
+                    <div class="mt-5 p-4 bg-light rounded">
+                        <h4 class="h5 mb-3">{% trans "Контактная информация" %}</h4>
+                        <p class="mb-2">
+                            <strong>{% trans "Ответственный за защиту данных:" %}</strong><br>
+                            {% trans "Алексей Петров, CEO EventHub" %}
+                        </p>
+                        <p class="mb-2">
+                            <strong>Email:</strong> privacy@eventhub.ru
+                        </p>
+                        <p class="mb-0">
+                            <strong>{% trans "Телефон:" %}</strong> +7 (495) 123-45-67
+                        </p>
+                    </div>
+
+                    <!-- Consent -->
+                    <div class="mt-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="policyConsent">
+                            <label class="form-check-label" for="policyConsent">
+                                {% trans "Я прочитал(а) и соглашаюсь с Политикой конфиденциальности EventHub" %}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download -->
+            <div class="text-center mt-4">
+                <a href="#" class="btn btn-outline-primary">
+                    <i class="fas fa-download me-2"></i>{% trans "Скачать PDF версию" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

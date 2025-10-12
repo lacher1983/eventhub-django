@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
 from .models import Event, Tag, Registration, Category, Favorite, Review, Advertisement, Cart, CartItem, Order, OrderItem
 from config.admin_customization import admin_site
+from .models import ExternalEventSource, ExternalEvent
 
 
 @admin.register(Tag)
@@ -136,3 +137,22 @@ class AdvertisementAdmin(admin.ModelAdmin):
     list_display = ('title', 'ad_type', 'is_active')
 
 
+@admin.register(ExternalEventSource)
+class ExternalEventSourceAdmin(admin.ModelAdmin):
+    list_display = ['name', 'url', 'is_active', 'last_sync']
+    list_filter = ['is_active']
+    actions = ['sync_selected_sources']
+    
+    def sync_selected_sources(self, request, queryset):
+        from django.core.management import call_command
+        for source in queryset:
+            call_command('sync_external_events', f'--source={source.id}')
+        self.message_user(request, "Синхронизация запущена")
+    sync_selected_sources.short_description = "Синхронизировать выбранные источники"
+
+@admin.register(ExternalEvent)
+class ExternalEventAdmin(admin.ModelAdmin):
+    list_display = ['title', 'source', 'date', 'location', 'is_free', 'is_archived']
+    list_filter = ['source', 'is_archived', 'is_free', 'category']
+    search_fields = ['title', 'location']
+    readonly_fields = ['created_at', 'updated_at']

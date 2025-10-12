@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Ресурсы для организаторов" %} | EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Заголовок -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary mb-3">{% trans "Ресурсы для организаторов" %}</h1>
+                <p class="lead text-muted">
+                    {% trans "Полезные материалы, гайды и инструменты для успешной организации мероприятий" %}
+                </p>
+            </div>
+
+            <!-- Навигация по ресурсам -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-4">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-flex mb-3">
+                                <i class="fas fa-book fa-2x text-primary"></i>
+                            </div>
+                            <h3 class="h5">{% trans "Гайды" %}</h3>
+                            <p class="text-muted small">
+                                {% trans "Пошаговые инструкции по организации мероприятий" %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-4">
+                            <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-flex mb-3">
+                                <i class="fas fa-file-download fa-2x text-success"></i>
+                            </div>
+                            <h3 class="h5">{% trans "Шаблоны" %}</h3>
+                            <p class="text-muted small">
+                                {% trans "Готовые шаблоны для планирования и продвижения" %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-4">
+                            <div class="bg-info bg-opacity-10 p-3 rounded-circle d-inline-flex mb-3">
+                                <i class="fas fa-video fa-2x text-info"></i>
+                            </div>
+                            <h3 class="h5">{% trans "Видеоуроки" %}</h3>
+                            <p class="text-muted small">
+                                {% trans "Обучающие видео по использованию платформы" %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Основной контент -->
+            <div class="row g-5">
+                <!-- Левая колонка - Гайды -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h2 class="h4 mb-0">
+                                <i class="fas fa-book text-primary me-2"></i>
+                                {% trans "Полезные гайды" %}
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item border-0 px-0 py-3">
+                                    <h5 class="mb-2">{% trans "Как организовать успешное мероприятие" %}</h5>
+                                    <p class="text-muted small mb-2">
+                                        {% trans "Пошаговое руководство от планирования до проведения" %}
+                                    </p>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">{% trans "Читать" %}</a>
+                                </div>
+                                <div class="list-group-item border-0 px-0 py-3">
+                                    <h5 class="mb-2">{% trans "Продвижение мероприятий в социальных сетях" %}</h5>
+                                    <p class="text-muted small mb-2">
+                                        {% trans "Эффективные стратегии продвижения" %}
+                                    </p>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">{% trans "Читать" %}</a>
+                                </div>
+                                <div class="list-group-item border-0 px-0 py-3">
+                                    <h5 class="mb-2">{% trans "Работа с участниками и обратная связь" %}</h5>
+                                    <p class="text-muted small mb-2">
+                                        {% trans "Как эффективно взаимодействовать с аудиторией" %}
+                                    </p>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">{% trans "Читать" %}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Правая колонка - Дополнительные ресурсы -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h3 class="h5 mb-0">
+                                <i class="fas fa-download text-success me-2"></i>
+                                {% trans "Шаблоны для скачивания" %}
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="#" class="btn btn-outline-success btn-sm text-start">
+                                    <i class="fas fa-file-excel me-2"></i>
+                                    {% trans "Бюджет мероприятия" %}
+                                </a>
+                                <a href="#" class="btn btn-outline-success btn-sm text-start">
+                                    <i class="fas fa-file-word me-2"></i>
+                                    {% trans "Чек-лист организации" %}
+                                </a>
+                                <a href="#" class="btn btn-outline-success btn-sm text-start">
+                                    <i class="fas fa-file-powerpoint me-2"></i>
+                                    {% trans "Презентация мероприятия" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h3 class="h5 mb-0">
+                                <i class="fas fa-headset text-info me-2"></i>
+                                {% trans "Поддержка" %}
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="small text-muted mb-3">
+                                {% trans "Нужна помощь? Наша команда поддержки всегда готова помочь" %}
+                            </p>
+                            <div class="d-grid gap-2">
+                                <a href="mailto:support@example.com" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    {% trans "Написать в поддержку" %}
+                                </a>
+                                <a href="#" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-comments me-2"></i>
+                                    {% trans "Чат поддержки" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

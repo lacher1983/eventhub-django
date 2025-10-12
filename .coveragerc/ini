@@ -1,0 +1,25 @@
+[run]
+source = events
+omit =
+    */migrations/*
+    */tests/*
+    */admin.py
+    */apps.py
+    */__init__.py
+    manage.py
+    */settings/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __str__
+    raise NotImplementedError
+    if settings.DEBUG
+    if self.debug
+    raise AssertionError
+    raise Exception
+    pass
+
+[html]
+directory = htmlcov
+title = EventHub Test Coverage

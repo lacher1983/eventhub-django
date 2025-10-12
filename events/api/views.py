@@ -5,6 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.db import models
 
+from rest_framework import generics
 from ..models import Event, Favorite, Review, Registration
 from .serializers import EventSerializer, FavoriteSerializer, ReviewSerializer, RegistrationSerializer
 
@@ -112,6 +113,7 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
             'is_available': available_spots > 0
         })
 
+
 class FavoriteViewSet(viewsets.ModelViewSet):
     """API для избранных мероприятий"""
     serializer_class = FavoriteSerializer
@@ -123,6 +125,7 @@ class FavoriteViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class ReviewViewSet(viewsets.ModelViewSet):
     """API для отзывов"""
     serializer_class = ReviewSerializer
@@ -133,6 +136,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
 
 class RegistrationViewSet(viewsets.ModelViewSet):
     """API для регистраций на мероприятия"""
@@ -151,3 +155,8 @@ class RegistrationViewSet(viewsets.ModelViewSet):
         registration = self.get_object()
         registration.delete()
         return Response({'status': 'registration_cancelled'})
+
+
+class EventListAPI(generics.ListAPIView):
+    queryset = Event.objects.filter(is_active=True)
+    serializer_class = EventSerializer

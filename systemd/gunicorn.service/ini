@@ -1,0 +1,15 @@
+[Unit]
+Description=gunicorn daemon for EventHub
+After=network.target
+
+[Service]
+User=webuser
+Group=webgroup
+WorkingDirectory=/opt/eventhub
+ExecStart=/opt/eventhub/venv/bin/gunicorn --config gunicorn.conf.py eventhub.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

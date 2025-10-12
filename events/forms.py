@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
+# from .models import BuddyRequest
 
 
 # Используем кастомную модель пользователя
@@ -543,3 +544,13 @@ class ContactOrganizerForm(forms.Form):
     )
 
 
+# class BuddyRequestForm(forms.ModelForm):
+#     class Meta:
+#         model = BuddyRequest
+#         fields = ['message', 'preferred_gender', 'max_buddies']
+#         widgets = {
+#             'message': forms.Textarea(attrs={
+#                 'rows': 4,
+#                 'placeholder': 'Опишите, кого вы ищете и ваши предпочтения...'
+#             }),
+#         }

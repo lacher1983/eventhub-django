@@ -47,12 +47,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Внес мои приложения
     'events',
+    # 'users',
     'accounts',
+    'events.gamification',
     'crispy_forms',
     'crispy_bootstrap5',
     'rest_framework',
     'django_filters',
     'celery',
+    'chatbot',
 ]
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
@@ -76,6 +79,25 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
 }
+
+
+# Настройки Celery для периодических задач
+CELERY_BEAT_SCHEDULE = {
+    'sync-external-events': {
+        'task': 'events.tasks.sync_external_events',
+        'schedule': 3600.0,  # Каждый час
+    },
+    'archive-old-events': {
+        'task': 'events.tasks.archive_old_events', 
+        'schedule': 86400.0,  # Раз в день
+    },
+}
+
+
+# Celery для фоновых задач
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
 
 TEMPLATES = [
     {
@@ -165,19 +187,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_URL = '/media/'
+MEDIA_ROOT ='/app/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Время
 TIME_ZONE = 'Europe/Moscow'
@@ -204,3 +229,31 @@ STRIPE_WEBHOOK_SECRET = 'whsec_your_webhook_secret'
 LOGIN_REDIRECT_URL = '/'  # или на любую другую страницу, например 'event_list'
 LOGIN_URL = '/accounts/login/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Новые настройки для интеграций
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
+OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY', '')
+
+# Кэширование для производительности
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+    }
+}
+
+
+# Настройки для API
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20
+}

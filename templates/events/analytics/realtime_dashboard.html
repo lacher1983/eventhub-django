@@ -1,0 +1,345 @@
+html
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Real-time метрики -->
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>📊 Real-time Analytics</h4>
+                    <div class="live-indicator">
+                        <span class="pulse-dot"></span>
+                        <span class="live-text">LIVE</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="realtime-metrics">
+                        <!-- Данные будут обновляться через WebSocket -->
+                        <div class="col-md-3 text-center">
+                            <div class="metric-card">
+                                <div class="metric-value" id="online-users">-</div>
+                                <div class="metric-label">Online Users</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="metric-card">
+                                <div class="metric-value" id="active-events">-</div>
+                                <div class="metric-label">Active Events</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="metric-card">
+                                <div class="metric-value" id="hour-registrations">-</div>
+                                <div class="metric-label">Registrations/Hour</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="metric-card">
+                                <div class="metric-value" id="total-events">-</div>
+                                <div class="metric-label">Total Events</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live updates -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>🔄 Live Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="activity-feed" id="activity-feed">
+                        <div class="activity-item">
+                            <div class="activity-content">Waiting for live updates...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popular categories -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>🎯 Popular Categories</h5>
+                </div>
+                <div class="card-body">
+                    <div id="popular-categories">
+                        <!-- Данные будут обновляться через WebSocket -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time график -->
+        <div class="col-12 mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📈 Registrations Timeline (Last 60 minutes)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="registrationsChart" width="400" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pulse-dot {
+    width: 10px;
+    height: 10px;
+    background: #ff4757;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.live-text {
+    color: #ff4757;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.metric-card {
+    padding: 20px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.metric-value {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.metric-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.activity-feed {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    animation: slideIn 0.5s ease;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-content {
+    font-size: 0.9em;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+</style>
+
+<script>
+class RealtimeAnalytics {
+    constructor() {
+        this.socket = null;
+        this.registrationsData = [];
+        this.chart = null;
+        this.init();
+    }
+
+    init() {
+        this.connectWebSocket();
+        this.initChart();
+    }
+
+    connectWebSocket() {
+        this.socket = new WebSocket(`ws://${window.location.host}/ws/analytics/`);
+        
+        this.socket.onopen = () => {
+            console.log('WebSocket connected');
+            this.socket.send(JSON.stringify({ action: 'subscribe' }));
+        };
+
+        this.socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            this.handleMessage(data);
+        };
+
+        this.socket.onclose = () => {
+            console.log('WebSocket disconnected');
+            // Переподключение через 5 секунд
+            setTimeout(() => this.connectWebSocket(), 5000);
+        };
+    }
+
+    handleMessage(data) {
+        switch (data.type) {
+            case 'analytics_update':
+                this.updateMetrics(data.data);
+                this.updateActivityFeed(data.data.live_updates);
+                this.updateCategories(data.data.popular_categories);
+                this.updateChart(data.data);
+                break;
+        }
+    }
+
+    updateMetrics(metrics) {
+        document.getElementById('online-users').textContent = metrics.online_users;
+        document.getElementById('active-events').textContent = metrics.active_events;
+        document.getElementById('hour-registrations').textContent = metrics.registrations_last_hour;
+        
+        // Анимация при изменении значений
+        this.animateValueChange('online-users', metrics.online_users);
+    }
+
+    animateValueChange(elementId, newValue) {
+        const element = document.getElementById(elementId);
+        const oldValue = parseInt(element.textContent) || 0;
+        
+        if (oldValue !== newValue) {
+            element.style.color = '#ff4757';
+            setTimeout(() => {
+                element.style.color = 'white';
+            }, 1000);
+        }
+    }
+
+    updateActivityFeed(updates) {
+        const feed = document.getElementById('activity-feed');
+        
+        updates.forEach(update => {
+            const activityItem = document.createElement('div');
+            activityItem.className = 'activity-item';
+            
+            let icon = '🔔';
+            if (update.type === 'registration') {
+                icon = '🎫';
+            } else if (update.type === 'event_created') {
+                icon = '🎪';
+            }
+            
+            activityItem.innerHTML = `
+                <div class="activity-content">
+                    ${icon} ${update.user} registered for "${update.event}"
+                    <small class="text-muted">just now</small>
+                </div>
+            `;
+            
+            feed.insertBefore(activityItem, feed.firstChild);
+            
+            // Ограничиваем количество элементов
+            if (feed.children.length > 10) {
+                feed.removeChild(feed.lastChild);
+            }
+        });
+    }
+
+    updateCategories(categories) {
+        const container = document.getElementById('popular-categories');
+        container.innerHTML = '';
+        
+        categories.forEach(cat => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'd-flex justify-content-between align-items-center mb-2';
+            categoryDiv.innerHTML = `
+                <span>${cat.category__name || 'Uncategorized'}</span>
+                <span class="badge bg-primary">${cat.count}</span>
+            `;
+            container.appendChild(categoryDiv);
+        });
+    }
+
+    initChart() {
+        const ctx = document.getElementById('registrationsChart').getContext('2d');
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Registrations',
+                    data: [],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1000
+                }
+            }
+        });
+    }
+
+    updateChart(data) {
+        // Обновляем данные графика
+        const now = new Date();
+        const label = now.toLocaleTimeString();
+        
+        this.registrationsData.push({
+            label: label,
+            value: data.registrations_last_hour
+        });
+        
+        // Ограничиваем до 20 точек
+        if (this.registrationsData.length > 20) {
+            this.registrationsData.shift();
+        }
+        
+        this.chart.data.labels = this.registrationsData.map(d => d.label);
+        this.chart.data.datasets[0].data = this.registrationsData.map(d => d.value);
+        this.chart.update();
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    window.analyticsDashboard = new RealtimeAnalytics();
+});
+</script>
+{% endblock %}

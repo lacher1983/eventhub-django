@@ -1,3 +1,4 @@
+eventhub-django\templates\base.html:
 {% load i18n static %}
 
 <!DOCTYPE html>
@@ -5,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}EventHub - {% trans "Платформа мероприятий" %}{% endblock %}</title>
+    <title>{% block title %}EventHub - {% trans "Найдите мероприятия рядом с вами" %}{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,347 +17,580 @@
     
     <style>
         :root {
-            --primary-color: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary-color: #f59e0b;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
-            --dark-color: #1f2937;
-            --light-color: #f8fafc;
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --primary-color: #e61e4d;
+            --primary-dark: #d50c52;
+            --primary-light: #fff0f0;
+            --secondary-color: #6f42c1;
+            --success-color: #28a745;
+            --dark-color: #1e0a3c;
+            --light-color: #f8f9fa;
+            --gray-light: #f5f5f5;
+            --gray-medium: #6c757d;
+            --border-radius: 8px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
             --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
-            --border-radius: 12px;
-            --transition: all 0.3s ease;
         }
 
         * {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background-color: var(--light-color);
-            color: #374151;
-            line-height: 1.6;
+            background-color: white;
+            color: #333;
+            line-height: 1.5;
+            padding-top: 72px;
         }
 
-        /* Навигация */
+        /* ===== НАВИГАЦИЯ ===== */
         .navbar {
-            background: var(--gradient-primary) !important;
-            box-shadow: var(--shadow-md);
-            padding: 1rem 0;
+            background: white !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 0.5rem 0;
+            height: 72px;
+            border-bottom: 1px solid #e5e5e5;
         }
 
         .navbar-brand {
             font-weight: 700;
-            font-size: 1.75rem;
-            color: white !important;
-            transition: var(--transition);
-        }
-
-        .navbar-brand:hover {
-            transform: translateY(-2px);
+            font-size: 1.5rem;
+            color: var(--primary-color) !important;
         }
 
         .nav-link {
             font-weight: 500;
-            color: rgba(255,255,255,0.9) !important;
-            transition: var(--transition);
-            border-radius: 8px;
-            margin: 0 2px;
+            color: var(--dark-color) !important;
             padding: 0.5rem 1rem !important;
+            border-radius: 6px;
+            transition: all 0.2s ease;
         }
 
-        .nav-link:hover {
-            color: white !important;
-            background: rgba(255,255,255,0.1);
-            transform: translateY(-1px);
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-color) !important;
+            background-color: var(--primary-light);
         }
 
-        .navbar-toggler {
-            border: none;
-            color: white;
-        }
-
-        .navbar-toggler:focus {
-            box-shadow: none;
-        }
-
-        /* Герой секция */
-        .hero-section {
-            background: var(--gradient-primary);
-            color: white;
-            padding: 100px 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.1"><polygon points="1000,100 1000,0 0,100"/></svg>');
-            background-size: cover;
-        }
-
-        /* Карточки мероприятий */
-        .event-card {
-            transition: var(--transition);
-            border: none;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            background: white;
-        }
-
-        .event-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .category-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 2;
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.35rem 0.75rem;
-            border-radius: 20px;
-        }
-
-        .event-image {
-            height: 200px;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .event-card:hover .event-image {
-            transform: scale(1.05);
-        }
-
-        /* Кнопки */
         .btn-primary {
             background: var(--primary-color);
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            transition: var(--transition);
+            padding: 0.5rem 1.5rem;
         }
 
         .btn-primary:hover {
             background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
         }
 
-        /* Форма выхода */
-        .logout-form {
-            display: inline;
+        /* Поиск в навигации */
+        .navbar-search {
+            flex: 0 1 400px;
         }
 
-        .logout-btn {
-            background: none;
+        .navbar-search .input-group {
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-radius: 30px;
+            transition: all 0.2s ease;
+        }
+
+        .navbar-search .input-group:focus-within {
+            border-color: var(--primary-color);
+        }
+
+        .navbar-search .form-control {
             border: none;
-            color: rgba(255,255,255,0.9) !important;
-            padding: 0.5rem 1rem;
-            text-decoration: none;
-            display: block;
-            border-radius: 8px;
-            transition: var(--transition);
-            font-weight: 500;
+            padding: 0.75rem 1.25rem;
         }
 
-        .logout-btn:hover {
-            color: white !important;
-            background: rgba(255,255,255,0.1);
-            transform: translateY(-1px);
-        }
-
-        /* Бейджи */
-        .badge {
-            font-weight: 600;
-            padding: 0.35em 0.65em;
-        }
-
-        /* Алерты */
-        .alert {
+        .navbar-search .btn {
+            background: transparent;
             border: none;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
+            color: var(--gray-medium);
+            padding: 0.75rem 1.25rem;
         }
 
-        /* Футер */
-        footer {
-            background: var(--dark-color) !important;
-            margin-top: auto;
-        }
-
-        /* Анимации */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        /* Кастомный скроллбар */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
-        }
-
-        /* Переключатель языка */
-        .language-switcher {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
+        /* ===== ГЕРОЙ СЕКЦИЯ ===== */
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 0.25rem 0.5rem;
-            transition: var(--transition);
+            padding: 100px 0 80px;
+            position: relative;
         }
 
-        .language-switcher:hover {
-            background: rgba(255,255,255,0.2);
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
         }
 
-        .language-switcher option {
-            background: var(--dark-color);
-            color: white;
+        .hero-subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 2.5rem;
         }
 
-        /* Адаптивность */
-        @media (max-width: 768px) {
-            .hero-section {
-                padding: 60px 0;
-            }
-            
-            .navbar-brand {
-                font-size: 1.5rem;
-            }
-            
-            .nav-link {
-                padding: 0.5rem !important;
-                margin: 2px 0;
-            }
+        .hero-search {
+            max-width: 700px;
+            margin: 0 auto;
         }
 
-        /* Стили для категорий */
-        .event-category-image {
-            width: 100%;
-            height: 200px;
-            background: var(--gradient-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 48px;
-            border-radius: var(--border-radius);
-        }
-
-        .category-education { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .category-business { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .category-entertainment { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-        .category-technology { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
-        .category-art { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
-        .category-sports { background: linear-gradient(135deg, #a3bded 0%, #6991c7 100%); }
-        .category-music { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
-        .category-food { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
-        .category-health { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
-        .category-science { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); }
-
-        /* Утилиты */
-        .text-gradient {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .shadow-custom {
+        .hero-search .input-group {
+            background: white;
+            border-radius: 50px;
+            padding: 0.5rem;
             box-shadow: var(--shadow-lg);
         }
 
-        .hover-lift {
-            transition: var(--transition);
+        .hero-search .form-control {
+            border: none;
+            padding: 1.25rem 1.5rem;
+            font-size: 1.1rem;
         }
 
-        .hover-lift:hover {
+        .hero-search .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 1.25rem 2.5rem;
+            font-weight: 600;
+        }
+
+        /* ===== КАТЕГОРИИ ===== */
+        .categories-section {
+            padding: 5rem 0;
+            background: white;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .category-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .category-card:hover {
             transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        /* ===== ПОПУЛЯРНЫЕ МЕРОПРИЯТИЯ ===== */
+        .events-section {
+            padding: 5rem 0;
+            background: var(--light-color);
+        }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .event-image {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .event-content {
+            padding: 1.5rem;
+        }
+
+        .event-date {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .event-title {
+            font-weight: 600;
+            margin: 0.5rem 0;
+            line-height: 1.4;
+        }
+
+        .event-location {
+            color: var(--gray-medium);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .event-price {
+            color: var(--success-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* ===== КАК ЭТО РАБОТАЕТ ===== */
+        .how-it-works {
+            padding: 5rem 0;
+            background: white;
+        }
+
+        .step-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .step-number {
+            background: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin: 0 auto 1.5rem;
+        }
+        
+        /* Стили для секции карты */
+        .map-section {
+            padding: 5rem 0;
+            background: white;
+        }
+
+        .map-sidebar {
+            background: var(--light-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            height: 100%;
+        }
+
+        .nearby-event-item {
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            transition: all 0.3s ease;
+        }
+
+        .nearby-event-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .city-stat {
+            padding: 1rem;
+        }
+
+        .event-marker {
+            transition: transform 0.3s ease;
+        }
+
+        .nearby-event-item:hover .event-marker {
+            transform: scale(1.1);
+        }
+
+
+        /* ===== ФУТЕР ===== */
+        .main-footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-links h6 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.75rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .social-links a {
+            color: rgba(255,255,255,0.7);
+            margin-right: 1rem;
+            font-size: 1.3rem;
+        }
+
+        /* ===== УТИЛИТЫ ===== */
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--gray-medium);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .section-title {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
+
+<!-- Уведомления о достижениях -->
+<div id="achievement-notifications"></div>
+
+<script>
+// Функция для показа уведомлений
+function showAchievementNotification(achievement) {
+    const container = document.getElementById('achievement-notifications');
+    const notification = document.createElement('div');
+    notification.className = 'achievement-notification';
+    notification.innerHTML = `
+        <div class="achievement-notification-content">
+            <div class="achievement-icon">${achievement.icon}</div>
+            <div class="achievement-info">
+                <h5>Новое достижение!</h5>
+                <p><strong>${achievement.name}</strong></p>
+                <p>${achievement.description}</p>
+                <small>+${achievement.points} очков</small>
+            </div>
+            <button class="close-notification" onclick="this.parentElement.parentElement.remove()">
+                &times;
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(notification);
+    
+    // Автоматическое удаление через 5 секунд
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Стили для уведомлений
+const style = document.createElement('style');
+style.textContent = `
+.achievement-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-left: 4px solid #4CAF50;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    z-index: 10001;
+    animation: slideInRight 0.3s ease;
+    max-width: 350px;
+}
+
+.achievement-notification-content {
+    display: flex;
+    padding: 15px;
+    align-items: flex-start;
+}
+
+.achievement-icon {
+    font-size: 2em;
+    margin-right: 15px;
+}
+
+.achievement-info {
+    flex: 1;
+}
+
+.achievement-info h5 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.achievement-info p {
+    margin: 2px 0;
+    color: #666;
+}
+
+.achievement-info small {
+    color: #FF9800;
+    font-weight: bold;
+}
+
+.close-notification {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    color: #999;
+    margin-left: 10px;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+`;
+document.head.appendChild(style);
+</script>
+
 <body class="d-flex flex-column min-vh-100">
-    <!-- Навигация -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <!-- НАВИГАЦИЯ -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand" href="{% url 'event_list' %}">
-                🎉 {% trans "EventHub" %}
+                🎉 EventHub
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <div class="navbar-search d-none d-lg-flex mx-4">
+                <form method="get" action="{% url 'event_list' %}" class="w-100">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" 
+                               placeholder="{% trans 'Поиск мероприятий' %}">
+                        <button class="btn" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <div class="d-lg-none mb-3">
+                    <form method="get" action="{% url 'event_list' %}">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control" 
+                                   placeholder="{% trans 'Поиск мероприятий' %}">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
                 <ul class="navbar-nav me-auto">
+                    <!-- ОСНОВНОЕ МЕНЮ МЕРОПРИЯТИЙ -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-calendar-alt me-1"></i> {% trans "Мероприятия" %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'combined_events' %}">
+                                <i class="fas fa-globe me-2"></i>{% trans "Все мероприятия" %}
+                                <small class="text-muted d-block">{% trans "Наши + внешние платформы" %}</small>
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'event_list' %}">
+                                <i class="fas fa-home me-2"></i>{% trans "Наши мероприятия" %}
+                                <small class="text-muted d-block">{% trans "Созданные на EventHub" %}</small>
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'external_events' %}">
+                                <i class="fas fa-external-link-alt me-2"></i>{% trans "С других платформ" %}
+                                <small class="text-muted d-block">{% trans "Bezkassira, Relax.by и др." %}</small>
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'archive' %}">
+                                <i class="fas fa-archive me-2"></i>{% trans "Архив" %}
+                                <small class="text-muted d-block">{% trans "Прошедшие мероприятия" %}</small>
+                            </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- КАТЕГОРИИ -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-filter me-1"></i> {% trans "Категории" %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for category in categories %}
+                            <li><a class="dropdown-item" href="?category={{ category.slug }}">
+                                <i class="fas fa-tag me-2"></i>{{ category.name }}
+                            </a></li>
+                            {% endfor %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'event_list' %}">
+                                <i class="fas fa-eye me-2"></i>{% trans "Все категории" %}
+                            </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- КАРТА МЕРОПРИЯТИЙ -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'event_list' %}">
-                            <i class="fas fa-calendar-alt me-1"></i>{% trans "Мероприятия" %}
+                        <a class="nav-link" href="{% url 'events_map' %}">
+                            <i class="fas fa-map-marker-alt me-1"></i> {% trans "Карта мероприятий" %}
                         </a>
                     </li>
-                    
+
+                    <!-- СОЗДАТЬ МЕРОПРИЯТИЕ -->
                     {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'event_create' %}">
-                            <i class="fas fa-plus-circle me-1"></i>{% trans "Создать мероприятие" %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'user_registrations' %}">
-                            <i class="fas fa-ticket-alt me-1"></i>{% trans "Мои регистрации" %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'favorite_list' %}">
-                            <i class="fas fa-star me-1"></i>{% trans "Избранное" %}
+                            <i class="fas fa-plus-circle me-1"></i> {% trans "Создать" %}
                         </a>
                     </li>
                     {% endif %}
                 </ul>
                 
                 <ul class="navbar-nav align-items-center">
-                    <!-- Переключатель языка -->
+                    <!-- ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА -->
                     <li class="nav-item me-3">
                         <form action="{% url 'set_language' %}" method="post" class="d-inline">
                             {% csrf_token %}
                             <input name="next" type="hidden" value="{{ request.get_full_path|default:'/' }}">
-                            <select name="language" onchange="this.form.submit()" class="form-select form-select-sm language-switcher">
+                            <select name="language" onchange="this.form.submit()" 
+                                    class="form-select form-select-sm border-0 bg-light">
                                 {% get_current_language as CURRENT_LANGUAGE %}
                                 {% get_available_languages as LANGUAGES %}
                                 {% for code, name in LANGUAGES %}
-                                    <option value="{{ code }}" 
-                                        {% if code == CURRENT_LANGUAGE %}selected{% endif %}>
+                                    <option value="{{ code }}" {% if code == CURRENT_LANGUAGE %}selected{% endif %}>
                                         {{ name }}
                                     </option>
                                 {% endfor %}
@@ -365,51 +599,46 @@
                     </li>
 
                     {% if user.is_authenticated %}
-                        <!-- Корзина -->
-                        <li class="nav-item">
+                        <!-- КОРЗИНА -->
+                        <li class="nav-item me-3">
                             <a class="nav-link position-relative" href="{% url 'cart_detail' %}">
-                                <i class="fas fa-shopping-cart me-1"></i>{% trans "Корзина" %}
+                                <i class="fas fa-shopping-cart"></i>
                                 {% if cart_items_count and cart_items_count > 0 %}
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">
                                     {{ cart_items_count }}
-                                    <span class="visually-hidden">{% trans "товаров в корзине" %}</span>
                                 </span>
                                 {% endif %}
                             </a>
                         </li>
-                        
-                        <!-- Профиль пользователя -->
+                    
+                        <!-- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i>{{ user.username }}
+                                <i class="fas fa-user me-1"></i> {{ user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <span class="dropdown-item-text">
-                                        <small>{% trans "Вошел как" %} {{ user.get_role_display }}</small>
-                                    </span>
-                                </li>
+                                <li><span class="dropdown-item-text small text-muted">
+                                    <i class="fas fa-user-circle me-2"></i>{{ user.get_role_display }}
+                                </span></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'user_registrations' %}">
-                                        <i class="fas fa-ticket-alt me-2"></i>{% trans "Мои регистрации" %}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'favorite_list' %}">
-                                        <i class="fas fa-star me-2"></i>{% trans "Избранное" %}
-                                    </a>
-                                </li>
+                                <li><a class="dropdown-item" href="{% url 'user_registrations' %}">
+                                    <i class="fas fa-ticket-alt me-2"></i>{% trans "Мои билеты" %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'favorite_list' %}">
+                                    <i class="fas fa-star me-2"></i>{% trans "Избранное" %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="#">
+                                    <i class="fas fa-bell me-2"></i>{% trans "Уведомления" %}
+                                </a></li>
                                 {% if user.is_staff %}
-                                <li>
-                                    <a class="dropdown-item" href="/admin/">
-                                        <i class="fas fa-cog me-2"></i>{% trans "Админка" %}
-                                    </a>
-                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/admin/">
+                                    <i class="fas fa-cog me-2"></i>{% trans "Админка" %}
+                                </a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="post" action="{% url 'logout' %}" class="dropdown-form">
+                                    <form method="post" action="{% url 'logout' %}">
                                         {% csrf_token %}
                                         <button type="submit" class="dropdown-item">
                                             <i class="fas fa-sign-out-alt me-2"></i>{% trans "Выйти" %}
@@ -419,14 +648,14 @@
                             </ul>
                         </li>
                     {% else %}
-                        <!-- Гость -->
+                        <!-- ГОСТЕВОЕ МЕНЮ -->
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">
                                 <i class="fas fa-sign-in-alt me-1"></i>{% trans "Войти" %}
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">
+                            <a class="btn btn-primary ms-2" href="{% url 'register' %}">
                                 <i class="fas fa-user-plus me-1"></i>{% trans "Регистрация" %}
                             </a>
                         </li>
@@ -436,67 +665,500 @@
         </div>
     </nav>
 
-    <!-- Сообщения -->
+    {# ПОПУТЧИКИ - ВРЕМЕННО ОТКЛЮЧЕНО #}
+    {% comment %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'travel_buddies' %}">
+            <i class="fas fa-users me-1"></i> {% trans "Попутчики" %}
+        </a>
+    </li>
+    {% endcomment %}
+
+    <!-- СООБЩЕНИЯ -->
     {% if messages %}
-        <div class="container mt-3 fade-in">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm">
-                    <div class="d-flex align-items-center">
-                        <i class="fas 
-                            {% if message.tags == 'success' %}fa-check-circle
-                            {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
-                            {% elif message.tags == 'warning' %}fa-exclamation-triangle
-                            {% else %}fa-info-circle{% endif %}
-                            me-2"></i>
-                        <div>{{ message }}</div>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
+    <div class="container mt-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas 
+                    {% if message.tags == 'success' %}fa-check-circle
+                    {% elif message.tags == 'error' %}fa-exclamation-circle
+                    {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                    {% else %}fa-info-circle{% endif %}
+                    me-2"></i>
+                <div>{{ message }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+        {% endfor %}
+    </div>
     {% endif %}
 
-    <!-- Основной контент -->
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
     <main class="flex-grow-1">
         {% block content %}
-        <!-- Контент будет здесь -->
+        <!-- ГЕРОЙ СЕКЦИЯ -->
+        <section class="hero-section">
+            <div class="container text-center">
+                <h1 class="hero-title">{% trans "Найдите своё следующее приключение" %}</h1>
+                <p class="hero-subtitle">{% trans "Откройте для себя уникальные мероприятия в вашем городе" %}</p>
+                
+                <div class="hero-search">
+                    <form method="get" action="{% url 'combined_events' %}">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control" 
+                                   placeholder="{% trans 'Поиск концертов, фестивалей, конференций...' %}">
+                            <button class="btn" type="submit">
+                                {% trans "Найти" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Быстрые ссылки -->
+                <div class="row mt-4">
+                    <div class="col-md-3 col-6 mb-2">
+                        <a href="{% url 'event_list' %}" class="btn btn-outline-light btn-sm w-100">
+                            <i class="fas fa-home me-1"></i>{% trans "Наши" %}
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6 mb-2">
+                        <a href="{% url 'external_events' %}" class="btn btn-outline-light btn-sm w-100">
+                            <i class="fas fa-external-link-alt me-1"></i>{% trans "Внешние" %}
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6 mb-2">
+                        <a href="{% url 'combined_events' %}" class="btn btn-outline-light btn-sm w-100">
+                            <i class="fas fa-globe me-1"></i>{% trans "Все" %}
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6 mb-2">
+                        <a href="{% url 'archive' %}" class="btn btn-outline-light btn-sm w-100">
+                            <i class="fas fa-archive me-1"></i>{% trans "Архив" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- КАТЕГОРИИ -->
+        <section class="categories-section">
+            <div class="container">
+                <h2 class="section-title">{% trans "Исследуйте по категориям" %}</h2>
+                <p class="section-subtitle">{% trans "Найдите мероприятия, которые соответствуют вашим интересам" %}</p>
+                
+                <div class="category-grid">
+                    <a href="{% url 'combined_events' %}?category=music" class="category-card">
+                        <span class="category-icon">🎵</span>
+                        <h4>{% trans "Музыка" %}</h4>
+                        <p class="text-muted">{% trans "Концерты, фестивали, клубные вечеринки" %}</p>
+                    </a>
+                    <a href="{% url 'combined_events' %}?category=art" class="category-card">
+                        <span class="category-icon">🎭</span>
+                        <h4>{% trans "Искусство" %}</h4>
+                        <p class="text-muted">{% trans "Выставки, театр, перформансы" %}</p>
+                    </a>
+                    <a href="{% url 'combined_events' %}?category=business" class="category-card">
+                        <span class="category-icon">💼</span>
+                        <h4>{% trans "Бизнес" %}</h4>
+                        <p class="text-muted">{% trans "Конференции, нетворкинг, семинары" %}</p>
+                    </a>
+                    <a href="{% url 'combined_events' %}?category=sports" class="category-card">
+                        <span class="category-icon">⚽</span>
+                        <h4>{% trans "Спорт" %}</h4>
+                        <p class="text-muted">{% trans "Марафоны, соревнования, фитнес" %}</p>
+                    </a>
+                    <a href="{% url 'combined_events' %}?category=food" class="category-card">
+                        <span class="category-icon">🍕</span>
+                        <h4>{% trans "Еда и напитки" %}</h4>
+                        <p class="text-muted">{% trans "Фестивали еды, дегустации, кулинарные классы" %}</p>
+                    </a>
+                    <a href="{% url 'combined_events' %}?category=technology" class="category-card">
+                        <span class="category-icon">💻</span>
+                        <h4>{% trans "Технологии" %}</h4>
+                        <p class="text-muted">{% trans "IT-конференции, воркшопы, хакатоны" %}</p>
+                    </a>
+                    <a href="{% url 'combined_events' %}?category=education" class="category-card">
+                        <span class="category-icon">🎓</span>
+                        <h4>{% trans "Образование" %}</h4>
+                        <p class="text-muted">{% trans "Мастер-классы, лекции, курсы" %}</p>
+                    </a>
+                    <a href="{% url 'combined_events' %}?category=health" class="category-card">
+                        <span class="category-icon">🧘</span>
+                        <h4>{% trans "Здоровье" %}</h4>
+                        <p class="text-muted">{% trans "Йога, медитация, wellness-мероприятия" %}</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ПОПУЛЯРНЫЕ МЕРОПРИЯТИЯ -->
+        <section class="events-section">
+            <div class="container">
+                <h2 class="section-title">{% trans "Популярные мероприятия" %}</h2>
+                <p class="section-subtitle">{% trans "Самые ожидаемые события этой недели" %}</p>
+                
+                <div class="event-grid">
+                    <!-- Пример мероприятия 1 -->
+                    <a href="#" class="event-card">
+                        <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Музыкальный фестиваль" class="event-image">
+                        <div class="event-content">
+                            <div class="event-date">СБ, 15 ДЕК • 19:00</div>
+                            <h3 class="event-title">{% trans "Летний музыкальный фестиваль 2024" %}</h3>
+                            <div class="event-location">Парк Горького, Москва</div>
+                            <div class="event-price">от 1 500 ₽</div>
+                        </div>
+                    </a>
+
+                    <!-- Пример мероприятия 2 -->
+                    <a href="#" class="event-card">
+                        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Бизнес конференция" class="event-image">
+                        <div class="event-content">
+                            <div class="event-date">ПТ, 20 ДЕК • 09:00</div>
+                            <h3 class="event-title">{% trans "Digital Business Conference" %}</h3>
+                            <div class="event-location">Крокус Экспо, Москва</div>
+                            <div class="event-price">от 5 000 ₽</div>
+                        </div>
+                    </a>
+
+                    <!-- Пример мероприятия 3 -->
+                    <a href="#" class="event-card">
+                        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Спортивное событие" class="event-image">
+                        <div class="event-content">
+                            <div class="event-date">ВС, 22 ДЕК • 08:00</div>
+                            <h3 class="event-title">{% trans "Московский марафон 2024" %}</h3>
+                            <div class="event-location">ВДНХ, Москва</div>
+                            <div class="event-price">Бесплатно</div>
+                        </div>
+                    </a>
+
+                    <!-- Пример мероприятия 4 -->
+                    <a href="#" class="event-card">
+                        <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Выставка искусств" class="event-image">
+                        <div class="event-content">
+                            <div class="event-date">ЧТ, 19 ДЕК • 11:00</div>
+                            <h3 class="event-title">{% trans "Современное русское искусство" %}</h3>
+                            <div class="event-location">Третьяковская галерея, Москва</div>
+                            <div class="event-price">от 500 ₽</div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="text-center mt-5">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'combined_events' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-globe me-2"></i>{% trans "Все мероприятия" %}
+                        </a>
+                        <a href="{% url 'event_list' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-home me-2"></i>{% trans "Наши" %}
+                        </a>
+                        <a href="{% url 'external_events' %}" class="btn btn-outline-info btn-lg">
+                            <i class="fas fa-external-link-alt me-2"></i>{% trans "Внешние" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- КАК ЭТО РАБОТАЕТ -->
+        <section class="how-it-works">
+            <div class="container">
+                <h2 class="section-title">{% trans "Как это работает" %}</h2>
+                <p class="section-subtitle">{% trans "Найдите и посетите мероприятия в несколько кликов" %}</p>
+                        <!-- КАРТА МЕРОПРИЯТИЙ -->
+        <section class="map-section">
+            <div class="container">
+                <h2 class="section-title">{% trans "Мероприятия на карте" %}</h2>
+                <p class="section-subtitle">{% trans "Найдите мероприятия рядом с вами" %}</p>
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- Контейнер для карты -->
+                        <div id="map-container" style="height: 400px; background: var(--gray-light); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center">
+                                <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                                <h4>{% trans "Интерактивная карта мероприятий" %}</h4>
+                                <p class="text-muted">{% trans "Просматривайте мероприятия на карте вашего города" %}</p>
+                                <a href="{% url 'events_map' %}" class="btn btn-primary mt-3">
+                                    <i class="fas fa-map me-2"></i>{% trans "Открыть карту" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="map-sidebar">
+                            <h5 class="mb-3">{% trans "Ближайшие мероприятия" %}</h5>
+                            
+                            <!-- Пример ближайших мероприятий -->
+                            <div class="nearby-events">
+                                <div class="nearby-event-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <div class="event-marker bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                                 style="width: 32px; height: 32px;">
+                                                <i class="fas fa-music text-white" style="font-size: 0.8rem;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-1">{% trans "Летний фестиваль" %}</h6>
+                                            <p class="text-muted small mb-1">{% trans "1.2 км от вас" %}</p>
+                                            <span class="badge bg-primary">{% trans "Музыка" %}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="nearby-event-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <div class="event-marker bg-success rounded-circle d-flex align-items-center justify-content-center" 
+                                                 style="width: 32px; height: 32px;">
+                                                <i class="fas fa-utensils text-white" style="font-size: 0.8rem;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-1">{% trans "Фестиваль еды" %}</h6>
+                                            <p class="text-muted small mb-1">{% trans "0.8 км от вас" %}</p>
+                                            <span class="badge bg-success">{% trans "Еда" %}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="nearby-event-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <div class="event-marker bg-info rounded-circle d-flex align-items-center justify-content-center" 
+                                                 style="width: 32px; height: 32px;">
+                                                <i class="fas fa-graduation-cap text-white" style="font-size: 0.8rem;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-1">{% trans "IT конференция" %}</h6>
+                                            <p class="text-muted small mb-1">{% trans "2.1 км от вас" %}</p>
+                                            <span class="badge bg-info">{% trans "Технологии" %}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'events_map' %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-search me-2"></i>{% trans "Найти на карте" %}
+                                    </a>
+                                    <button class="btn btn-outline-secondary" onclick="requestLocation()">
+                                        <i class="fas fa-location-arrow me-2"></i>{% trans "Мое местоположение" %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Статистика по городам -->
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <h5 class="text-center mb-4">{% trans "Мероприятия по городам" %}</h5>
+                        <div class="row text-center">
+                            <div class="col-md-3 col-6 mb-3">
+                                <div class="city-stat">
+                                    <div class="h4 text-primary">156</div>
+                                    <div class="text-muted">{% trans "Москва" %}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <div class="city-stat">
+                                    <div class="h4 text-primary">89</div>
+                                    <div class="text-muted">{% trans "Санкт-Петербург" %}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <div class="city-stat">
+                                    <div class="h4 text-primary">45</div>
+                                    <div class="text-muted">{% trans "Новосибирск" %}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <div class="city-stat">
+                                    <div class="h4 text-primary">32</div>
+                                    <div class="text-muted">{% trans "Екатеринбург" %}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <style>
+        .map-section {
+            padding: 5rem 0;
+            background: white;
+        }
+
+        .map-sidebar {
+            background: var(--light-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            height: 100%;
+        }
+
+        .nearby-event-item {
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            transition: all 0.3s ease;
+        }
+
+        .nearby-event-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .city-stat {
+            padding: 1rem;
+        }
+
+        .event-marker {
+            transition: transform 0.3s ease;
+        }
+
+        .nearby-event-item:hover .event-marker {
+            transform: scale(1.1);
+        }
+        </style>
+
+        <script>
+        function requestLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        showNotification('{% trans "Местоположение определено!" %}', 'success');
+                        // Здесь можно добавить логику для центрирования карты
+                    },
+                    function(error) {
+                        showNotification('{% trans "Не удалось определить местоположение" %}', 'error');
+                    }
+                );
+            } else {
+                showNotification('{% trans "Геолокация не поддерживается вашим браузером" %}', 'warning');
+            }
+        }
+
+        // Имитация загрузки карты (в реальном проекте здесь будет интеграция с Яндекс.Картами или Google Maps)
+        document.addEventListener('DOMContentLoaded', function() {
+            const mapContainer = document.getElementById('map-container');
+            
+            // Добавляем интерактивность для демонстрации
+            mapContainer.addEventListener('click', function() {
+                window.location.href = "{% url 'events_map' %}";
+            });
+            
+            mapContainer.style.cursor = 'pointer';
+            mapContainer.title = "{% trans 'Нажмите для открытия полной карты' %}";
+        });
+        </script>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <h4>{% trans "Найдите мероприятие" %}</h4>
+                            <p class="text-muted">{% trans "Ищите по категориям, датам или ключевым словам" %}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <h4>{% trans "Забронируйте билеты" %}</h4>
+                            <p class="text-muted">{% trans "Быстрая и безопасная оплата онлайн" %}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <h4>{% trans "Посетите событие" %}</h4>
+                            <p class="text-muted">{% trans "Получите билеты на email и приходите на мероприятие" %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
         {% endblock %}
     </main>
 
-    <!-- Футер -->
-    <footer class="bg-dark text-white py-4 mt-5">
+    <!-- ФУТЕР -->
+    <footer class="main-footer">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <h5 class="mb-3">🎉 {% trans "EventHub" %}</h5>
-                    <p class="mb-0">{% trans "Лучшая платформа для поиска и организации мероприятий" %}</p>
+                <div class="col-lg-4 mb-4">
+                    <h4 class="mb-3">🎉 EventHub</h4>
+                    <p class="text-muted">{% trans "Крупнейшая платформа для поиска и организации мероприятий. Присоединяйтесь к миллионам пользователей по всему миру." %}</p>
+                    <div class="social-links mt-4">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <h6>{% trans "Навигация" %}</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="{% url 'event_list' %}" class="text-white-50 text-decoration-none">{% trans "Мероприятия" %}</a></li>
-                        {% if user.is_authenticated %}
-                        <li><a href="{% url 'event_create' %}" class="text-white-50 text-decoration-none">{% trans "Создать мероприятие" %}</a></li>
-                        {% endif %}
-                    </ul>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6>{% trans "МЕРОПРИЯТИЯ" %}</h6>
+                    <div class="footer-links">
+                        <a href="{% url 'combined_events' %}">{% trans "Все мероприятия" %}</a>
+                        <a href="{% url 'event_list' %}">{% trans "Наши мероприятия" %}</a>
+                        <a href="{% url 'external_events' %}">{% trans "Внешние платформы" %}</a>
+                        <a href="{% url 'archive' %}">{% trans "Архив" %}</a>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <h6>{% trans "Контакты" %}</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="mailto:support@eventhub.com" class="text-white-50 text-decoration-none">support@eventhub.com</a></li>
-                        <li><a href="tel:+79999999999" class="text-white-50 text-decoration-none">+7 (999) 999-99-99</a></li>
-                    </ul>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6>{% trans "ОРГАНИЗАТОРАМ" %}</h6>
+                    <div class="footer-links">
+                        <a href="{% url 'event_create' %}">{% trans "Создать мероприятие" %}</a>
+                        <a href="{% url 'organizer_solutions' %}">{% trans "Решения для организаторов" %}</a>
+                        <a href="{% url 'organizer_guidelines' %}">{% trans "Рекомендации" %}</a>
+                        <a href="{% url 'organizer_resources' %}">{% trans "Ресурсы" %}</a>
+                        <a href="{% url 'pricing' %}">{% trans "Тарифы" %}</a>
+                        <a href="{% url 'success_stories' %}">{% trans "Истории успеха" %}</a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6>{% trans "КОМПАНИЯ" %}</h6>
+                    <div class="footer-links">
+                        <a href="{% url 'about' %}">{% trans "О нас" %}</a>
+                        <a href="{% url 'blog' %}">{% trans "Блог" %}</a>
+                        <a href="{% url 'careers' %}">{% trans "Карьера" %}</a>
+                        <a href="{% url 'press' %}">{% trans "Пресса" %}</a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6>{% trans "ПОДДЕРЖКА" %}</h6>
+                    <div class="footer-links">
+                        <a href="{% url 'faq' %}">{% trans "Помощь" %}</a>
+                        <a href="{% url 'contact' %}">{% trans "Контакты" %}</a>
+                        <a href="{% url 'privacy_policy' %}">{% trans "Политика конфиденциальности" %}</a>
+                        <a href="{% url 'terms_of_use' %}">{% trans "Условия использования" %}</a>
+                        <a href="{% url 'refund_policy' %}">{% trans "Политика возвратов" %}</a>
+                    </div>
                 </div>
             </div>
-            <hr class="my-4">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0">&copy; 2025 EventHub. {% trans "Все права защищены." %}</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <small class="text-white-50">
-                        {% trans "Сделано с" %} <i class="fas fa-heart text-danger"></i> {% trans "для сообщества" %}
-                    </small>
+            
+            <div class="border-top pt-4 mt-4 text-center text-md-start">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="text-muted mb-0">&copy; 2024 EventHub. {% trans "Все права защищены." %}</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="footer-links d-inline">
+                            <a href="{% url 'privacy_policy' %}" class="d-inline me-3">{% trans "Конфиденциальность" %}</a>
+                            <a href="{% url 'terms_of_use' %}" class="d-inline me-3">{% trans "Условия" %}</a>
+                            <a href="{% url 'sitemap' %}" class="d-inline">{% trans "Карта сайта" %}</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -506,62 +1168,40 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-    // Функции для рекламы
-    function incrementAdClick(adId) {
-        fetch(`/ads/click/${adId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json',
-            }
-        }).catch(error => console.error('Error:', error));
-    }
-
-    // Отслеживание показов рекламы
+    // Анимации при скролле
     document.addEventListener('DOMContentLoaded', function() {
-        const adElements = document.querySelectorAll('[data-ad-id]');
-        adElements.forEach(ad => {
-            const adId = ad.getAttribute('data-ad-id');
-            fetch(`/ads/impression/${adId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json',
+        // Плавное появление элементов
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
                 }
             });
+        }, observerOptions);
+
+        // Анимируем карточки
+        document.querySelectorAll('.category-card, .event-card, .step-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
         });
-    });
 
-    // Управление полем цены для бесплатных мероприятий
-    function togglePriceField() {
-        const isFree = document.getElementById('id_is_free');
-        const priceField = document.getElementById('id_price');
-        const priceLabel = document.querySelector('label[for="id_price"]');
-        
-        if (isFree && priceField) {
-            if (isFree.checked) {
-                priceField.disabled = true;
-                priceField.value = '0';
-                if (priceLabel) {
-                    priceLabel.classList.add('text-muted');
+        // Автоматическое закрытие алертов через 5 секунд
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
                 }
-            } else {
-                priceField.disabled = false;
-                if (priceLabel) {
-                    priceLabel.classList.remove('text-muted');
-                }
-            }
-        }
-    }
-
-    // Инициализация при загрузке страницы
-    document.addEventListener('DOMContentLoaded', function() {
-        togglePriceField();
-        
-        // Анимация появления элементов
-        const animatedElements = document.querySelectorAll('.fade-in');
-        animatedElements.forEach((el, index) => {
-            el.style.animationDelay = `${index * 0.1}s`;
+            }, 5000);
         });
 
         // Плавная прокрутка для якорей
@@ -579,11 +1219,11 @@
         });
     });
 
-    // Уведомления для пользователя
+    // Глобальные функции для уведомлений
     function showNotification(message, type = 'info') {
         const alertClass = {
             'success': 'alert-success',
-            'error': 'alert-danger',
+            'error': 'alert-danger', 
             'warning': 'alert-warning',
             'info': 'alert-info'
         }[type] || 'alert-info';
@@ -592,7 +1232,14 @@
         notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
         notification.style.zIndex = '1060';
         notification.innerHTML = `
-            ${message}
+            <div class="d-flex align-items-center">
+                <i class="fas 
+                    ${type === 'success' ? 'fa-check-circle' :
+                      type === 'error' ? 'fa-exclamation-circle' :
+                      type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}
+                    me-2"></i>
+                <div>${message}</div>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         
@@ -601,7 +1248,8 @@
         // Автоматическое скрытие через 5 секунд
         setTimeout(() => {
             if (notification.parentNode) {
-                notification.remove();
+                const bsAlert = new bootstrap.Alert(notification);
+                bsAlert.close();
             }
         }, 5000);
     }
@@ -609,12 +1257,85 @@
     // Глобальные функции для использования в других скриптах
     window.EventHub = {
         showNotification,
-        togglePriceField
+        // Другие глобальные функции могут быть добавлены здесь
     };
     </script>
 
     {% block extra_scripts %}
     <!-- Дополнительные скрипты для конкретных страниц -->
     {% endblock %}
+
+    {% block extra_js %}
+    <!-- Дополнительные JavaScript файлы для конкретных страниц -->
+    {% endblock %}
+
+
+    <style>
+    .user-game-widget {
+        position: fixed;
+        top: 80px;
+        left: 20px;
+        z-index: 999;
+    }
+
+    .level-badge-mini {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9em;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .level-badge-mini:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+
+    .level-icon {
+        font-size: 1.1em;
+    }
+
+    .points {
+        background: rgba(255,255,255,0.2);
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.8em;
+    }
+
+    @media (max-width: 768px) {
+        .user-game-widget {
+            top: 60px;
+            left: 10px;
+        }
+        
+        .level-badge-mini {
+            font-size: 0.8em;
+            padding: 6px 10px;
+        }
+    }
+    </style>
+
+    <!-- AI Чатбот -->
+    {% include 'events/chatbot/chat_widget.html' %}
+
+    <!-- Геймификация - Бейдж пользователя -->
+    {% if user.is_authenticated %}
+    <div class="user-game-widget">
+        <div class="level-badge-mini" 
+            onclick="window.location.href='{% url 'game_profile' %}'"
+            title="Мой профиль">
+            <span class="level-icon">{{ user.game_profile.current_level.badge_icon|default:"⭐" }}</span>
+            <span class="level-text">Ур. {{ user.game_profile.current_level.level|default:1 }}</span>
+            <span class="points">{{ user.game_profile.total_points|default:0 }}</span>
+        </div>
+    </div>
+    {% endif %}
 </body>
 </html>

@@ -1,0 +1,94 @@
+{% extends 'events/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <h2>{% trans "Найдите попутчиков на мероприятия" %}</h2>
+            <p class="text-muted">{% trans "Найдите компанию для посещения мероприятий" %}</p>
+
+            <!-- Активные запросы -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Активные запросы" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% for request in active_requests %}
+                    <div class="buddy-request-card mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ request.event.title }}</h6>
+                                <p class="text-muted small mb-1">{{ request.user.username }}</p>
+                                <p class="mb-2">{{ request.description }}</p>
+                                <span class="badge bg-{% if request.request_type == 'individual' %}primary{% elif request.request_type == 'group' %}success{% else %}info{% endif %}">
+                                    {{ request.get_request_type_display }}
+                                </span>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted">{{ request.created_at|date:"d.m.Y" }}</small>
+                                <br>
+                                <a href="{% url 'event_detail' request.event.id %}" class="btn btn-sm btn-outline-primary mt-2">
+                                    {% trans "Подробнее" %}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">{% trans "Пока нет активных запросов" %}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Мои группы -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Мои группы" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% for group in my_groups %}
+                    <div class="group-item mb-3">
+                        <h6 class="mb-1">{{ group.name }}</h6>
+                        <p class="text-muted small mb-1">{{ group.event.title }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-secondary">{{ group.current_members_count }}/{{ group.max_members }}</span>
+                            <a href="{% url 'group_chat' group.id %}" class="btn btn-sm btn-primary">
+                                {% trans "Чат" %}
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">{% trans "Вы не состоите в группах" %}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Рекомендации -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Ваши мероприятия" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% for event in recommended_events %}
+                    <div class="event-item mb-3">
+                        <h6 class="mb-1">{{ event.title }}</h6>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'create_buddy_request' event.id %}" class="btn btn-outline-primary">
+                                {% trans "Найти попутчика" %}
+                            </a>
+                            <a href="{% url 'create_buddy_group' event.id %}" class="btn btn-outline-success">
+                                {% trans "Создать группу" %}
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">{% trans "Зарегистрируйтесь на мероприятия чтобы искать попутчиков" %}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

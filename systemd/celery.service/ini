@@ -1,0 +1,16 @@
+[Unit]
+Description=Celery Service for EventHub
+After=network.target
+
+[Service]
+Type=simple
+User=webuser
+Group=webgroup
+WorkingDirectory=/opt/eventhub
+Environment="PATH=/opt/eventhub/venv/bin"
+ExecStart=/opt/eventhub/venv/bin/celery -A eventhub worker --loglevel=info
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

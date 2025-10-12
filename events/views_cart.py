@@ -18,14 +18,12 @@ import json
 def cart_detail(request):
     """Детальная страница корзины"""
     try:
-        # cart, created = Cart.objects.get_or_create(user=request.user)
         cart = Cart.objects.get(user=request.user)
-        # cart_items = cart.items.select_related('event').all()
         cart_items = cart.items.all()
         total_amount = sum(item.total_price for item in cart_items)
         total_quantity = sum(item.quantity for item in cart_items)
 
-    except Cart.DoesNotExist:  # изменил
+    except Cart.DoesNotExist:  # Правильное имя исключения
         cart = None
         cart_items = []
         total_quantity = 0

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Pricing" %} - EventsHub{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="mb-4">{% trans "Pricing for Organizers" %}</h1>
+            <p class="lead">{% trans "Choose the plan that works best for your events" %}</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Basic Plan -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h3 class="text-center">{% trans "Basic" %}</h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title pricing-card-title">$0 <small class="text-muted">/ {% trans "month" %}</small></h4>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li>✓ {% trans "Up to 3 events" %}</li>
+                        <li>✓ {% trans "Basic event page" %}</li>
+                        <li>✓ {% trans "Email support" %}</li>
+                        <li>✓ {% trans "100 attendees per event" %}</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-lg btn-block btn-outline-primary">{% trans "Get Started" %}</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="text-center">{% trans "Professional" %}</h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title pricing-card-title">$29 <small class="text-muted">/ {% trans "month" %}</small></h4>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li>✓ {% trans "Unlimited events" %}</li>
+                        <li>✓ {% trans "Advanced event page" %}</li>
+                        <li>✓ {% trans "Priority support" %}</li>
+                        <li>✓ {% trans "Up to 1000 attendees" %}</li>
+                        <li>✓ {% trans "Analytics dashboard" %}</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-lg btn-block btn-primary">{% trans "Get Started" %}</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enterprise Plan -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="text-center">{% trans "Enterprise" %}</h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title pricing-card-title">$99 <small class="text-muted">/ {% trans "month" %}</small></h4>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li>✓ {% trans "Unlimited events" %}</li>
+                        <li>✓ {% trans "Custom branding" %}</li>
+                        <li>✓ {% trans "24/7 phone support" %}</li>
+                        <li>✓ {% trans "Unlimited attendees" %}</li>
+                        <li>✓ {% trans "Advanced analytics" %}</li>
+                        <li>✓ {% trans "API access" %}</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-lg btn-block btn-dark">{% trans "Contact Sales" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-lg-12">
+            <div class="text-center">
+                <h2>{% trans "Frequently Asked Questions" %}</h2>
+            </div>
+            <div class="accordion mt-4" id="faqAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                            {% trans "Can I change plans later?" %}
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show">
+                        <div class="accordion-body">
+                            {% trans "Yes, you can upgrade or downgrade your plan at any time." %}
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                            {% trans "Is there a setup fee?" %}
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            {% trans "No, there are no setup fees for any of our plans." %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
