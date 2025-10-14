@@ -52,3 +52,4 @@ echo "env/" >> .gitignore
 echo "venv/" >> .gitignore
 echo ".env" >> .gitignore
 echo ".vscode/" >> .gitignoredb.sqlite3
+db.sqlite3
