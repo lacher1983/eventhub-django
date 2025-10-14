@@ -29,8 +29,10 @@ urlpatterns = [
     path('event/new/', EventCreateView.as_view(), name='event_create'),
     path('event/<int:pk>/update/', EventUpdateView.as_view(), name='event_update'),
     path('event/<int:pk>/delete/', EventDeleteView.as_view(), name='event_delete'),
+    # path('map-test/', views.map_test_view, name='map_test'),
     path('map/', views.EventsMapView.as_view(), name='events_map'),
-    
+    path('api/events/map/', views.events_map_api, name='events_map_api'),
+
     # Регистрации пользователя
     path('register/', register, name='register'),
     path('my-registrations/', views.user_registrations, name='user_registrations'),

@@ -19,7 +19,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LogoutView
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.serializers.json import DjangoJSONEncoder
 
 # Подтверждение email
@@ -70,46 +70,20 @@ class EventListView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        queryset = Event.objects.filter(is_active=True).select_related('organizer')
-        
-        print("=== DEBUG FILTERS ===")
-        print(f"Initial queryset count: {queryset.count()}")
-
-        # Получаем параметры фильтрации
-        category = self.request.GET.get('category', '')
-        event_type = self.request.GET.get('event_type', '')
-        event_format = self.request.GET.get('event_format', '')
-        difficulty_level = self.request.GET.get('difficulty_level', '')
-        price_type = self.request.GET.get('price_type', '')
-        search_query = self.request.GET.get('q', '')
-
-        print(f"Category filter: '{category}'")
-        print(f"Event type filter: '{event_type}'")
-        print(f"Event format filter: '{event_format}'")
-        print(f"Difficulty level filter: '{difficulty_level}'")
-        print(f"Price type filter: '{price_type}'")
-        print(f"Search query: '{search_query}'")
+        # ПРОСТОЙ запрос без аннотаций
+        queryset = Event.objects.filter(is_active=True)
 
         # Фильтрация по категории
-        if category:
-            # Находим ID категории по slug
-            try:
-                category_obj = Category.objects.get(slug=category)
-                queryset = queryset.filter(category=str(category_obj.id))
-            except Category.DoesNotExist:
-                # Если категория не найдена, возвращаем пустой queryset
-                queryset = queryset.none()
+        category_slug = self.request.GET.get('category')
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
 
-        if event_type:
-            queryset = queryset.filter(event_type=event_type)
-        if event_format:
-            queryset = queryset.filter(event_format=event_format)
-        if difficulty_level:
-            queryset = queryset.filter(difficulty_level=difficulty_level)
-        if price_type == 'free':
-            queryset = queryset.filter(Q(price=0) | Q(is_free=True))
-        elif price_type == 'paid':
-            queryset = queryset.filter(price__gt=0, is_free=False)        
+        # Фильтрация по цене
+        price_filter = self.request.GET.get('price')
+        if price_filter == 'free':
+            queryset = queryset.filter(price=0)
+        elif price_filter == 'paid':
+            queryset = queryset.filter(price__gt=0)
         
         # Поиск
         search_query = self.request.GET.get('q')
@@ -120,18 +94,41 @@ class EventListView(ListView):
                 Q(short_description__icontains=search_query)
             )
         
-        # Сортировка
-        sort = self.request.GET.get('sort', 'date')
-        if sort == 'price':
-            queryset = queryset.order_by('price')
-        elif sort == 'price_desc':
-            queryset = queryset.order_by('-price')
-        elif sort == 'rating':
-            queryset = queryset.order_by('-avg_rating')
+        return queryset.select_related('category', 'organizer').order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['YANDEX_MAPS_API_KEY'] = getattr(settings, 'YANDEX_MAPS_API_KEY', '')
+        context['map_pages'] = ['events_map', 'event_list']  # страницы где нужны карты
+    
+        # Добавляем категории в контекст
+        context['categories'] = Category.objects.all()
+
+        # Добавляем текущие параметры фильтрации в контекст
+        context['current_filters'] = {
+            'category': self.request.GET.get('category', ''),
+            'search': self.request.GET.get('q', ''),
+        }
+        
+        # ИНФОРМАЦИЯ О РЕГИСТРАЦИЯХ
+        if self.request.user.is_authenticated:
+            # ID мероприятий, на которые пользователь зарегистрирован - используем status вместо is_confirmed
+            user_registered_ids = Registration.objects.filter(
+                user=self.request.user,
+                status='confirmed'
+            ).values_list('event_id', flat=True)
+            context['user_registered_events'] = list(user_registered_ids)
+
+            # Помечаем избранные события
+            for event in context['events']:
+                event.is_favorite = Favorite.objects.filter(
+                    user=self.request.user, 
+                    event=event
+                ).exists()
         else:
-            queryset = queryset.order_by('date')
-            
-        return queryset.order_by('-date')
+            context['user_registered_events'] = []
+
+        return context
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -187,20 +184,26 @@ class EventDetailView(DetailView):
     context_object_name = 'event'
 
     def get_queryset(self):
-        return Event.objects.select_related(
-            'organizer'
-        ).prefetch_related(
-            'reviews', 'reviews__user'
-        ).annotate(
-            registrations_count=Count('registrations'),
-            avg_rating=Avg('reviews__rating')
-        )
+        return Event.objects.filter(is_active=True).select_related('category', 'organizer')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        event = self.get_object()
+        event = context['event']
+
+        # Вычисляем значения ВРУЧНУЮ в контексте
+        context['registrations_count'] = event.registrations.filter(status='confirmed').count()
         
-        # Информация о регистрации и избранном
+        # Вычисляем средний рейтинг
+        reviews = event.reviews.all()
+        if reviews:
+            context['average_rating'] = sum(review.rating for review in reviews) / reviews.count()
+        else:
+            context['average_rating'] = 0
+            
+        # Используем capacity вместо max_participants
+        context['available_spots'] = event.capacity - context['registrations_count']
+
+        # Дополнительный контекст
         context['is_registered'] = False
         context['is_favorite'] = False
         context['user_review'] = None
@@ -208,7 +211,7 @@ class EventDetailView(DetailView):
         if self.request.user.is_authenticated:
             # Проверка регистрации
             context['is_registered'] = Registration.objects.filter(
-                user=self.request.user, event=event
+                user=self.request.user, event=event, status='confirmed'
             ).exists()
             
             # Проверка избранного
@@ -224,10 +227,6 @@ class EventDetailView(DetailView):
         # Все отзывы о мероприятии
         context['reviews'] = event.reviews.all().select_related('user')
         context['review_form'] = ReviewForm()
-        context['available_seats'] = event.capacity - event.registrations_count
-
-        # Используем аннотацию avg_rating
-        context['average_rating'] = getattr(event, 'avg_rating', None)
 
         return context
     
@@ -480,14 +479,19 @@ def register_for_event(request, pk):
     """Регистрация на мероприятие"""
     event = get_object_or_404(Event, pk=pk, is_active=True)
     
-    if Registration.objects.filter(user=request.user, event=event).exists():
+    # Используем status вместо is_confirmed
+    if Registration.objects.filter(user=request.user, event=event, status='confirmed').exists():
         messages.info(request, 'Вы уже зарегистрированы на это мероприятие')
-    elif event.registrations.count() >= event.capacity:
+    elif event.registrations.filter(status='confirmed').count() >= event.capacity:
         messages.error(request, 'К сожалению, все места заняты.')
     elif event.date < timezone.now():
         messages.error(request, 'Мероприятие уже прошло.')
     else:
-        Registration.objects.create(user=request.user, event=event)
+        Registration.objects.create(
+            user=request.user, 
+            event=event,
+            status='confirmed'  # Устанавливаем статус confirmed
+        )
         messages.success(request, 'Вы успешно зарегистрировались на мероприятие!')
     
     return redirect('event_detail', pk=pk)
@@ -764,6 +768,10 @@ class CombinedEventsView(ListView):
         
         # Преобразуем внутренние мероприятия
         for event in internal_events:
+            # ВЫЧИСЛЯЕМ ВРУЧНУЮ - используем поле status вместо is_confirmed
+            registrations_count = event.registrations.filter(status='confirmed').count()
+            avg_rating = event.reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+            
             combined.append({
                 'type': 'internal',
                 'object': event,
@@ -772,12 +780,14 @@ class CombinedEventsView(ListView):
                 'date': event.date,
                 'location': event.location,
                 'price': event.price,
-                'is_free': event.is_free,
-                'image_url': event.get_image_url(),
-                'category': self._get_event_category(event),  # Используем внутренний метод
+                'is_free': event.price == 0,
+                'image_url': event.get_image_url() if hasattr(event, 'get_image_url') else '',
+                'category': self._get_event_category(event),
                 'url': event.get_absolute_url(),
                 'source_name': 'EventHub',
                 'is_past': False,
+                'average_rating': avg_rating,
+                'registrations_count': registrations_count
             })
         
         # Преобразуем внешние мероприятия
@@ -811,9 +821,9 @@ class CombinedEventsView(ListView):
             # Если есть стандартный метод Django get_FOO_display
             elif hasattr(event, 'get_category_display'):
                 return event.get_category_display()
-            # Просто возвращаем поле category
-            elif hasattr(event, 'category'):
-                return getattr(event, 'category', 'Не указана')
+            # Если есть связанная категория
+            elif hasattr(event, 'category') and event.category:
+                return event.category.name
             else:
                 return 'Не указана'
         except Exception:
@@ -826,7 +836,7 @@ class CombinedEventsView(ListView):
         
         # Статистика
         context['internal_count'] = Event.objects.filter(
-            is_active=True, date__gte=timezone.now()
+            is_active=True, date__gte=timezone.now()  # Исправлено: date вместо start_date
         ).count()
         context['external_count'] = ExternalEvent.objects.filter(
             is_archived=False, date__gte=timezone.now()
@@ -927,16 +937,102 @@ class EventsMapView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Получаем активные мероприятия с координатами
-        events = Event.objects.filter(
+        from django.conf import settings
+        from django.db.models import Q
+        from .models import Event
+        import json
+        
+        context['YANDEX_MAPS_API_KEY'] = getattr(settings, 'YANDEX_MAPS_API_KEY', '')
+        
+        # Простой запрос мероприятий с координатами
+        events_with_coords = Event.objects.filter(
             Q(latitude__isnull=False) & 
             Q(longitude__isnull=False) &
             Q(is_active=True)
-        ).select_related('category')
+        )[:20]
         
-        context['events'] = events
+        print(f"Найдено мероприятий с координатами: {events_with_coords.count()}")
+        
+        # Если есть мероприятия с координатами - используем их
+        if events_with_coords.exists():
+            events_data = []
+            for event in events_with_coords:
+                # ВЫЧИСЛЯЕМ ВРУЧНУЮ для каждого события - используем status вместо is_confirmed
+                registrations_count = event.registrations.filter(status='confirmed').count()
+                
+                # Вычисляем средний рейтинг
+                avg_rating = event.reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+                
+                events_data.append({
+                    'id': event.id,
+                    'title': event.title,
+                    'latitude': float(event.latitude),
+                    'longitude': float(event.longitude),
+                    'location': event.location or 'Место не указано',
+                    'date': event.date.isoformat() if event.date else None,
+                    'price': float(event.price) if event.price else 0,
+                    'category_name': event.category.name if event.category else 'Другое',
+                    'organizer_name': getattr(event.organizer, 'username', 'Неизвестно'),
+                    'short_description': event.short_description or event.description[:100] + '...' if event.description else 'Описание отсутствует',
+                    'average_rating': float(avg_rating),
+                    'registrations_count': registrations_count,
+                    'url': f"/event/{event.id}/"
+                })
+            context['events_count'] = len(events_data)
+            context['events_json'] = json.dumps(events_data, ensure_ascii=False)
+            print(f"✅ Используем {context['events_count']} реальных мероприятий")
+            
+        else:
+            # Создаем простые тестовые данные
+            print("Создаем тестовые данные...")
+            test_data = self.create_simple_test_data()
+            context['events_json'] = json.dumps(test_data, ensure_ascii=False)
+            context['events_count'] = len(test_data)
+            print(f"✅ Создано {context['events_count']} тестовых мероприятий")
+        
         return context
-
+    
+def events_map_api(request):
+    """API для получения мероприятий для карты (JSON)"""
+    from django.db.models import Q
+    from .models import Event
+    from django.db.models import Avg
+    
+    # ПРОСТОЙ запрос без аннотаций
+    events = Event.objects.filter(
+        Q(latitude__isnull=False) & 
+        Q(longitude__isnull=False) &
+        Q(is_active=True)
+    ).select_related('category')[:50]  # Ограничиваем количество
+    
+    events_data = []
+    for event in events:
+        # ВЫЧИСЛЯЕМ ВРУЧНУЮ для каждого события
+        registrations_count = event.registrations.filter(is_confirmed=True).count()
+        
+        # Вычисляем средний рейтинг
+        avg_rating = event.reviews.aggregate(avg=Avg('rating'))['avg'] or 0
+        
+        events_data.append({
+            'id': event.id,
+            'title': event.title,
+            'description': event.description,
+            'location': event.location,
+            'latitude': event.latitude,
+            'longitude': event.longitude,
+            'start_date': event.start_date.isoformat() if event.start_date else None,
+            'end_date': event.end_date.isoformat() if event.end_date else None,
+            'category_id': event.category.id if event.category else None,
+            'category_name': event.category.name if event.category else '',
+            'price': float(event.price) if event.price else 0,
+            'max_participants': event.max_participants,
+            'organizer': event.organizer.get_full_name() if event.organizer else 'Неизвестно',
+            'average_rating': float(avg_rating),
+            'registrations_count': registrations_count,
+            'url': event.get_absolute_url()
+        })
+    
+    return JsonResponse(events_data, safe=False)
 
 # # ==================== СИСТЕМА ПОПУТЧИКОВ ====================
 
@@ -1167,7 +1263,7 @@ class ArchiveEventsView(ListView):
     def get_queryset(self):
         # Архив внутренних мероприятий
         internal_archive = Event.objects.filter(
-            Q(is_active=False) | Q(date__lt=timezone.now())
+            Q(is_active=False) | Q(date__lt=timezone.now())  # Исправлено: date вместо start_date
         )
         
         # Архив внешних мероприятий
@@ -1182,9 +1278,9 @@ class ArchiveEventsView(ListView):
                 'type': 'internal',
                 'object': event,
                 'title': event.title,
-                'date': event.date,
+                'date': event.date,  # Исправлено: date вместо start_date
                 'location': event.location,
-                'is_past': event.date < timezone.now(),
+                'is_past': event.date < timezone.now(),  # Исправлено: date вместо start_date
                 'source_name': 'EventHub',
             })
         
@@ -1202,11 +1298,6 @@ class ArchiveEventsView(ListView):
         # Сортируем по дате (сначала самые новые прошедшие)        
         combined.sort(key=lambda x: x['date'], reverse=True)
         return combined
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_title'] = 'Архив мероприятий'
-        return context
     
 
 class ExternalEventsView(ListView):
@@ -1232,6 +1323,7 @@ def get_ai_recommended_events(request):
     """Представление для AI-рекомендаций"""
     if request.user.is_authenticated:
         engine = AIRecommendationEngine()
+
         recommendations = engine.get_hybrid_recommendations(request.user, 6)
     else:
         # Для неавторизованных - популярные мероприятия
@@ -1242,21 +1334,6 @@ def get_ai_recommended_events(request):
     
     return recommendations
 
-class EventsMapView(TemplateView):
-    template_name = "events/events_map.html"
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Получаем активные мероприятия с координатами
-        events = Event.objects.filter(
-            Q(latitude__isnull=False) & 
-            Q(longitude__isnull=False) &
-            Q(status='active')  # или ваше условие для активных мероприятий
-        ).select_related('category')
-        
-        context['events'] = events
-        return context
 
 class OrganizerSolutionsView(TemplateView):
     template_name = "events/organizer_solutions.html"

@@ -404,18 +404,18 @@
                                         
                                         <!-- Рейтинг -->
                                         <div class="text-center mt-2">
-                                            {% if event.average_rating %}
+                                            {% if event.get_average_rating %}
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <div class="text-warning me-1" style="font-size: 0.8rem;">
                                                         {% for i in "12345" %}
-                                                            {% if forloop.counter <= event.average_rating %}
+                                                            {% if forloop.counter <= event.get_average_rating %}
                                                                 <i class="fas fa-star"></i>
                                                             {% else %}
                                                                 <i class="far fa-star"></i>
                                                             {% endif %}
                                                         {% endfor %}
                                                     </div>
-                                                    <small class="text-muted" style="font-size: 0.75rem;">({{ event.reviews.count }})</small>
+                                                    <small class="text-muted">({{ event.get_average_rating|floatformat:1 }})</small>
                                                 </div>
                                             {% else %}
                                                 <small class="text-muted" style="font-size: 0.75rem;">{% trans "Нет оценок" %}</small>

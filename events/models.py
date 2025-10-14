@@ -15,9 +15,23 @@ from datetime import datetime
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+import time
+import logging
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
+
+# Пытаемся импортировать geopy, но делаем это опционально
+try:
+    from geopy.geocoders import Nominatim
+    from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+    GEOPY_AVAILABLE = True
+except ImportError:
+    GEOPY_AVAILABLE = False
+    logger.warning("Geopy not available. Geocoding will be disabled.")
 
 class Advertisement(models.Model):
     AD_TYPES = [
@@ -165,7 +179,7 @@ class Event(models.Model):
     short_description = models.CharField(max_length=300, verbose_name=_("Краткое описание"), 
                                        default=_('Краткое описание мероприятия'))
     date = models.DateTimeField(verbose_name=_("Дата и время"))
-    location = models.CharField(max_length=200, verbose_name=_("Место проведения"))
+    location = models.CharField(max_length=300, verbose_name=_("Место проведения"))
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True,
         verbose_name=_("Категория"), default='education')
     event_type = models.CharField(max_length=20, choices=EVENT_TYPES, verbose_name=_("Тип мероприятия"), default='workshop')
@@ -192,8 +206,8 @@ class Event(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name=_("Дата обновления"))
     average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0, blank=True, verbose_name=_("Средний рейтинг"))
     # новые поля для карты
-    latitude = models.FloatField('Широта', null=True, blank=True)
-    longitude = models.FloatField('Долгота', null=True, blank=True)
+    latitude = models.FloatField(_('Широта'), null=True, blank=True)
+    longitude = models.FloatField(_('Долгота'), null=True, blank=True)
     
     # Теги
     tags = models.ManyToManyField('Tag', blank=True, verbose_name=_("Теги"))
@@ -253,10 +267,104 @@ class Event(models.Model):
                     img.save(self.image.path)
             except:
                 pass
+        # Автоматическое геокодирование при сохранении (только если geopy доступен)
+        if GEOPY_AVAILABLE and self.location and (not self.latitude or not self.longitude):
+            self.geocode_location()
+        super().save(*args, **kwargs)
 
+    def geocode_location(self):
+        """Автоматическое определение координат по адресу"""
+        if not GEOPY_AVAILABLE:
+            logger.warning("Geopy not available. Cannot geocode location.")
+            return
+            
+        try:
+            import time
+            geolocator = Nominatim(user_agent="eventhub_app")
+            time.sleep(1)  # Задержка чтобы не превысить лимиты API
+            
+            location = geolocator.geocode(
+                f"{self.location}, Россия", 
+                country_codes='ru',
+                language='ru',
+                timeout=10
+            )
+            
+            if location:
+                self.latitude = location.latitude
+                self.longitude = location.longitude
+                logger.info(f"Геокодирование успешно: {self.location} → {self.latitude}, {self.longitude}")
+            else:
+                logger.warning(f"Не удалось геокодировать: {self.location}")
+                
+        except (GeocoderTimedOut, GeocoderServiceError) as e:
+            logger.error(f"Ошибка геокодирования для {self.location}: {e}")
+        except Exception as e:
+            logger.error(f"Непредвиденная ошибка геокодирования: {e}")
+    
+    def update_coordinates(self):
+        """Принудительное обновление координат"""
+        if self.location:
+            self.geocode_location()
+            self.save()
+
+    def get_absolute_url(self):
+        return reverse('event_detail', kwargs={'pk': self.pk})
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('Мероприятие')
+        verbose_name_plural = _('Мероприятия')
+    
     def __str__(self):
         return self.title
     
+    # Рейтинг (вычисляемое поле)
+    def get_average_rating(self):
+        """Вычисляет средний рейтинг"""        
+        reviews = self.reviews.all()
+        if reviews:
+            return sum(review.rating for review in reviews) / reviews.count()
+        return 0
+    
+    # Количество участников
+    def get_registrations_count(self):
+        """Вычисляет количество подтвержденных регистраций - используем status вместо is_confirmed"""
+        return self.registrations.filter(status='confirmed').count()
+    
+    def get_average_rating(self):
+        """Вычисляет средний рейтинг"""
+        reviews = self.reviews.all()
+        if reviews:
+            return sum(review.rating for review in reviews) / reviews.count()
+        return 0
+    
+    @property
+    def average_rating(self):
+        """Property для среднего рейтинга"""
+        try:
+            return self.get_average_rating()
+        except (TypeError, AttributeError):
+            return 0
+    
+    @property 
+    def registrations_count(self):
+        """Property для количества регистраций"""
+        try:
+            return self.get_registrations_count()
+        except (TypeError, AttributeError):
+            return 0
+    
+    # # Добавляем методы для аннотации
+    # @classmethod
+    # def with_counts(cls):
+    #     """Возвращает QuerySet с аннотированными счетчиками"""
+    #     from django.db.models import Count, Avg
+    #     return cls.objects.annotate(
+    #         _registrations_count=Count('registrations', filter=models.Q(registrations__is_confirmed=True)),
+    #         _average_rating=Avg('reviews__rating')
+    #     )
+
     @property
     def is_free_event(self):
         return self.price <= 0 or self.is_free
@@ -378,8 +486,6 @@ class Registration(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.event.title}"
-
-User = get_user_model()
 
 
 class Favorite(models.Model):
@@ -583,9 +689,6 @@ class OrderItem(models.Model):
     def total_price(self):
         return self.price * self.quantity
     
-
-User = get_user_model()
-
 
 class EmailConfirmation(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -791,7 +894,6 @@ class TravelBuddyMessage(models.Model):
 #     def __str__(self):
 #         return f"{self.user.username} - {self.event.title}"
 
-User = get_user_model()
 
 class ChatSession(models.Model):
     """Сессия чата пользователя с ботом"""

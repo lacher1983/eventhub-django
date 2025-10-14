@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from django.utils.translation import gettext_lazy as _
+from decouple import config
 
 load_dotenv()
 
@@ -113,6 +114,7 @@ TEMPLATES = [
                 'events.context_processors.advertisements',
                 'events.context_processors.cart_context',
                 'django.template.context_processors.i18n',
+                'events.context_processors.map_pages',
             ],
         },
     },
@@ -257,3 +259,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20
 }
+
+# API ключи
+YANDEX_MAPS_API_KEY = os.getenv('YANDEX_MAPS_API_KEY', '68350a7a-73c2-438e-a7d0-5c6542ce05c9')

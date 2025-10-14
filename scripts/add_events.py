@@ -3,7 +3,7 @@ import django
 import datetime
 from django.utils import timezone
 from django.core.files import File
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import io
 import sys
 
@@ -32,8 +32,8 @@ def create_sample_image(width=400, height=300, color='#667eea', text='Event', em
     """Создание красивого изображения для мероприятия"""
     try:
         # Создаем изображение с градиентом
-        img = Image.new('RGB', (width, height), color='#f8f9fa')
-        draw = ImageDraw.Draw(img)
+        img = img.filter(ImageFilter.GaussianBlur(radius=0.5))
+        draw .rectangle([0, 0, width, height], outline=scheme['accent'], width=4)  # рамка
 
         # Рисуем градиентный фон
         for i in range(height):

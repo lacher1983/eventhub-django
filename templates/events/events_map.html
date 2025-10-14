@@ -1,0 +1,428 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Карта мероприятий - EventHub{% endblock %}
+
+{% block yandex_maps %}
+<script src="https://api-maps.yandex.ru/2.1/?apikey={{ YANDEX_MAPS_API_KEY }}&lang=ru_RU"></script>
+{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'events/css/map_filters.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'events/js/enhanced_map.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Заголовок и фильтры -->
+    <div class="bg-light py-4 mb-0">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="h3 mb-0">🗺️ Карта мероприятий</h1>
+                    <p class="text-muted mb-0">
+                        {% if events_count > 0 %}
+                            ✅ Найдено <strong>{{ events_count }}</strong> мероприятий на карте
+                        {% else %}
+                            ❌ Мероприятия не найдены. Создаем тестовые данные...
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+                            🔧 Расширенные фильтры
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="checkStatus()">
+                            📊 Статус
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="addTestData()">
+                            📍 Тест
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Базовые фильтры -->
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm" id="category-filter">
+                        <option value="all">🎯 Все категории</option>
+                        <option value="concert">🎵 Концерты</option>
+                        <option value="conference">💼 Конференции</option>
+                        <option value="workshop">🔧 Мастер-классы</option>
+                        <option value="sport">⚽ Спорт</option>
+                        <option value="exhibition">🖼️ Выставки</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm" id="price-filter">
+                        <option value="all">💰 Любая цена</option>
+                        <option value="free">🎫 Бесплатные</option>
+                        <option value="paid">💵 Платные</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm" id="date-filter">
+                        <option value="all">📅 Все даты</option>
+                        <option value="today">Сегодня</option>
+                        <option value="week">На этой неделе</option>
+                        <option value="month">В этом месяце</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control form-control-sm" id="map-search" 
+                           placeholder="🔍 Поиск мероприятий...">
+                </div>
+            </div>
+
+            <!-- Расширенные фильтры -->
+            <div class="collapse mt-3" id="advancedFilters">
+                <div class="card card-body">
+                    <h6 class="card-title">🎛️ Расширенные фильтры</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">📍 Радиус поиска</label>
+                            <input type="range" class="form-range" id="radius-filter" min="0" max="50" value="0">
+                            <div class="form-text" id="radius-value">Любой радиус</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">⭐ Минимальный рейтинг</label>
+                            <select class="form-select" id="rating-filter">
+                                <option value="all">Любой рейтинг</option>
+                                <option value="4.5">4.5+ ⭐⭐⭐⭐⭐</option>
+                                <option value="4.0">4.0+ ⭐⭐⭐⭐</option>
+                                <option value="3.5">3.5+ ⭐⭐⭐</option>
+                                <option value="3.0">3.0+ ⭐⭐</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">👥 Участников</label>
+                            <select class="form-select" id="participants-filter">
+                                <option value="all">Любое количество</option>
+                                <option value="10">10+ участников</option>
+                                <option value="50">50+ участников</option>
+                                <option value="100">100+ участников</option>
+                                <option value="200">200+ участников</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="btn-group">
+                                <button id="locate-user-btn" class="btn btn-outline-primary btn-sm">
+                                    📍 Определить мое местоположение
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="resetAllFilters()">
+                                    🔄 Сбросить все фильтры
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основная карта -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div id="map" style="width: 100%; height: 75vh; border-radius: 0;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Сайдбар для деталей события -->
+<div id="event-sidebar" class="event-sidebar"></div>
+
+<!-- Статистика -->
+<div id="map-stats"></div>
+
+<script>
+// Передаем данные мероприятий из Django в JavaScript
+window.EVENTS_DATA = {{ events_json|safe }};
+console.log('=== MAP DATA ===');
+console.log('Events loaded:', EVENTS_DATA.length);
+console.log('Sample event:', EVENTS_DATA[0]);
+
+// Глобальные функции для отладки
+window.checkStatus = function() {
+    const info = {
+        eventsCount: EVENTS_DATA.length,
+        mapContainer: document.getElementById('map'),
+        ymapsLoaded: typeof ymaps !== 'undefined',
+        eventMapInitialized: !!window.eventMap,
+        sampleEvent: EVENTS_DATA[0]
+    };
+    console.log('Status:', info);
+    alert(`Статус:\n• Событий: ${info.eventsCount}\n• Карта: ${info.mapContainer ? 'НАЙДЕНА' : 'НЕ НАЙДЕНА'}\n• Яндекс.Карты: ${info.ymapsLoaded ? 'ЗАГРУЖЕНЫ' : 'НЕ ЗАГРУЖЕНЫ'}\n• Карта инициализирована: ${info.eventMapInitialized ? 'ДА' : 'НЕТ'}`);
+};
+
+window.addTestData = function() {
+    if (window.eventMap && typeof window.eventMap.addEventMarker === 'function') {
+        const testEvent = {
+            id: 999,
+            title: 'ТЕСТОВЫЙ МАРКЕР',
+            latitude: 55.76,
+            longitude: 37.64,
+            location: 'Тестовая локация',
+            price: 0,
+            category_name: 'Тест',
+            organizer_name: 'Система',
+            short_description: 'Это тестовый маркер для проверки',
+            average_rating: 4.8,
+            registrations_count: 150
+        };
+        window.eventMap.addEventMarker(testEvent, true);
+        alert('✅ Тестовый маркер добавлен!');
+    } else {
+        alert('❌ Карта не инициализирована');
+    }
+};
+
+window.resetAllFilters = function() {
+    if (window.eventMap && window.eventMap.filters) {
+        window.eventMap.filters.resetFilters();
+    } else {
+        // Сбрасываем фильтры вручную
+        document.getElementById('category-filter').value = 'all';
+        document.getElementById('price-filter').value = 'all';
+        document.getElementById('date-filter').value = 'all';
+        document.getElementById('map-search').value = '';
+        document.getElementById('radius-filter').value = '0';
+        document.getElementById('radius-value').textContent = 'Любой радиус';
+        document.getElementById('rating-filter').value = 'all';
+        document.getElementById('participants-filter').value = 'all';
+        
+        if (window.eventMap) {
+            window.eventMap.applyFilters();
+        }
+    }
+    showNotification('Фильтры сброшены', 'info');
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing map with', EVENTS_DATA.length, 'events');
+    
+    if (typeof ymaps === 'undefined') {
+        console.error('Yandex Maps not loaded');
+        showNotification('Ошибка загрузки Яндекс.Карт', 'error');
+        return;
+    }
+
+    ymaps.ready(function() {
+        try {
+            initEventMap('map', {
+                center: [55.76, 37.64],
+                zoom: 10,
+                heatmapEnabled: true,
+                clusteringEnabled: true,
+                eventsData: EVENTS_DATA,
+                apiKey: '{{ YANDEX_MAPS_API_KEY }}'
+            });
+            
+            // Инициализируем обработчики для ползунка радиуса
+            const radiusSlider = document.getElementById('radius-filter');
+            const radiusValue = document.getElementById('radius-value');
+            
+            if (radiusSlider && radiusValue) {
+                radiusSlider.addEventListener('input', function(e) {
+                    const radius = parseInt(e.target.value);
+                    if (radius === 0) {
+                        radiusValue.textContent = 'Любой радиус';
+                    } else {
+                        radiusValue.textContent = `${radius} км от вас`;
+                    }
+                });
+            }
+            
+            console.log('Map initialized successfully');
+            
+        } catch (error) {
+            console.error('Map init error:', error);
+            showNotification('Ошибка инициализации карты: ' + error.message, 'error');
+        }
+    });
+});
+
+// Функция для показа уведомлений
+function showNotification(message, type = 'info') {
+    // Создаем уведомление, если его еще нет
+    let notification = document.getElementById('map-notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'map-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            min-width: 300px;
+            max-width: 400px;
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        `;
+        document.body.appendChild(notification);
+    }
+    
+    // Устанавливаем стили в зависимости от типа
+    const styles = {
+        'success': { background: '#28a745', icon: '✅' },
+        'error': { background: '#dc3545', icon: '❌' },
+        'info': { background: '#17a2b8', icon: 'ℹ️' },
+        'warning': { background: '#ffc107', icon: '⚠️' }
+    };
+    
+    const style = styles[type] || styles.info;
+    notification.style.background = style.background;
+    notification.innerHTML = `${style.icon} ${message}`;
+    
+    // Показываем уведомление
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Скрываем через 5 секунд
+    setTimeout(() => {
+        notification.style.transform = 'translateX(120%)';
+    }, 5000);
+}
+</script>
+
+<style>
+.event-sidebar {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background: white;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+    z-index: 1001;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+}
+
+.event-sidebar.active {
+    right: 0;
+}
+
+.event-sidebar-content {
+    padding: 20px;
+    position: relative;
+}
+
+.close-sidebar {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #666;
+}
+
+.map-stats {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(255,255,255,0.95);
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 999;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.stat-item {
+    margin-right: 15px;
+    font-size: 0.85em;
+    color: #666;
+}
+
+/* Стили для расширенных фильтров */
+.advanced-filters .card {
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.advanced-filters .card-body {
+    padding: 1.25rem;
+}
+
+.advanced-filters .form-range::-webkit-slider-thumb {
+    background: #007bff;
+}
+
+.advanced-filters .form-range::-moz-range-thumb {
+    background: #007bff;
+}
+
+.advanced-filters .form-range::-webkit-slider-track {
+    background: #dee2e6;
+}
+
+.advanced-filters .form-range::-moz-range-track {
+    background: #dee2e6;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .event-sidebar {
+        width: 100%;
+        right: -100%;
+    }
+    
+    .map-stats {
+        left: 10px;
+        bottom: 10px;
+        padding: 8px 12px;
+    }
+    
+    .stat-item {
+        display: block;
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+    
+    .advanced-filters .card-body {
+        padding: 1rem;
+    }
+    
+    .btn-group .btn {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* Анимации */
+.collapse {
+    transition: all 0.3s ease;
+}
+
+.btn {
+    transition: all 0.2s ease;
+}
+
+.form-control, .form-select, .form-range {
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: #007bff;
+}
+</style>
+{% endblock %}

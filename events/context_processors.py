@@ -34,3 +34,19 @@ def cart_context(request):
     return {
         'cart_items_count': cart_items_count
     }
+
+def map_pages(request):
+    """Определяет, на каких страницах нужны Яндекс.Карты"""
+    map_url_names = [
+        'events_map',  # страница карты мероприятий
+        'event_detail', # детальная страница события (если есть мини-карта)
+        'event_create', # создание события (если есть карта)
+        'event_edit',   # редактирование события
+    ]
+    
+    current_url_name = request.resolver_match.url_name if request.resolver_match else None
+    
+    return {
+        'map_pages': map_url_names,
+        'current_url_needs_map': current_url_name in map_url_names,
+    }
