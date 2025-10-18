@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Статистика платформы" %} | EventsHub{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">{% trans "Статистика платформы" %}</h1>
+            <p class="text-muted">{% trans "Обзор активности и метрик платформы" %}</p>
+        </div>
+    </div>
+
+    <!-- Карточки с общей статистикой -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_events }}</h4>
+                            <p class="card-text">{% trans "Мероприятий" %}</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_users }}</h4>
+                            <p class="card-text">{% trans "Пользователей" %}</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_registrations }}</h4>
+                            <p class="card-text">{% trans "Регистраций" %}</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-ticket-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ active_events }}</h4>
+                            <p class="card-text">{% trans "Активных событий" %}</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-rocket fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Детальная статистика -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Статистика по категориям" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% if category_stats %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Категория" %}</th>
+                                        <th>{% trans "Количество событий" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for stat in category_stats %}
+                                    <tr>
+                                        <td>{{ stat.category__name }}</td>
+                                        <td>{{ stat.count }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">{% trans "Нет данных по категориям" %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Последняя активность" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_activity %}
+                        <div class="list-group">
+                            {% for activity in recent_activity %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ activity.title }}</h6>
+                                    <small>{{ activity.created_at|timesince }} {% trans "назад" %}</small>
+                                </div>
+                                <p class="mb-1">{{ activity.description }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">{% trans "Нет данных о активности" %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Графики (можно добавить позже) -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Статистика регистраций за последние 30 дней" %}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">{% trans "Здесь могут отображаться графики регистраций" %}</p>
+                    <!-- Место для Chart.js или другого графического решения -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Можно добавить JavaScript для графиков позже
+console.log('Platform statistics page loaded');
+</script>
+{% endblock %}

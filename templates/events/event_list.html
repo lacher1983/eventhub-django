@@ -581,9 +581,7 @@ document.getElementById('projectVideoModal').addEventListener('hidden.bs.modal',
                                     <div class="event-header position-relative">
                                         <div class="event-image-container">
                                             {% if event.image %}
-                                                <img src="{{ event.image.url }}" 
-                                                     alt="{{ event.title }}" 
-                                                     class="event-image">
+                                                <img src="{{ event.image.url }}" alt="{{ event.title }}" class="event-image">
                                             {% else %}
                                                 <!-- Генерируемое изображение по категории -->
                                                 <div class="event-category-image category-{{ event.category.slug|default:'default' }}">
@@ -817,24 +815,43 @@ document.getElementById('projectVideoModal').addEventListener('hidden.bs.modal',
                             <h5 class="card-title mb-0">Мероприятия на карте</h5>
                         </div>
                         <div class="card-body p-0">
-                            <div id="mini-events-map">
+                            <div id="mini-map">
                                 {% block extra_js %}
                                 {{ block.super }}
                                 <script>
                                 document.addEventListener('DOMContentLoaded', function() {
-                                const miniMapContainer = document.getElementById('mini-map');
-                                if (!miniMapContainer || typeof ymaps === 'undefined') return;
+                                    const miniMapContainer = document.getElementById('mini-map');
+                                    if (!miniMapContainer || typeof ymaps === 'undefined') return;
 
-                                ymaps.ready(function () {
-                                    // Создаём карту
-                                    const miniMap = new ymaps.Map('mini-map', {
-                                    center: [55.751244, 37.618423], // Москва
-                                    zoom: 10,
-                                    controls: ['zoomControl']
-                                    }, {
-                                    suppressMapOpenBlock: true
+                                    ymaps.ready(function () {
+                                        try {
+                                        // Создаём карту
+                                        const miniMap = new ymaps.Map('mini-map', {
+                                            center: [55.751244, 37.618423], // Москва
+                                            zoom: 10,
+                                            controls: ['zoomControl']
+                                          });
+
+                                          // Тестовые маркеры (замените на реальные данные из events_for_map)
+                                          const testEvents = [
+                                            {title: 'Концерт', lat: 55.75, lon: 37.62},
+                                            {title: 'Выставка', lat: 55.76, lon: 37.64}
+                                          ];
+                                          testEvents.forEach(e => {
+                                            miniMap.geoObjects.add(new ymaps.Placemark(
+                                                [e.lat, e.lon],
+                                                { balloonContent: e.title },
+                                                { preset: 'islands#blueDotIcon' }
+                                            ));
+                                          });
+                                        } catch (error) {
+                                          console.error('Ошибка инициализации карты:', error);
+                                          miniMapContainer.innerHTML = '<div class="alert alert-warning">Карта недоступна</div>';
+                                        }
+                                      });
                                     });
-
+                                    </script>
+                                 
                                     // === ЗАГРУЗКА МЕРОПРИЯТИЙ ===
                                     {% if events_for_map %}
                                     const events = {{ events_for_map|safe }};
