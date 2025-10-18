@@ -53,3 +53,12 @@ echo "venv/" >> .gitignore
 echo ".env" >> .gitignore
 echo ".vscode/" >> .gitignoredb.sqlite3
 db.sqlite3
+.env
+db.sqlite3
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+.venv/
+venv/
+.env.local

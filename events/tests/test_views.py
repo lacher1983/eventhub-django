@@ -59,7 +59,7 @@ class EventViewsTest(TestCase):
         assert response.status_code == 200
 
     def test_event_filtering(self, client, test_event):
-        # Test category filter
+        # Фильтр категории теста
         response = client.get(
             reverse('event_list') + f'?category={test_event.category.slug}'
         )
@@ -129,5 +129,5 @@ class ReviewViewsTest(TestCase):
         response = authenticated_client.get(
             reverse('add_review', args=[test_event.pk])
         )
-        # Should redirect because user is not registered
+        # Необходимо перенаправить, поскольку пользователь не зарегистрирован
         assert response.status_code == 302

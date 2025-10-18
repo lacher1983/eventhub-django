@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{% trans "Мой профиль" %}</h2>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>{% trans "Имя пользователя:" %}</strong> {{ user.username }}</p>
+            <p><strong>{% trans "Email:" %}</strong> {{ user.email }}</p>
+            <!-- Добавьте другие поля профиля -->
+        </div>
+    </div>
+</div>
+{% endblock %}

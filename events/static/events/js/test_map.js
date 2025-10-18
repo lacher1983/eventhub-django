@@ -1,4 +1,3 @@
-// events/static/events/js/test_map.js
 console.log('=== TEST MAP SCRIPT LOADED ===');
 
 function initTestMap() {

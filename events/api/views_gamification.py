@@ -125,7 +125,7 @@ def claim_quest_reward(request, quest_id):
         )
         
         # Помечаем награду как полученную
-        user_quest.delete()  # Или помечаем другим способом
+        user_quest.delete()  # Или помечаем другим способом (грамоту дадим)
         
         return Response({
             'status': 'success',

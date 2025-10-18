@@ -128,3 +128,8 @@ class HaveIBeenPwnedValidator:
     
     def get_help_text(self):
         return _('Пароль проверяется на наличие в известных утечках данных.')
+    
+
+def validate_image_file(image):
+    if not image.content_type.startswith('image/'):
+        raise ValidationError("Файл должен быть изображением.")

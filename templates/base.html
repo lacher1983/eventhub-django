@@ -10,6 +10,8 @@
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts -->
@@ -391,25 +393,13 @@
                 🎉 EventHub
             </a>
             
-            <div class="navbar-search d-none d-lg-flex mx-4">
-                <form method="get" action="{% url 'event_list' %}" class="w-100">
-                    <div class="input-group">
-                        <input type="text" name="q" class="form-control" 
-                               placeholder="{% trans 'Поиск мероприятий' %}">
-                        <button class="btn" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarMain">
                 <div class="d-lg-none mb-3">
-                    <form method="get" action="{% url 'event_list' %}">
+                    <form method="get" action="{% url 'combined_events' %}">
                         <div class="input-group">
                             <input type="text" name="q" class="form-control" 
                                    placeholder="{% trans 'Поиск мероприятий' %}">
@@ -419,6 +409,7 @@
                         </div>
                     </form>
                 </div>
+            
 
                 <ul class="navbar-nav me-auto">
                     <!-- ОСНОВНОЕ МЕНЮ МЕРОПРИЯТИЙ -->
@@ -465,6 +456,28 @@
                         </ul>
                     </li>
 
+                    <!-- ТИПЫ МЕРОПРИЯТИЙ -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tags me-1"></i> {% trans "Типы" %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for type_value, type_label in event_types %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'combined_events' %}?event_type={{ type_value }}">
+                                        {{ type_label }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'combined_events' %}">
+                                    <i class="fas fa-ban me-2"></i>{% trans "Все типы" %}
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                     <!-- КАРТА МЕРОПРИЯТИЙ -->
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'events_map' %}">
@@ -473,7 +486,7 @@
                     </li>
 
                     <!-- СОЗДАТЬ МЕРОПРИЯТИЕ -->
-                    {% if user.is_authenticated %}
+                    {% if user.is_authenticated and user.role in 'organizer,admin' %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'event_create' %}">
                             <i class="fas fa-plus-circle me-1"></i> {% trans "Создать" %}
@@ -530,7 +543,7 @@
                                 <li><a class="dropdown-item" href="{% url 'favorite_list' %}">
                                     <i class="fas fa-star me-2"></i>{% trans "Избранное" %}
                                 </a></li>
-                                <li><a class="dropdown-item" href="#">
+                                <li><a class="dropdown-item" href="{% url 'notifications' %}">
                                     <i class="fas fa-bell me-2"></i>{% trans "Уведомления" %}
                                 </a></li>
                                 {% if user.is_staff %}
@@ -539,6 +552,14 @@
                                     <i class="fas fa-cog me-2"></i>{% trans "Админка" %}
                                 </a></li>
                                 {% endif %}
+
+                                {% if user.role == 'admin' %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'platform_statistics' %}">
+                                    <i class="fas fa-chart-bar me-2"></i>{% trans "Статистика платформы" %}
+                                </a></li>
+                                {% endif %}  
+                                                              
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="post" action="{% url 'logout' %}">
@@ -896,7 +917,9 @@
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6>{% trans "ОРГАНИЗАТОРАМ" %}</h6>
                     <div class="footer-links">
+                        {% if user.is_authenticated and user.role in 'organizer,admin' %}
                         <a href="{% url 'event_create' %}">{% trans "Создать мероприятие" %}</a>
+                        {% endif %}
                         <a href="{% url 'organizer_solutions' %}">{% trans "Решения для организаторов" %}</a>
                         <a href="{% url 'organizer_guidelines' %}">{% trans "Рекомендации" %}</a>
                         <a href="{% url 'organizer_resources' %}">{% trans "Ресурсы" %}</a>
@@ -1048,434 +1071,701 @@
     {% endblock %}
 
     <!-- JavaScript для мини-карты -->
-<script>
-// Мини-карта на главной странице
-let miniMap = null;
-let userLocationMarker = null;
+    <script>
+    // Мини-карта на главной странице
+    let miniMap = null;
+    let userLocationMarker = null;
 
-function initMiniMap() {
-    console.log('Initializing mini map...');
+    function initMiniMap() {
+        console.log('Initializing mini map...');
     
-    // Проверяем наличие контейнера
-    const mapContainer = document.getElementById('mini-map');
-    if (!mapContainer) {
-        console.error('Mini map container not found');
-        return;
-    }
-
-    if (typeof ymaps === 'undefined') {
-        console.error('Yandex Maps API not loaded');
-        showNotification('Библиотека карт не загружена', 'error');
-        return;
-    }
-
-    ymaps.ready(() => {
-        try {
-            console.log('Yandex Maps ready, creating map...');
-            
-            // Создаем карту
-            miniMap = new ymaps.Map('mini-map', {
-                center: [55.76, 37.64],
-                zoom: 10,
-                controls: ['zoomControl', 'typeSelector']
-            }, {
-                suppressMapOpenBlock: true
-            });
-
-            // Загружаем мероприятия
-            loadEventsForMiniMap();
-            
-            console.log('Mini map initialized successfully');
-            
-        } catch (error) {
-            console.error('Error initializing mini-map:', error);
-            showNotification('Ошибка загрузки карты', 'error');
-            
-            // Показываем fallback контент
-            showFallbackMap();
+        // Проверяем наличие контейнера
+        const mapContainer = document.getElementById('mini-map');
+        if (!mapContainer) {
+            console.error('Mini map container not found');
+            return;
         }
-    });
-}
 
-function showFallbackMap() {
-    const container = document.getElementById('mini-map');
-    if (container) {
-        container.innerHTML = `
-            <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 12px;">
-                <div class="text-center">
-                    <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
-                    <h4>Карта мероприятий</h4>
-                    <p class="text-muted">Используйте карту для поиска мероприятий рядом с вами</p>
-                    <a href="{% url 'events_map' %}" class="btn btn-primary mt-3">
-                        <i class="fas fa-map me-2"></i>Открыть полную карту
-                    </a>
-                </div>
-            </div>
-        `;
-    }
-}
-
-function loadEventsForMiniMap() {
-    // Тестовые данные
-    const testEvents = [
-        {
-            id: 1,
-            title: 'Концерт классической музыки',
-            latitude: 55.7558,
-            longitude: 37.6173,
-            location: 'Москва, Красная площадь',
-            price: 1500,
-            category_name: 'Музыка',
-            url: '#',
-            date: '2024-12-20T19:00:00'
-        },
-        {
-            id: 2,
-            title: 'Выставка современного искусства',
-            latitude: 55.7415,
-            longitude: 37.6204,
-            location: 'Москва, Парк Горького',
-            price: 500,
-            category_name: 'Искусство',
-            url: '#',
-            date: '2024-12-22T11:00:00'
-        },
-        {
-            id: 3,
-            title: 'Бизнес конференция',
-            latitude: 55.7508,
-            longitude: 37.6172,
-            location: 'Москва, Кремль',
-            price: 3000,
-            category_name: 'Бизнес',
-            url: '#',
-            date: '2024-12-25T09:00:00'
-        },
-        {
-            id: 4,
-            title: 'Спортивный марафон',
-            latitude: 55.7338,
-            longitude: 37.5889,
-            location: 'Москва, Воробьевы горы',
-            price: 0,
-            category_name: 'Спорт',
-            url: '#',
-            date: '2024-12-18T08:00:00'
+        if (typeof ymaps === 'undefined') {
+            console.error('Yandex Maps API not loaded');
+            showNotification('Библиотека карт не загружена', 'error');
+            return;
         }
-    ];
 
-    // В реальном приложении раскомментируйте fetch запрос
-    /*
-    fetch('/api/events/map/?limit=20')
-        .then(response => {
-            if (!response.ok) throw new Error('Network error');
-            return response.json();
-        })
-        .then(events => {
-            renderEventsOnMiniMap(events);
-            updateNearbyEventsList(events);
-            updateCityStats(events);
-        })
-        .catch(error => {
-            console.error('Error loading events:', error);
-            // Используем тестовые данные при ошибке
-            renderEventsOnMiniMap(testEvents);
-            updateNearbyEventsList(testEvents);
-            updateCityStats(testEvents);
-        });
-    */
-
-    // Используем тестовые данные
-    renderEventsOnMiniMap(testEvents);
-    updateNearbyEventsList(testEvents);
-    updateCityStats(testEvents);
-}
-
-function renderEventsOnMiniMap(events) {
-    if (!miniMap || !events.length) return;
-
-    // Очищаем старые метки
-    miniMap.geoObjects.removeAll();
-
-    // Создаем коллекцию для кластеризации
-    const objectManager = new ymaps.ObjectManager({
-        clusterize: true,
-        gridSize: 64,
-        clusterDisableClickZoom: true
-    });
-
-    // Настройка стилей
-    objectManager.objects.options.set('preset', 'islands#blueDotIcon');
-    objectManager.clusters.options.set('preset', 'islands#blueClusterIcons');
-
-    // Добавляем мероприятия
-    const features = events.map(event => ({
-        type: 'Feature',
-        id: event.id,
-        geometry: {
-            type: 'Point',
-            coordinates: [event.latitude, event.longitude]
-        },
-        properties: {
-            balloonContentHeader: event.title,
-            balloonContentBody: `
-                <div class="mini-event-balloon">
-                    <h6>${event.title}</h6>
-                    <p><strong>📍 ${event.location}</strong></p>
-                    <p>📅 ${new Date(event.date).toLocaleDateString('ru-RU')}</p>
-                    <p>💰 ${event.price > 0 ? event.price + '₽' : 'Бесплатно'}</p>
-                    <p>🎯 ${event.category_name || 'Другое'}</p>
-                    <a href="${event.url}" class="btn btn-primary btn-sm mt-2" onclick="event.stopPropagation();">Подробнее</a>
-                </div>
-            `,
-            hintContent: event.title
-        }
-    }));
-
-    objectManager.add(features);
-    miniMap.geoObjects.add(objectManager);
-
-    // Автоматически подбираем масштаб чтобы показать все метки
-    if (features.length > 0) {
-        miniMap.setBounds(objectManager.getBounds(), {
-            checkZoomRange: true,
-            zoomMargin: 50
-        });
-    }
-}
-
-function updateNearbyEventsList(events) {
-    const container = document.getElementById('nearby-events');
-    if (!container) return;
-
-    if (!events || events.length === 0) {
-        container.innerHTML = `
-            <div class="text-center py-4">
-                <i class="fas fa-map-marker-alt fa-2x text-muted mb-3"></i>
-                <p class="text-muted">Мероприятия не найдены</p>
-            </div>
-        `;
-        return;
-    }
-
-    const nearbyEvents = events.slice(0, 5);
-    
-    container.innerHTML = nearbyEvents.map(event => `
-        <div class="nearby-event-item mb-3">
-            <div class="d-flex align-items-start">
-                <div class="flex-shrink-0">
-                    <div class="event-marker bg-primary rounded-circle d-flex align-items-center justify-content-center" 
-                         style="width: 32px; height: 32px;">
-                        <i class="fas fa-map-marker-alt text-white" style="font-size: 0.8rem;"></i>
-                    </div>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                    <h6 class="mb-1">${event.title}</h6>
-                    <p class="text-muted small mb-1">${event.location}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge bg-primary">${event.category_name || 'Другое'}</span>
-                        <small class="text-muted">${event.price > 0 ? event.price + '₽' : 'Бесплатно'}</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function updateCityStats(events) {
-    if (!events) return;
-    
-    const moscowCount = events.filter(e => e.location && e.location.toLowerCase().includes('москва')).length;
-    const spbCount = events.filter(e => e.location && e.location.toLowerCase().includes('петербург')).length;
-    const novosibirskCount = events.filter(e => e.location && e.location.toLowerCase().includes('новосибирск')).length;
-    const ekbCount = events.filter(e => e.location && e.location.toLowerCase().includes('екатеринбург')).length;
-
-    const updateElement = (id, value) => {
-        const element = document.getElementById(id);
-        if (element) element.textContent = value;
-    };
-
-    updateElement('moscow-count', moscowCount);
-    updateElement('spb-count', spbCount);
-    updateElement('novosibirsk-count', novosibirskCount);
-    updateElement('ekb-count', ekbCount);
-}
-
-function locateUserOnMiniMap() {
-    if (!navigator.geolocation) {
-        showNotification('Геолокация не поддерживается вашим браузером', 'warning');
-        return;
-    }
-
-    showNotification('Определяем ваше местоположение...', 'info');
-
-    navigator.geolocation.getCurrentPosition(
-        function(position) {
-            const userLocation = [position.coords.latitude, position.coords.longitude];
+        ymaps.ready(() => {
+            try {
+                console.log('Yandex Maps ready, creating map...');
             
-            if (userLocationMarker && miniMap) {
-                miniMap.geoObjects.remove(userLocationMarker);
-            }
-
-            if (miniMap) {
-                userLocationMarker = new ymaps.Placemark(userLocation, {
-                    hintContent: 'Ваше местоположение',
-                    balloonContent: 'Вы здесь!'
+                // Создаем карту
+                miniMap = new ymaps.Map('mini-map', {
+                    center: [55.76, 37.64],
+                    zoom: 10,
+                    controls: ['zoomControl', 'typeSelector']
                 }, {
-                    preset: 'islands#blueCircleIcon',
-                    iconColor: '#1e88e5'
+                    suppressMapOpenBlock: true
                 });
 
-                miniMap.geoObjects.add(userLocationMarker);
-                miniMap.setCenter(userLocation, 13);
+                // Загружаем мероприятия
+                loadEventsForMiniMap();
+            
+                console.log('Mini map initialized successfully');
+            
+            } catch (error) {
+                console.error('Error initializing mini-map:', error);
+                showNotification('Ошибка загрузки карты', 'error');
+            
+                // Показываем fallback контент
+                showFallbackMap();
+            }
+        });
+    }
+
+    function showFallbackMap() {
+        const container = document.getElementById('mini-map');
+        if (container) {
+            container.innerHTML = `
+                <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 12px;">
+                    <div class="text-center">
+                        <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
+                        <h4>Карта мероприятий</h4>
+                        <p class="text-muted">Используйте карту для поиска мероприятий рядом с вами</p>
+                        <a href="{% url 'events_map' %}" class="btn btn-primary mt-3">
+                            <i class="fas fa-map me-2"></i>Открыть полную карту
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function loadEventsForMiniMap() {
+        // Тестовые данные
+        const testEvents = [
+            {
+                id: 1,
+                title: 'Концерт классической музыки',
+                latitude: 55.7558,
+                longitude: 37.6173,
+                location: 'Москва, Красная площадь',
+                price: 1500,
+                category_name: 'Музыка',
+                url: '#',
+                date: '2024-12-20T19:00:00'
+            },
+            {
+                id: 2,
+                title: 'Выставка современного искусства',
+                latitude: 55.7415,
+                longitude: 37.6204,
+                location: 'Москва, Парк Горького',
+                price: 500,
+                category_name: 'Искусство',
+                url: '#',
+                date: '2024-12-22T11:00:00'
+            },
+            {
+                id: 3,
+                title: 'Бизнес конференция',
+                latitude: 55.7508,
+                longitude: 37.6172,
+                location: 'Москва, Кремль',
+                price: 3000,
+                category_name: 'Бизнес',
+                url: '#',
+                date: '2024-12-25T09:00:00'
+            },
+            {
+                id: 4,
+                title: 'Спортивный марафон',
+                latitude: 55.7338,
+                longitude: 37.5889,
+                location: 'Москва, Воробьевы горы',
+                price: 0,
+                category_name: 'Спорт',
+                url: '#',
+                date: '2024-12-18T08:00:00'
+            }
+        ];
+
+        // В реальном приложении раскомментируйте fetch запрос
+        /*
+        fetch('/api/events/map/?limit=20')
+            .then(response => {
+                if (!response.ok) throw new Error('Network error');
+                return response.json();
+            })
+            .then(events => {
+                renderEventsOnMiniMap(events);
+                updateNearbyEventsList(events);
+                updateCityStats(events);
+            })
+            .catch(error => {
+                console.error('Error loading events:', error);
+                // Используем тестовые данные при ошибке
+                renderEventsOnMiniMap(testEvents);
+                updateNearbyEventsList(testEvents);
+                updateCityStats(testEvents);
+            });
+        */
+
+        // Используем тестовые данные
+        renderEventsOnMiniMap(testEvents);
+        updateNearbyEventsList(testEvents);
+        updateCityStats(testEvents);
+    }
+
+    function renderEventsOnMiniMap(events) {
+        if (!miniMap || !events.length) return;
+
+        // Очищаем старые метки
+        miniMap.geoObjects.removeAll();
+
+        // Создаем коллекцию для кластеризации
+        const objectManager = new ymaps.ObjectManager({
+            clusterize: true,
+            gridSize: 64,
+            clusterDisableClickZoom: true
+        });
+
+        // Настройка стилей
+        objectManager.objects.options.set('preset', 'islands#blueDotIcon');
+        objectManager.clusters.options.set('preset', 'islands#blueClusterIcons');
+
+        // Добавляем мероприятия
+        const features = events.map(event => ({
+            type: 'Feature',
+            id: event.id,
+            geometry: {
+                type: 'Point',
+                coordinates: [event.latitude, event.longitude]
+            },
+            properties: {
+                balloonContentHeader: event.title,
+                balloonContentBody: `
+                    <div class="mini-event-balloon">
+                        <h6>${event.title}</h6>
+                        <p><strong>📍 ${event.location}</strong></p>
+                        <p>📅 ${new Date(event.date).toLocaleDateString('ru-RU')}</p>
+                        <p>💰 ${event.price > 0 ? event.price + '₽' : 'Бесплатно'}</p>
+                        <p>🎯 ${event.category_name || 'Другое'}</p>
+                        <a href="${event.url}" class="btn btn-primary btn-sm mt-2" onclick="event.stopPropagation();">Подробнее</a>
+                    </div>
+                `,
+                hintContent: event.title
+            }
+        }));
+
+        objectManager.add(features);
+        miniMap.geoObjects.add(objectManager);
+
+        // Автоматически подбираем масштаб чтобы показать все метки
+        if (features.length > 0) {
+            miniMap.setBounds(objectManager.getBounds(), {
+                checkZoomRange: true,
+                zoomMargin: 50
+            });
+        }
+    }
+
+    function updateNearbyEventsList(events) {
+        const container = document.getElementById('nearby-events');
+        if (!container) return;
+
+        if (!events || events.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-map-marker-alt fa-2x text-muted mb-3"></i>
+                    <p class="text-muted">Мероприятия не найдены</p>
+                </div>
+            `;
+            return;
+        }
+
+        const nearbyEvents = events.slice(0, 5);
+        
+        container.innerHTML = nearbyEvents.map(event => `
+            <div class="nearby-event-item mb-3">
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0">
+                        <div class="event-marker bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                            style="width: 32px; height: 32px;">
+                            <i class="fas fa-map-marker-alt text-white" style="font-size: 0.8rem;"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">${event.title}</h6>
+                        <p class="text-muted small mb-1">${event.location}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary">${event.category_name || 'Другое'}</span>
+                            <small class="text-muted">${event.price > 0 ? event.price + '₽' : 'Бесплатно'}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function updateCityStats(events) {
+        if (!events) return;
+        
+        const moscowCount = events.filter(e => e.location && e.location.toLowerCase().includes('москва')).length;
+        const spbCount = events.filter(e => e.location && e.location.toLowerCase().includes('петербург')).length;
+        const novosibirskCount = events.filter(e => e.location && e.location.toLowerCase().includes('новосибирск')).length;
+        const ekbCount = events.filter(e => e.location && e.location.toLowerCase().includes('екатеринбург')).length;
+
+        const updateElement = (id, value) => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = value;
+        };
+
+        updateElement('moscow-count', moscowCount);
+        updateElement('spb-count', spbCount);
+        updateElement('novosibirsk-count', novosibirskCount);
+        updateElement('ekb-count', ekbCount);
+    }
+
+    function locateUserOnMiniMap() {
+        if (!navigator.geolocation) {
+            showNotification('Геолокация не поддерживается вашим браузером', 'warning');
+            return;
+        }
+
+        showNotification('Определяем ваше местоположение...', 'info');
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const userLocation = [position.coords.latitude, position.coords.longitude];
                 
-                showNotification('Ваше местоположение определено!', 'success');
+                if (userLocationMarker && miniMap) {
+                    miniMap.geoObjects.remove(userLocationMarker);
+                }
+
+                if (miniMap) {
+                    userLocationMarker = new ymaps.Placemark(userLocation, {
+                        hintContent: 'Ваше местоположение',
+                        balloonContent: 'Вы здесь!'
+                    }, {
+                        preset: 'islands#blueCircleIcon',
+                        iconColor: '#1e88e5'
+                    });
+
+                    miniMap.geoObjects.add(userLocationMarker);
+                    miniMap.setCenter(userLocation, 13);
+                    
+                    showNotification('Ваше местоположение определено!', 'success');
+                }
+            },
+            function(error) {
+                let errorMessage = 'Не удалось определить местоположение';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = 'Доступ к геолокации запрещен';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = 'Информация о местоположении недоступна';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = 'Время ожидания истекло';
+                        break;
+                }
+                showNotification(errorMessage, 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
             }
-        },
-        function(error) {
-            let errorMessage = 'Не удалось определить местоположение';
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMessage = 'Доступ к геолокации запрещен';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMessage = 'Информация о местоположении недоступна';
-                    break;
-                case error.TIMEOUT:
-                    errorMessage = 'Время ожидания истекло';
-                    break;
-            }
-            showNotification(errorMessage, 'error');
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 60000
-        }
-    );
-}
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing mini map...');
-    
-    // Даем время на загрузку всех ресурсов
-    setTimeout(() => {
-        if (typeof ymaps !== 'undefined' && ymaps.ready) {
-            initMiniMap();
-        } else {
-            console.log('Yandex Maps not loaded yet, waiting...');
-            // Пробуем снова через 2 секунды
-            setTimeout(initMiniMap, 2000);
-        }
-    }, 1000);
-});
-
-// Стили для балунов
-const miniMapStyles = `
-.mini-event-balloon {
-    max-width: 250px;
-    padding: 10px;
-}
-
-.mini-event-balloon h6 {
-    font-size: 1rem;
-    margin-bottom: 8px;
-    color: #333;
-    font-weight: 600;
-}
-
-.mini-event-balloon p {
-    font-size: 0.85rem;
-    margin-bottom: 5px;
-    color: #666;
-}
-
-.mini-event-balloon .btn {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.75rem;
-}
-
-.ymaps-2-1-79-balloon__content {
-    margin-right: 0 !important;
-}
-`;
-
-// Добавляем стили
-if (!document.querySelector('#mini-map-styles')) {
-    const styleSheet = document.createElement('style');
-    styleSheet.id = 'mini-map-styles';
-    styleSheet.textContent = miniMapStyles;
-    document.head.appendChild(styleSheet);
-}
-</script>
-
-    <!-- Геймификация - Бейдж пользователя -->
-    {% if user.is_authenticated %}
-    <div class="user-game-widget">
-        <div class="level-badge-mini" 
-            onclick="window.location.href='{% url 'game_profile' %}'"
-            title="Мой профиль">
-            <span class="level-icon">⭐</span>
-            <span class="level-text">Ур. 1</span>
-            <span class="points">0</span>
-        </div>
-    </div>
-
-    <style>
-    .user-game-widget {
-        position: fixed;
-        top: 80px;
-        left: 20px;
-        z-index: 999;
+        );
     }
 
-    .level-badge-mini {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 20px;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.9em;
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing mini map...');
+        
+        // Даем время на загрузку всех ресурсов
+        setTimeout(() => {
+            if (typeof ymaps !== 'undefined' && ymaps.ready) {
+                initMiniMap();
+            } else {
+                console.log('Yandex Maps not loaded yet, waiting...');
+                // Пробуем снова через 2 секунды
+                setTimeout(initMiniMap, 2000);
+            }
+        }, 1000);
+    });
+
+    // Стили для балунов
+    const miniMapStyles = `
+    .mini-event-balloon {
+        max-width: 250px;
+        padding: 10px;
+    }
+
+    .mini-event-balloon h6 {
+        font-size: 1rem;
+        margin-bottom: 8px;
+        color: #333;
         font-weight: 600;
-        transition: all 0.3s ease;
     }
 
-    .level-badge-mini:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    .mini-event-balloon p {
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+        color: #666;
     }
 
-    .level-icon {
-        font-size: 1.1em;
+    .mini-event-balloon .btn {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.75rem;
     }
 
-    .points {
-        background: rgba(255,255,255,0.2);
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 0.8em;
+    .ymaps-2-1-79-balloon__content {
+        margin-right: 0 !important;
     }
+    `;
 
-    @media (max-width: 768px) {
+    // Добавляем стили
+    if (!document.querySelector('#mini-map-styles')) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'mini-map-styles';
+        styleSheet.textContent = miniMapStyles;
+        document.head.appendChild(styleSheet);
+    }
+    </script>
+
+        <!-- Геймификация - Бейдж пользователя -->
+        {% if user.is_authenticated %}
+        <div class="user-game-widget">
+            <div class="level-badge-mini" 
+                onclick="window.location.href='{% url 'game_profile' %}'"
+                title="Мой профиль">
+                <span class="level-icon">⭐</span>
+                <span class="level-text">Ур. 1</span>
+                <span class="points">0</span>
+            </div>
+        </div>
+
+        <style>
         .user-game-widget {
-            top: 60px;
-            left: 10px;
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            z-index: 999;
+        }
+
+        .level-badge-mini {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .level-badge-mini:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .level-icon {
+            font-size: 1.1em;
+        }
+
+        .points {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+
+        @media (max-width: 768px) {
+            .user-game-widget {
+                top: 60px;
+                left: 10px;
+            }
+            
+            .level-badge-mini {
+                font-size: 0.8em;
+                padding: 6px 10px;
+            }
+        }
+        </style>
+        {% endif %}
+
+    <!-- <script>
+    // Глобальные функции для видео
+    function playVideo(button) {
+        console.log('playVideo function called');
+        
+        const videoWrapper = button.closest('.video-wrapper');
+        if (!videoWrapper) {
+            console.error('Video wrapper not found');
+            return;
         }
         
-        .level-badge-mini {
-            font-size: 0.8em;
-            padding: 6px 10px;
+        const video = videoWrapper.querySelector('video');
+        const overlay = videoWrapper.querySelector('.video-overlay');
+        
+        if (video && overlay) {
+            console.log('Video and overlay found, playing video...');
+            
+            // Показываем элементы управления
+            video.controls = true;
+            
+            // Скрываем оверлей
+            overlay.style.display = 'none';
+            
+            // Пытаемся воспроизвести видео
+            video.play().then(() => {
+                console.log('Video started playing');
+                
+                // Отправка статистики просмотра
+                const eventId = videoWrapper.dataset.eventId;
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+                
+                if (eventId && csrfToken) {
+                    fetch(`/api/events/${eventId}/promo-video/view/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'same-origin'
+                    }).then(response => {
+                        console.log('View count updated');
+                    }).catch(error => {
+                        console.error('Error updating view count:', error);
+                    });
+                }
+            }).catch(error => {
+                console.error('Error playing video:', error);
+                // Если автовоспроизведение заблокировано, показываем оверлей снова
+                overlay.style.display = 'flex';
+                video.controls = true;
+            });
+        } else {
+            console.error('Video or overlay not found');
         }
     }
-    </style>
-    {% endif %}
+
+    // Функция для модального окна регистрации
+    function showRegistrationModal() {
+        console.log('Show registration modal');
+        // Реализуйте логику модального окна
+        alert('Функция регистрации будет реализована позже');
+    }
+
+    // Функция для шаринга
+    function shareEvent() {
+        if (navigator.share) {
+            navigator.share({
+                title: document.title,
+                text: 'Посмотрите это мероприятие!',
+                url: window.location.href,
+            });
+        } else {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert('Ссылка скопирована в буфер обмена!');
+            });
+        }
+    }
+    </script> -->
+    // Улучшенная функция воспроизведения видео
+    function playVideo(button) {
+        console.log('=== playVideo called ===');
+        console.log('Button:', button);
+        
+        if (!button) {
+            console.error('Button element is required');
+            return;
+        }
+        
+        // Ищем video-wrapper разными способами
+        let videoWrapper = button.closest('.video-wrapper');
+        console.log('Found by .video-wrapper:', videoWrapper);
+        
+        if (!videoWrapper) {
+            videoWrapper = button.closest('.video-container');
+            console.log('Found by .video-container:', videoWrapper);
+        }
+        
+        if (!videoWrapper) {
+            videoWrapper = button.closest('.video-promo-banner');
+            console.log('Found by .video-promo-banner:', videoWrapper);
+        }
+        
+        if (!videoWrapper) {
+            console.error('Video wrapper not found. Available parents:');
+            let parent = button.parentElement;
+            let level = 0;
+            while (parent && level < 5) {
+                console.log(`Parent ${level}:`, parent.className, parent.tagName);
+                parent = parent.parentElement;
+                level++;
+            }
+            return;
+        }
+        
+        // Ищем видео разными способами
+        let video = videoWrapper.querySelector('video');
+        console.log('Video found by querySelector:', video);
+        
+        if (!video) {
+            // Пробуем найти видео в iframe или другими способами
+            video = document.querySelector('video');
+            console.log('Video found globally:', video);
+        }
+        
+        // Ищем оверлей
+        let overlay = videoWrapper.querySelector('.video-overlay');
+        console.log('Overlay found:', overlay);
+        
+        if (!overlay) {
+            overlay = button.closest('.video-overlay');
+            console.log('Overlay found via button:', overlay);
+        }
+        
+        if (video && overlay) {
+            console.log('Starting video playback...');
+            
+            try {
+                // Скрываем оверлей
+                overlay.style.display = 'none';
+                console.log('Overlay hidden');
+                
+                // Включаем контролы
+                video.controls = true;
+                console.log('Controls enabled');
+                
+                // Проверяем источник видео
+                console.log('Video sources:');
+                video.querySelectorAll('source').forEach((source, index) => {
+                    console.log(`Source ${index}:`, source.src);
+                });
+                
+                // Пытаемся воспроизвести
+                const playPromise = video.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log('✅ Video playback started successfully');
+                    }).catch(error => {
+                        console.log('❌ Video playback failed:', error);
+                        console.log('Showing controls for manual playback');
+                        video.controls = true;
+                        
+                        // Показываем оверлей снова если автовоспроизведение заблокировано
+                        if (error.name === 'NotAllowedError') {
+                            overlay.style.display = 'flex';
+                            console.log('Autoplay blocked, showing overlay again');
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('💥 Error in playVideo:', error);
+            }
+        } else {
+            console.error('❌ Video or overlay not found');
+            console.log('Available videos on page:', document.querySelectorAll('video').length);
+            console.log('Available overlays on page:', document.querySelectorAll('.video-overlay').length);
+            
+            // Попробуем найти и воспроизвести любое видео на странице
+            const allVideos = document.querySelectorAll('video');
+            if (allVideos.length > 0) {
+                console.log('Trying to play first available video');
+                allVideos[0].play().catch(err => console.log('Fallback play failed:', err));
+            }
+        }
+    }
+
+    // Альтернативная функция для поиска и воспроизведения любого видео
+    function playAnyVideo() {
+        console.log('=== playAnyVideo called ===');
+        
+        const videos = document.querySelectorAll('video');
+        console.log('Found videos:', videos.length);
+        
+        videos.forEach((video, index) => {
+            console.log(`Video ${index}:`, video);
+            console.log(`Video ${index} src:`, video.querySelector('source')?.src);
+        });
+        
+        if (videos.length > 0) {
+            const video = videos[0];
+            video.controls = true;
+            
+            // Скрываем все оверлеи
+            document.querySelectorAll('.video-overlay').forEach(overlay => {
+                overlay.style.display = 'none';
+            });
+            
+            video.play().then(() => {
+                console.log('✅ Video played successfully');
+            }).catch(error => {
+                console.log('❌ Video play failed:', error);
+            });
+        } else {
+            console.error('No videos found on page');
+        }
+    }
+
+    // Глобальные функции для совместимости
+    window.playVideo = playVideo;
+    window.playAnyVideo = playAnyVideo;
+
+    // Делегирование событий как запасной вариант
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== Setting up video event delegation ===');
+        
+        document.addEventListener('click', function(e) {
+            // Проверяем клик по кнопке воспроизведения
+            if (e.target.closest('.btn-play') || 
+                e.target.closest('[onclick*="playVideo"]') ||
+                e.target.classList.contains('fa-play')) {
+                
+                console.log('🎬 Play button clicked via delegation');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const button = e.target.closest('.btn-play') || e.target;
+                
+                // Даем время на выполнение оригинального onclick
+                setTimeout(() => {
+                    playVideo(button);
+                }, 10);
+            }
+        });
+        
+        // Отладочная информация
+        console.log('Video elements on page:', document.querySelectorAll('video').length);
+        console.log('Play buttons on page:', document.querySelectorAll('.btn-play').length);
+        console.log('Video wrappers on page:', document.querySelectorAll('.video-wrapper').length);
+    });
+    </script>
 
     <!-- AI Чатбот -->
     {% include 'events/chatbot/chat_widget.html' %}
+
+    <!-- Кнопка "Посмотреть демо" -->
+    <button class="btn btn-play btn-lg rounded-circle" onclick="showDemoVideo()">
+    <i class="fas fa-play"></i>
+    </button>
+
+    <!-- Скрытый видеоплеер -->
+    <div id="demoVideoContainer" style="display: none; margin-top: 20px;">
+    <video controls width="100%" poster="{% static 'images/demo-thumb.jpg' %}">
+        <source src="{% get_media_prefix %}demo.mp4" type="video/mp4">
+        Ваш браузер не поддерживает HTML5 видео.
+    </video>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+   
 
 </body>

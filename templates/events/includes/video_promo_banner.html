@@ -1,0 +1,322 @@
+
+<div class="video-promo-banner mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <div class="video-container position-relative">
+                {% if event.main_promo_video %}
+                    <div class="video-wrapper rounded-3 shadow-lg">
+                        {% if event.main_promo_video.is_external_embed %}
+                            <iframe 
+                                src="{{ event.main_promo_video.get_video_url }}"
+                                width="100%" 
+                                height="315"
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                                {% if event.main_promo_video.autoplay %}autoplay{% endif %}
+                                class="rounded-3">
+                            </iframe>
+                        {% else %}
+                            <video 
+                                controls 
+                                width="100%" 
+                                poster="{{ event.main_promo_video.thumbnail.url|default:event.image.url }}"
+                                {% if event.main_promo_video.autoplay %}autoplay muted{% endif %}
+                                class="rounded-3">
+                                <source src="{{ event.main_promo_video.get_video_url }}" type="video/mp4">
+                                Ваш браузер не поддерживает видео тег.
+                            </video>
+                        {% endif %}
+                        
+                        <!-- Overlay with play button for uploaded videos -->
+                        {% if not event.main_promo_video.is_external_embed %}
+                        <div class="video-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                            <button class="btn btn-play btn-lg rounded-circle" onclick="playVideo(this)">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Video stats -->
+                    <div class="video-stats mt-2 d-flex justify-content-between text-muted small">
+                        <span>
+                            <i class="fas fa-eye me-1"></i>
+                            {{ event.main_promo_video.view_count }} просмотров
+                        </span>
+                        {% if event.main_promo_video.duration %}
+                        <span>
+                            <i class="fas fa-clock me-1"></i>
+                            {{ event.main_promo_video.duration }}
+                        </span>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <!-- Fallback to image if no video -->
+                    <div class="no-video-placeholder rounded-3 shadow-lg bg-light d-flex align-items-center justify-content-center"
+                         style="height: 315px;">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-video fa-3x mb-3"></i>
+                            <p>Промо-ролик отсутствует</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="promo-content ps-lg-4">
+                <h1 class="display-5 fw-bold mb-3">{{ event.title }}</h1>
+                <p class="lead mb-4">{{ event.short_description }}</p>
+                
+                <!-- Event details -->
+                <div class="event-details mb-4">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                <span>{{ event.date|date:"d M Y, H:i" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                <span>{{ event.location }}</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-tag text-success me-2"></i>
+                                <span>{{ event.get_category_display }}</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-money-bill-wave text-warning me-2"></i>
+                                <span>
+                                    {% if event.is_free %}
+                                        <span class="badge bg-success">Бесплатно</span>
+                                    {% else %}
+                                        {{ event.price }} ₽
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action buttons -->
+                <div class="action-buttons">
+                    {% if user.is_authenticated %}
+                        <button class="btn btn-primary btn-lg me-2" onclick="showRegistrationModal()">
+                            <i class="fas fa-ticket-alt me-2"></i>
+                            Зарегистрироваться
+                        </button>
+                    {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg me-2">
+                            <i class="fas fa-ticket-alt me-2"></i>
+                            Войти для регистрации
+                        </a>
+                    {% endif %}
+                    
+                    <button class="btn btn-outline-secondary btn-lg" onclick="shareEvent()">
+                        <i class="fas fa-share-alt me-2"></i>
+                        Поделиться
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.video-promo-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 3rem;
+    border-radius: 20px;
+    color: white;
+    margin: 2rem 0;
+}
+
+.video-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: #000;
+}
+
+.video-overlay {
+    background: rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.video-overlay:hover {
+    background: rgba(0,0,0,0.2);
+}
+
+.btn-play {
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    color: #667eea;
+    transition: all 0.3s ease;
+}
+
+.btn-play:hover {
+    transform: scale(1.1);
+    background: white;
+}
+
+.no-video-placeholder {
+    border: 2px dashed #dee2e6;
+}
+</style>
+
+<script>
+function playVideo(button) {
+    const video = button.closest('.video-wrapper').querySelector('video');
+    const overlay = button.closest('.video-overlay');
+    
+    if (video) {
+        video.play();
+        video.controls = true;
+        overlay.style.display = 'none';
+        
+        // Отправка статистики просмотра
+        fetch(`/api/events/{{ event.id }}/promo-video/view/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            }
+        });
+    }
+}
+
+// Функция для показа демо-видео
+function showDemoVideo() {
+    const videoWrapper = document.querySelector('.video-wrapper');
+    if (videoWrapper) {
+        const video = videoWrapper.querySelector('video');
+        const overlay = videoWrapper.querySelector('.video-overlay');
+        
+        if (video && overlay) {
+            // Показываем видео и скрываем оверлей
+            overlay.style.display = 'none';
+            video.style.display = 'block';
+            video.controls = true;
+            
+            // Пытаемся воспроизвести видео
+            video.play().catch(error => {
+                console.log('Автовоспроизведение заблокировано:', error);
+                // Показываем кнопку воспроизведения
+                overlay.style.display = 'flex';
+            });
+        }
+    }
+}
+
+// Альтернативная функция для модального окна с видео
+function showVideoModal() {
+    const video = document.querySelector('.video-wrapper video');
+    if (video) {
+        // Создаем модальное окно для видео
+        const modalHtml = `
+            <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Промо-ролик: {{ event.title }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <video controls autoplay style="width: 100%; height: auto;">
+                                <source src="${video.querySelector('source').src}" type="video/mp4">
+                                Ваш браузер не поддерживает видео тег.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Добавляем модальное окно в DOM
+        document.body.insertAdjacentHTML('beforeend', modalHtml');
+        
+        // Показываем модальное окно
+        const videoModal = new bootstrap.Modal(document.getElementById('videoModal'));
+        videoModal.show();
+        
+        // Удаляем модальное окно при закрытии
+        document.getElementById('videoModal').addEventListener('hidden.bs.modal', function() {
+            this.remove();
+        });
+        
+        // Отправка статистики просмотра
+        fetch(`/api/events/{{ event.id }}/promo-video/view/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            }
+        });
+    }
+}
+
+
+function shareEvent() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ event.title }}',
+            text: '{{ event.short_description }}',
+            url: window.location.href,
+        });
+    } else {
+        // Fallback для desktop
+        navigator.clipboard.writeText(window.location.href);
+        alert('Ссылка скопирована в буфер обмена!');
+    }
+}
+
+// Функция для показа модального окна регистрации
+function showRegistrationModal() {
+    // Здесь должна быть логика показа модального окна регистрации
+    console.log('Show registration modal for event {{ event.id }}');
+    // Например:
+    // const modal = new bootstrap.Modal(document.getElementById('registrationModal'));
+    // modal.show();
+}
+
+</script>
+
+<!-- Кнопка временноя для отладки -->
+<div class="mt-3 text-center">
+    <button class="btn btn-warning btn-sm" onclick="debugVideo()">
+        <i class="fas fa-bug me-2"></i>Отладка Видео
+    </button>
+    <button class="btn btn-info btn-sm ms-2" onclick="playAnyVideo()">
+        <i class="fas fa-play me-2"></i>Воспроизвести Любое Видео
+    </button>
+</div>
+
+<script>
+function debugVideo() {
+    console.log('=== VIDEO DEBUG INFO ===');
+    console.log('Video elements:', document.querySelectorAll('video'));
+    console.log('Video wrappers:', document.querySelectorAll('.video-wrapper'));
+    console.log('Video containers:', document.querySelectorAll('.video-container'));
+    console.log('Play buttons:', document.querySelectorAll('.btn-play'));
+    console.log('Overlays:', document.querySelectorAll('.video-overlay'));
+    
+    const video = document.querySelector('video');
+    if (video) {
+        console.log('First video details:');
+        console.log('- src:', video.querySelector('source')?.src);
+        console.log('- currentSrc:', video.currentSrc);
+        console.log('- networkState:', video.networkState);
+        console.log('- readyState:', video.readyState);
+        console.log('- error:', video.error);
+    }
+}
+</script>

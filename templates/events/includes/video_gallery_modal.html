@@ -1,0 +1,87 @@
+
+<div class="modal fade" id="videoGalleryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Промо-ролики мероприятия</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Main video -->
+                    <div class="col-12 mb-4">
+                        <div id="mainVideoPlayer" class="ratio ratio-16x9">
+                            <!-- Video will be loaded here dynamically -->
+                        </div>
+                    </div>
+                    
+                    <!-- Video thumbnails -->
+                    <div class="col-12">
+                        <h6>Другие видео</h6>
+                        <div class="video-thumbnails row g-2">
+                            {% for video in event.promo_videos.all %}
+                            <div class="col-md-3 col-6">
+                                <div class="video-thumbnail card {% if video.is_main_promo %}border-primary{% endif %}" 
+                                     onclick="loadVideo('{{ video.get_video_url }}', '{{ video.video_source }}', {{ video.id }})">
+                                    {% if video.thumbnail %}
+                                    <img src="{{ video.thumbnail.url }}" class="card-img-top" alt="{{ video.title }}">
+                                    {% else %}
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 100px;">
+                                        <i class="fas fa-video text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div class="card-body p-2">
+                                        <small class="card-text">{{ video.title }}</small>
+                                        <div class="d-flex justify-content-between text-muted">
+                                            <small>{{ video.duration|default:"-" }}</small>
+                                            <small>{{ video.view_count }} просмотров</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function loadVideo(videoUrl, videoSource, videoId) {
+    const player = document.getElementById('mainVideoPlayer');
+    
+    if (videoSource === 'youtube' || videoSource === 'vimeo') {
+        player.innerHTML = `
+            <iframe src="${videoUrl}" 
+                    frameborder="0" 
+                    allowfullscreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+            </iframe>
+        `;
+    } else {
+        player.innerHTML = `
+            <video controls autoplay class="w-100 h-100">
+                <source src="${videoUrl}" type="video/mp4">
+                Ваш браузер не поддерживает видео.
+            </video>
+        `;
+    }
+    
+    // Track video view
+    fetch(`/api/promo-videos/${videoId}/view/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        }
+    });
+    
+    // Update active thumbnail
+    document.querySelectorAll('.video-thumbnail').forEach(thumb => {
+        thumb.classList.remove('border-primary', 'shadow');
+    });
+    event.currentTarget.classList.add('border-primary', 'shadow');
+}
+</script>

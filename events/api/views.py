@@ -4,25 +4,37 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.db import models
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django.db.models import Prefetch
 
 from rest_framework import generics
 from ..models import Event, Favorite, Review, Registration
 from .serializers import EventSerializer, FavoriteSerializer, ReviewSerializer, RegistrationSerializer
 
-from django.db.models import Prefetch
+from .filters import EventFilter
 
 
 class EventViewSet(viewsets.ReadOnlyModelViewSet):
     """API для мероприятий"""
     queryset = Event.objects.filter(is_active=True).select_related('category')
     serializer_class = EventSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = EventFilter
     filterset_fields = ['category', 'event_type']
+    search_fields = ['title', 'description', 'location']
+    ordering_fields = ['date', 'price', 'created_at']
+    ordering = ['-date']
     
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+    
+    def get_queryset(self):
+        queryset = Event.objects.all()
+        # Добавить любую дополнительную фильтрацию если нужно
+        return queryset
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def toggle_favorite(self, request, pk=None):

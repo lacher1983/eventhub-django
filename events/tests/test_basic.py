@@ -14,7 +14,7 @@ class BasicDjangoTests(TestCase):
     def test_admin_login(self):
         """Тест страницы админки"""
         response = self.client.get('/admin/')
-        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.assertEqual(response.status_code, 302)  # Не хаватает справочки, перенаправляю вас to login
 
 
 @pytest.mark.django_db

@@ -1,0 +1,259 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}О проекте EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold mb-4">О проекте EventHub</h1>
+            <p class="lead text-muted">Платформа, которая меняет подход к организации и поиску мероприятий</p>
+        </div>
+    </div>
+
+    <!-- Main Promo Video -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="project-video-section">
+                <h2 class="text-center mb-4">Смотрите наш проморолик</h2>
+                
+                {% with main_promo=project_promos.main.0 %}
+                {% if main_promo %}
+                <div class="video-container-main rounded-4 shadow-lg">
+                    <div class="ratio ratio-16x9">
+                        <iframe src="{{ main_promo.get_embed_url }}" 
+                                frameborder="0" 
+                                allowfullscreen
+                                class="rounded-4">
+                        </iframe>
+                    </div>
+                    
+                    <div class="video-info-main p-4">
+                        <h4>{{ main_promo.title }}</h4>
+                        <p class="text-muted">{{ main_promo.description }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="video-stats">
+                                <span class="text-muted">
+                                    <i class="fas fa-eye me-1"></i>
+                                    {{ main_promo.view_count }} просмотров
+                                </span>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="shareVideo()">
+                                <i class="fas fa-share-alt me-1"></i>
+                                Поделиться
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Videos -->
+    {% if project_promos.other %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="mb-4">Другие видео о проекте</h3>
+            <div class="row g-4">
+                {% for video in project_promos.other %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="video-card h-100">
+                        <div class="video-thumb position-relative">
+                            {% if video.thumbnail %}
+                            <img src="{{ video.thumbnail.url }}" 
+                                 alt="{{ video.title }}" 
+                                 class="card-img-top rounded-3">
+                            {% else %}
+                            <div class="card-img-top bg-light rounded-3 d-flex align-items-center justify-content-center"
+                                 style="height: 200px;">
+                                <i class="fas fa-video text-muted fa-2x"></i>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="play-btn-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded-3"
+                                 onclick="showVideoModal('{{ video.get_embed_url }}', '{{ video.title }}', {{ video.id }})">
+                                <button class="btn btn-play btn-lg rounded-circle">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <h6 class="card-title">{{ video.title }}</h6>
+                            <p class="card-text text-muted small">{{ video.description|truncatewords:15 }}</p>
+                            <div class="d-flex justify-content-between text-muted small">
+                                <span>{{ video.duration_display }}</span>
+                                <span>{{ video.view_count }} просмотров</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Project Features -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="text-center mb-5">Возможности платформы</h3>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-search fa-3x text-primary"></i>
+                        </div>
+                        <h5>Умный поиск</h5>
+                        <p class="text-muted">AI-рекомендации мероприятий по вашим интересам</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-ticket-alt fa-3x text-success"></i>
+                        </div>
+                        <h5>Легкая регистрация</h5>
+                        <p class="text-muted">Быстрая покупка билетов и регистрация на события</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-users fa-3x text-warning"></i>
+                        </div>
+                        <h5>Сообщество</h5>
+                        <p class="text-muted">Найдите попутчиков и единомышленников</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Video Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="videoModalLabel">Проморолик</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <iframe id="videoModalFrame" 
+                            src="" 
+                            frameborder="0" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.project-video-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 3rem;
+    border-radius: 20px;
+}
+
+.video-container-main {
+    background: white;
+    overflow: hidden;
+}
+
+.video-info-main {
+    background: white;
+    border-top: 1px solid #eee;
+}
+
+.video-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.video-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.play-btn-overlay {
+    background: rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+}
+
+.video-card:hover .play-btn-overlay {
+    opacity: 1;
+}
+
+.btn-play {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    color: #333;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+</style>
+
+<script>
+function showVideoModal(videoUrl, title, videoId) {
+    const modal = new bootstrap.Modal(document.getElementById('videoModal'));
+    const frame = document.getElementById('videoModalFrame');
+    const modalLabel = document.getElementById('videoModalLabel');
+    
+    frame.src = videoUrl;
+    modalLabel.textContent = title;
+    modal.show();
+    
+    // Трекинг просмотра
+    trackVideoView(videoId);
+}
+
+function trackVideoView(videoId) {
+    fetch('/api/project-promo/view/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            video_id: videoId
+        })
+    });
+}
+
+function shareVideo() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'EventHub - Проморолик проекта',
+            text: 'Посмотрите проморолик платформы EventHub!',
+            url: window.location.href,
+        });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Ссылка скопирована в буфер обмена!');
+    }
+}
+</script>
+{% endblock %}

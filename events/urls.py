@@ -2,6 +2,10 @@ from django.urls import path, include
 from . import views
 from .views import EventsMapView
 from .api import views as api_views
+from .views_video import (  # Добавим импорт из views_video
+    PromoVideoCreateView, PromoVideoUpdateView, PromoVideoDeleteView,
+    track_video_view, AboutProjectView, track_project_promo_view
+)
 from .views import (
     EventListView, EventDetailView, EventCreateView, 
     EventUpdateView, EventDeleteView, EventSearchView,
@@ -32,6 +36,7 @@ urlpatterns = [
     # path('map-test/', views.map_test_view, name='map_test'),
     path('map/', views.EventsMapView.as_view(), name='events_map'),
     path('api/events/map/', views.events_map_api, name='events_map_api'),
+    path('sitemap/', SitemapView.as_view(), name='sitemap'),
 
     # Регистрации пользователя
     path('register/', register, name='register'),
@@ -108,6 +113,16 @@ urlpatterns = [
     path('profile/game/', views.GameProfileView.as_view(), name='game_profile'),
     path('leaderboard/', views.LeaderboardView.as_view(), name='leaderboard_page'),
 
+     # Промо-видео URL
+    path('event/<int:event_id>/add-video/', PromoVideoCreateView.as_view(), name='add_promo_video'),
+    path('promo-video/<int:pk>/edit/', PromoVideoUpdateView.as_view(), name='edit_promo_video'),
+    path('promo-video/<int:pk>/delete/', PromoVideoDeleteView.as_view(), name='delete_promo_video'),
+    path('api/promo-videos/<int:video_id>/view/', track_video_view, name='track_video_view'),
+
+    # Проморолики проекта
+    path('about-project/', AboutProjectView.as_view(), name='about_project'),
+    path('api/project-promo/view/', track_project_promo_view, name='track_project_promo_view'),
+        
     # Footer странички - КОМПАНИЯ
     path('about/', AboutView.as_view(), name='about'),
     path('blog/', BlogView.as_view(), name='blog'),
@@ -129,5 +144,4 @@ urlpatterns = [
     path('organizers/success-stories/', SuccessStoriesView.as_view(), name='success_stories'),
     path('partners/', PartnersView.as_view(), name='partners'),
     path('api/docs/', APIDocsView.as_view(), name='api_docs'),
-    path('sitemap/', SitemapView.as_view(), name='sitemap'),
 ]

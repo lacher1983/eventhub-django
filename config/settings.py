@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+from django.conf import settings
+from django.conf.urls.static import static
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -48,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Внес мои приложения
     'events',
-    # 'users',
+    # 'users', у меня же кастом
     'accounts',
     'events.gamification',
     'crispy_forms',
@@ -78,6 +79,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
     ],
 }
 
@@ -115,6 +118,7 @@ TEMPLATES = [
                 'events.context_processors.cart_context',
                 'django.template.context_processors.i18n',
                 'events.context_processors.map_pages',
+                'events.context_processors.event_filters',
             ],
         },
     },
@@ -190,14 +194,18 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 MEDIA_URL = '/media/'
-MEDIA_ROOT ='/app/media/'
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_ROOT ='/app/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# Разрешенные хосты
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-
 
 
 # Default primary key field type
@@ -262,3 +270,19 @@ REST_FRAMEWORK = {
 
 # API ключи
 YANDEX_MAPS_API_KEY = os.getenv('YANDEX_MAPS_API_KEY', '68350a7a-73c2-438e-a7d0-5c6542ce05c9')
+
+
+# Video settings
+VIDEO_MAX_SIZE = 100 * 1024 * 1024  # 100MB
+VIDEO_ALLOWED_EXTENSIONS = ['.mp4', '.mov', '.avi', '.webm']
+VIDEO_UPLOAD_PATH = 'promo_videos/'
+
+# YouTube API (для получения информации о видео)
+YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY', '')
+
+# Vimeo API
+VIMEO_ACCESS_TOKEN = os.getenv('VIMEO_ACCESS_TOKEN', '')
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB

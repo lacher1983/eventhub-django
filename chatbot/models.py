@@ -74,5 +74,3 @@ class ChatMessage(models.Model):
         verbose_name = "Сообщение чата"
         verbose_name_plural = "Сообщения чатов"
         ordering = ['created_at']
-
-

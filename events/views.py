@@ -1,3 +1,5 @@
+from functools import wraps
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -11,8 +13,10 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from .models import Event, ExternalEvent, ExternalEventSource, Category, Registration, Advertisement, Favorite, Review
-from .forms import EventForm, RegistrationForm, ReviewForm, EventFilterForm, CustomUserCreationForm
+from .models import (Event, ExternalEvent, ExternalEventSource, Category, 
+    Registration, Advertisement, Favorite, Review,PromoVideo, ProjectPromoVideo)
+from .forms import (EventForm, RegistrationForm, ReviewForm, EventFilterForm, CustomUserCreationForm,
+    PromoVideoForm, ProjectPromoVideoForm)
 import json
 from django.utils.translation import gettext as _
 from django.contrib.auth import login, logout
@@ -21,6 +25,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth import get_user_model
 from django.core.serializers.json import DjangoJSONEncoder
+from .decorators import organizer_required, admin_required
+from django.utils.decorators import method_decorator
+from .models import ProjectPromoVideo
+from django.core.serializers import serialize
 
 # Подтверждение email
 from django.core.mail import send_mail
@@ -96,6 +104,29 @@ class EventListView(ListView):
         
         return queryset.select_related('category', 'organizer').order_by('-created_at')
 
+    def get_queryset(self):
+        queryset = Event.objects.filter(is_active=True).select_related(
+            'category', 'organizer'
+        ).prefetch_related('tags')
+        
+        # Применяем фильтры
+        category = self.request.GET.get('category')
+        event_type = self.request.GET.get('event_type')
+        search = self.request.GET.get('search')
+        
+        if category:
+            queryset = queryset.filter(category=category)
+        if event_type:
+            queryset = queryset.filter(event_type=event_type)
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) |
+                Q(description__icontains=search) |
+                Q(location__icontains=search)
+            )
+        
+        return queryset.order_by('-date')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['YANDEX_MAPS_API_KEY'] = getattr(settings, 'YANDEX_MAPS_API_KEY', '')
@@ -109,8 +140,9 @@ class EventListView(ListView):
             'category': self.request.GET.get('category', ''),
             'search': self.request.GET.get('q', ''),
         }
+
         
-        # ИНФОРМАЦИЯ О РЕГИСТРАЦИЯХ
+        # Геймификация - ИНФОРМАЦИЯ О РЕГИСТРАЦИЯХ
         if self.request.user.is_authenticated:
             # ID мероприятий, на которые пользователь зарегистрирован - используем status вместо is_confirmed
             user_registered_ids = Registration.objects.filter(
@@ -128,6 +160,27 @@ class EventListView(ListView):
         else:
             context['user_registered_events'] = []
 
+        return context
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # === ДАННЫЕ ДЛЯ МИНИКАРТЫ ===
+        from django.db.models import Q
+        import json
+
+        # Получаем до 20 активных мероприятий с координатами
+        events_for_map = Event.objects.filter(
+            Q(latitude__isnull=False) & 
+            Q(longitude__isnull=False) & 
+            Q(is_active=True)
+        ).values(
+            'id', 'title', 'location', 'latitude', 'longitude'
+        )[:20]
+
+        # Преобразуем в JSON
+        context['events_for_map'] = json.dumps(list(events_for_map), ensure_ascii=False)
+        
         return context
 
     def get_context_data(self, **kwargs):
@@ -175,6 +228,55 @@ class EventListView(ListView):
             context['points_remaining'] = 0
             
         return context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Получаем проморолики проекта
+        project_promos = ProjectPromoVideo.objects.filter(is_active=True)
+        
+        context.update({
+            'project_promos': project_promos,
+            'total_events': Event.objects.filter(is_active=True).count(),
+            'total_users': User.objects.count(),
+            'total_cities': Event.objects.filter(is_active=True)
+                                      .values('location')
+                                      .distinct()
+                                      .count(),
+        })
+        return context
+
+class AboutProjectView(TemplateView):
+    """Страница 'О проекте' с видео"""
+    template_name = 'events/about_project.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        project_promos = ProjectPromoVideo.objects.filter(is_active=True)
+        
+        context.update({
+            'project_promos': {
+                'main': project_promos.filter(video_type='main'),
+                'other': project_promos.exclude(video_type='main')
+            }
+        })
+        return context
+
+@require_POST
+def track_project_promo_view(request):
+    """Трекинг просмотров промороликов проекта"""
+    video_id = request.POST.get('video_id')
+    
+    if video_id and video_id != '0':
+        try:
+            video = ProjectPromoVideo.objects.get(id=video_id)
+            video.increment_view_count()
+            return JsonResponse({'success': True, 'view_count': video.view_count})
+        except ProjectPromoVideo.DoesNotExist:
+            pass
+    
+    return JsonResponse({'success': False})
 
 
 class EventDetailView(DetailView):
@@ -239,6 +341,7 @@ class EventDetailView(DetailView):
             messages.error(self.request, "Ошибка базы данных")
             return redirect('event_list')
 
+@method_decorator(organizer_required, name='dispatch') # === ЗАЩИТА ПРЕДСТАВЛЕНИЙ ОРГАНИЗАТОРОВ ===
 class EventCreateView(LoginRequiredMixin, CreateView):
     """Создание мероприятия"""
     model = Event
@@ -292,7 +395,8 @@ class EventCreateView(LoginRequiredMixin, CreateView):
         context['difficulty_levels_json'] = json.dumps(difficulty_levels, cls=TranslationSafeJSONEncoder)
         
         return context
-
+    
+@method_decorator(organizer_required, name='dispatch')
 class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """Редактирование мероприятия"""
     model = Event
@@ -310,7 +414,7 @@ class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('event_detail', kwargs={'pk': self.object.pk})
 
-
+@method_decorator(organizer_required, name='dispatch')
 class EventDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """Удаление мероприятия"""
     model = Event
@@ -387,7 +491,7 @@ class EventSearchView(ListView):
         context['categories'] = Category.objects.all()
         return context
 
-
+@method_decorator(organizer_required, name='dispatch')
 class OrganizerDashboardView(LoginRequiredMixin, TemplateView):
     """Дашборд организатора"""
     template_name = 'events/dashboard/organizer_dashboard.html'
@@ -427,28 +531,33 @@ class FavoriteListView(LoginRequiredMixin, ListView):
     context_object_name = 'favorites'
 
     def get_queryset(self):
-        # Простой запрос без аннотаций
+        # Запрос с аннотациями для оптимизации
         return Favorite.objects.filter(
             user=self.request.user
-        ).select_related('event', 'event__organizer')
+        ).select_related('event', 'event__organizer').prefetch_related(
+            'event__registrations',
+            'event__reviews'
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
         # Добавляем дополнительную информацию для каждого избранного мероприятия
         for favorite in context['favorites']:
-            # Количество регистраций
-            favorite.event.registrations_count = favorite.event.registrations.count()
+            # Временные атрибуты с префиксом _
+            favorite.event._registrations_count = favorite.event.registrations.count()
+            favorite.event._reviews_count = favorite.event.reviews.count()
             
-            # Средний рейтинг
-            avg_rating = favorite.event.reviews.aggregate(
-                avg_rating=Avg('rating')
-            )['avg_rating']
-            favorite.event.average_rating = avg_rating if avg_rating else 0
+            # Средний рейтинг вычисляем через агрегацию по отзывам
+            if favorite.event._reviews_count > 0:
+                total_rating = sum(review.rating for review in favorite.event.reviews.all())
+                favorite.event._average_rating = total_rating / favorite.event._reviews_count
+            else:
+                favorite.event._average_rating = 0
             
-            # Краткое описание (если пустое)
+            # Краткое описание
             if not favorite.event.short_description:
-                favorite.event.short_description = "Описание отсутствует"
+                favorite.event._short_description = "Описание отсутствует"
         
         return context
 
@@ -612,7 +721,7 @@ def send_confirmation_email(user):
     html_message = render_to_string('events/emails/confirmation_email.html', {
         'user': user,
         'confirmation_code': confirmation.confirmation_code,
-        'site_url': 'http://127.0.0.1:8000',  # Замените на ваш домен
+        'site_url': 'http://127.0.0.1:8000',  # Заменим на мой домен
     })
     plain_message = strip_tags(html_message)
     
@@ -673,7 +782,7 @@ def notifications(request):
     """Страница уведомлений пользователя"""
     notifications = Notification.objects.filter(
         user=request.user
-    ).select_related('event').order_by('-sent_at')
+    ).select_related('event').order_by('created_at')
     
     return render(request, 'events/notifications.html', {
         'notifications': notifications,
@@ -701,7 +810,7 @@ def event_statistics(request, pk):
         'stats': stats,
     })
 
-@staff_member_required
+@admin_required # === ЗАЩИТА АДМИНИСТРАТИВНЫХ ФУНКЦИЙ ===
 def platform_statistics(request):
     """Статистика платформы (только для staff)"""
     today = timezone.now().date()
@@ -757,6 +866,13 @@ class CombinedEventsView(ListView):
             date__gte=timezone.now()
         ).select_related('organizer')
         
+        # Фильтр по категории (модель Category)
+        if self.request.GET.get('category'):
+            qs = qs.filter(category__slug=self.request.GET['category'])
+        # Фильтр по типу (поле event_type)
+        if self.request.GET.get('event_type'):
+            qs = qs.filter(event_type=self.request.GET['event_type'])
+
         # Текущие внешние мероприятия (не в архиве)
         external_events = ExternalEvent.objects.filter(
             is_archived=False,
@@ -1946,3 +2062,75 @@ class LeaderboardView(LoginRequiredMixin, TemplateView):
         context['total_players'] = len(leaderboard_data)
         
         return context
+    
+
+# class PromoVideoCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+#     """Создание промо-видео"""
+#     model = PromoVideo
+#     form_class = PromoVideoForm
+#     template_name = 'events/promovideo_form.html'
+    
+#     def test_func(self):
+#         """Проверка, что пользователь - организатор мероприятия"""
+#         event = get_object_or_404(Event, pk=self.kwargs['event_id'])
+#         return self.request.user == event.organizer or self.request.user.is_staff
+    
+#     def form_valid(self, form):
+#         event = get_object_or_404(Event, pk=self.kwargs['event_id'])
+#         form.instance.event = event
+        
+#         # Если это главное промо, снимаем флаг с других видео
+#         if form.cleaned_data.get('is_main_promo'):
+#             PromoVideo.objects.filter(event=event, is_main_promo=True).update(is_main_promo=False)
+        
+#         response = super().form_valid(form)
+        
+#         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+#             return JsonResponse({
+#                 'success': True,
+#                 'video_id': self.object.id,
+#                 'video_title': self.object.title
+#             })
+#         return response
+    
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['event'] = get_object_or_404(Event, pk=self.kwargs['event_id'])
+#         return context
+
+# class PromoVideoUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+#     """Редактирование промо-видео"""
+#     model = PromoVideo
+#     form_class = PromoVideoForm
+#     template_name = 'events/promovideo_form.html'
+    
+#     def test_func(self):
+#         video = self.get_object()
+#         return self.request.user == video.event.organizer or self.request.user.is_staff
+
+# class PromoVideoDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+#     """Удаление промо-видео"""
+#     model = PromoVideo
+#     template_name = 'events/promovideo_confirm_delete.html'
+    
+#     def test_func(self):
+#         video = self.get_object()
+#         return self.request.user == video.event.organizer or self.request.user.is_staff
+    
+#     def get_success_url(self):
+#         return reverse('event_detail', kwargs={'pk': self.object.event.pk})
+
+# @require_POST
+# @login_required
+# def track_video_view(request, video_id):
+#     """Трекинг просмотров видео"""
+#     video = get_object_or_404(PromoVideo, id=video_id)
+    
+#     # Проверяем, не просматривал ли пользователь уже это видео
+#     view_key = f'video_view_{video_id}'
+#     if not request.session.get(view_key):
+#         video.increment_view_count()
+#         request.session[view_key] = True
+#         request.session.modified = True
+    
+#     return JsonResponse({'success': True, 'view_count': video.view_count})

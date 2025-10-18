@@ -13,9 +13,8 @@ class User(AbstractUser):
     phone = models.CharField(_('телефон'), max_length=15, blank=True)
     avatar = models.ImageField(_('аватар'), upload_to='avatars/', blank=True, null=True)
 
-    class Meta:
-        verbose_name = _('пользователь')
-        verbose_name_plural = _('пользователи')
+    def is_admin(self):
+        return self.role == 'admin' or self.is_superuser
             
-    def __str__(self):
-        return f"{self.username} ({self.get_role_display()})"
+    def is_moderator(self):
+        return self.role == 'moderator' or self.is_admin()

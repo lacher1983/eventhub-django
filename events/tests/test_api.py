@@ -43,7 +43,7 @@ class RegistrationAPITest(APITestCase):
 
 class ReviewAPITest(APITestCase):
     def test_review_create_api(self, authenticated_api_client, test_event):
-        # First register for the event
+        # Первая регистрация на мероприятие
         baker.make(
             'events.Registration',
             user=authenticated_api_client.user,

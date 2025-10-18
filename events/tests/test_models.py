@@ -113,11 +113,11 @@ class ReviewModelTest(TestCase):
         assert review.comment == 'Great event!'
 
     def test_rating_validation(self, test_user, test_event):
-        # Valid rating
+        # Действительный рейтинг
         review = Review(user=test_user, event=test_event, rating=5)
         review.full_clean()  # Should not raise
         
-        # Invalid rating
+        # Неверный рейтинг
         review.rating = 6
         with pytest.raises(ValidationError):
             review.full_clean()
@@ -134,6 +134,6 @@ class UserProfileModelTest(TestCase):
         assert profile.bio == 'Test bio'
 
     def test_profile_auto_creation(self, test_user):
-        # Profile should be created automatically via signal
+        # Профиль должен быть создан автоматически через сигнал
         assert hasattr(test_user, 'userprofile')
         assert test_user.userprofile is not None

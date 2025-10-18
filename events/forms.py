@@ -1,11 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
-from .models import Event, Tag, Category, Registration, Review
+from .models import Event, Tag, Category, Registration, Review, PromoVideo, ProjectPromoVideo
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+import os
 # from .models import BuddyRequest
 
 
@@ -60,6 +62,12 @@ class CustomUserCreationForm(UserCreationForm):
         return user
 
 class EventForm(forms.ModelForm):
+    def clean_date(self):
+        date = self.cleaned_data['date']
+        if date < timezone.now():
+            raise ValidationError("Дата не может быть в прошлом")
+        return date
+
     class Meta:
         model = Event
         fields = [
@@ -543,6 +551,125 @@ class ContactOrganizerForm(forms.Form):
         label=_('Отправить копию мне')
     )
 
+
+class PromoVideoForm(forms.ModelForm):
+    """Форма для загрузки промо-видео"""
+    
+    class Meta:
+        model = PromoVideo
+        fields = [
+            'title', 'description', 'video_source', 'youtube_url', 
+            'vimeo_url', 'external_url', 'uploaded_video', 'thumbnail',
+            'is_main_promo', 'display_order', 'autoplay'
+        ]
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Название промо-ролика'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Описание видео'
+            }),
+            'video_source': forms.Select(attrs={
+                'class': 'form-control',
+                'onchange': 'toggleVideoFields()'
+            }),
+            'youtube_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://www.youtube.com/watch?v=...'
+            }),
+            'vimeo_url': forms.URLInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'https://vimeo.com/...'
+            }),
+            'external_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ссылка на видео'
+            }),
+            'uploaded_video': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'video/mp4,video/x-m4v,video/*'
+            }),
+            'is_main_promo': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+            'autoplay': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+        labels = {
+            'is_main_promo': 'Сделать главным промо-роликом',
+            'autoplay': 'Автовоспроизведение'
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        video_source = cleaned_data.get('video_source')
+        
+        # Валидация в зависимости от источника видео
+        if video_source == 'youtube' and not cleaned_data.get('youtube_url'):
+            raise forms.ValidationError("Для YouTube необходимо указать ссылку")
+        elif video_source == 'vimeo' and not cleaned_data.get('vimeo_url'):
+            raise forms.ValidationError("Для Vimeo необходимо указать ссылку")
+        elif video_source == 'upload' and not cleaned_data.get('uploaded_video'):
+            raise forms.ValidationError("Необходимо загрузить видео файл")
+        elif video_source == 'external' and not cleaned_data.get('external_url'):
+            raise forms.ValidationError("Необходимо указать внешнюю ссылку")
+        
+        return cleaned_data
+    
+    def clean_uploaded_video(self):
+        """Валидация загружаемого видео"""
+        video = self.cleaned_data.get('uploaded_video')
+        if video:
+            # Проверка размера файла (максимум 100MB)
+            if video.size > 100 * 1024 * 1024:
+                raise forms.ValidationError("Размер видео не должен превышать 100MB")
+            
+            # Проверка расширения
+            ext = os.path.splitext(video.name)[1].lower()
+            if ext not in ['.mp4', '.mov', '.avi', '.webm']:
+                raise forms.ValidationError("Поддерживаются только MP4, MOV, AVI, WebM форматы")
+        
+        return video
+    
+class ProjectPromoVideoForm(forms.ModelForm):
+    """Форма для промороликов проекта"""
+    
+    class Meta:
+        model = ProjectPromoVideo
+        fields = [
+            'title', 'description', 'video_type', 'youtube_url', 'video_file', 'thumbnail',
+            'is_active', 'show_on_homepage', 'show_on_landing', 'autoplay', 'display_order'
+        ]
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Название проморолика проекта'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Описание проморолика'
+            }),
+            'video_type': forms.Select(attrs={'class': 'form-control'}),
+            'youtube_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://www.youtube.com/watch?v=...'
+            }),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_on_homepage': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_on_landing': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'autoplay': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+        labels = {
+            'is_active': 'Активный',
+            'show_on_homepage': 'Показывать на главной',
+            'show_on_landing': 'Показывать в лендинге',
+            'autoplay': 'Автовоспроизведение'
+        }
 
 # class BuddyRequestForm(forms.ModelForm):
 #     class Meta:

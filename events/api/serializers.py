@@ -1,3 +1,4 @@
+
 from rest_framework import serializers
 from ..models import Event, Favorite, Category, Review, Registration
 from accounts.models import User  

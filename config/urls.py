@@ -32,6 +32,12 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
     path('', include('events.urls')),
     path('events/', include('events.urls')),
+
+    # Включение стандартных auth URLs (для смены пароля и т.д.)
+    path('accounts/', include('django.contrib.auth.urls')),
+
+    # Включение кастомных URL
+    path('accounts/', include('accounts.urls')),
     
     # Аутентификация - ОДИН раз для каждого URL
     path('accounts/login/', 
@@ -40,9 +46,6 @@ urlpatterns = [
     
     # Путь для выхода (CustomLogoutView)
     path('accounts/logout/', CustomLogoutView.as_view(), name='logout'),
-
-    # Включение стандартных auth URLs (для смены пароля и т.д.)
-    path('accounts/', include('django.contrib.auth.urls')),
 
     # API
     path('api/', include('events.api.urls')),
@@ -82,7 +85,6 @@ urlpatterns = [
          ), 
          name='password_reset_complete'),
     
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='events/login.html'), name='login'),
   
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

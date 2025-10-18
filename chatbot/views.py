@@ -16,11 +16,11 @@ def chat_interface(request):
 @require_http_methods(["POST"])
 def chat_api(request):
     """API endpoint для обработки сообщений чатбота"""
-    print("=== CHAT API CALLED ===")  # Это ДОЛЖНО появиться в консоли Django
+    print("=== CHAT API CALLED ===")  # Это ДОЛЖНО появляться в консоли Django
     
     if request.method == 'POST':
         try:
-            # Проверяем, что тело запроса не пустое
+            # Проверяем, что тельце запроса не пустое
             if not request.body:
                 print("Empty request body")
                 return JsonResponse({'error': 'Пустой запрос'}, status=400)

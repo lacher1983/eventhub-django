@@ -20,7 +20,7 @@ class GamificationEngineTest:
         assert new_points == initial_points + 10
 
     def test_level_calculation(self, test_user):
-        # Award enough points to level up
+        # Насобирай достаточно очков для повышения уровня
         gamification_engine.award_points(test_user, points=150, reason='Level up')
         
         level = gamification_engine.get_user_level(test_user)
@@ -36,12 +36,12 @@ class GamificationEngineTest:
             date=timezone.now() + timezone.timedelta(days=7)
         )
         
-        # Trigger the signal manually
+        # Активируем сигнал вручную
         from events.signals_gamification import handle_event_creation
         handle_event_creation(Event, event, created=True)
         
         new_points = gamification_engine.get_user_points(test_organizer)
-        assert new_points == initial_points + 15  # 15 points for event creation
+        assert new_points == initial_points + 15  # 15 баллов за создание события
 
     def test_registration_points(self, test_user, test_event):
         initial_points = gamification_engine.get_user_points(test_user)
@@ -51,7 +51,7 @@ class GamificationEngineTest:
             event=test_event
         )
         
-        # Trigger the signal manually
+        # Активируйте сигнал вручную
         from events.signals_gamification import handle_event_registration
         handle_event_registration(Registration, registration, created=True)
         
@@ -59,7 +59,7 @@ class GamificationEngineTest:
         assert new_points == initial_points + 5  # 5 points for registration
 
     def test_review_points(self, test_user, test_event):
-        # First register for the event
+        # Первая регистрация на мероприятие
         baker.make(Registration, user=test_user, event=test_event)
         
         initial_points = gamification_engine.get_user_points(test_user)
@@ -71,16 +71,16 @@ class GamificationEngineTest:
             comment='Great event for gamification!'
         )
         
-        # Trigger the signal manually
+        # активируйте сигнал вручную
         from events.signals_gamification import handle_review_creation
         handle_review_creation(Review, review, created=True)
         
         new_points = gamification_engine.get_user_points(test_user)
-        # 3 base points + (5-3) for good rating = 5 points
+        # 3 балла + (5-3) за хороший рейтинг = 5 баллов
         assert new_points == initial_points + 5
 
     def test_achievement_unlock(self, test_user):
-        # Create multiple events to trigger achievements
+        # Создайте несколько событий для запуска достижений
         for i in range(5):
             gamification_engine.award_points(
                 test_user, 
@@ -98,11 +98,11 @@ class GamificationModelsTest:
         assert test_user.userprofile.total_points >= 0
 
     def test_leaderboard_calculation(self, test_user, test_organizer):
-        # Award different points to users
+        # Начисляй пользователям различные баллы
         gamification_engine.award_points(test_user, points=50, reason='Test')
         gamification_engine.award_points(test_organizer, points=100, reason='Test')
         
         leaderboard = gamification_engine.get_leaderboard(limit=10)
         assert len(leaderboard) >= 2
-        # Organizer should be higher due to more points
+        # Организатор должен быть выше из-за большего количества баллов
         assert leaderboard[0]['points'] >= leaderboard[1]['points']

@@ -1,10 +1,4 @@
-from django.db import models
-from django.urls import reverse
-from django.core.files.base import ContentFile
-from PIL import Image
-import io
-import os
-from django.conf import settings
+from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
@@ -14,11 +8,20 @@ from django.utils.translation import gettext_lazy as _
 from datetime import datetime
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+import os
+import io
+from PIL import Image
+from django.core.files.base import ContentFile
+from django.db import models
+from django.urls import reverse
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 import time
 import logging
+from django.db.models import Sum, Count, Avg, Q
+import re  # Для работы с регулярными выражениямиeve
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -101,6 +104,12 @@ class Category(models.Model):
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
+def validate_image(image):
+    filesize = image.size
+    if filesize > 5 * 1024 * 1024:  # 5MB
+        raise ValidationError("Макс. размер — 5 МБ")
+    if not image.name.lower().endswith(('.png', '.jpg', '.jpeg')):
+        raise ValidationError("Только JPG/PNG")
 
 class Event(models.Model):
     # Группировка по категориям
@@ -193,7 +202,7 @@ class Event(models.Model):
         verbose_name=_("Уровень сложности")
     )
     requirements = models.TextField(blank=True, verbose_name=_("Что нужно взять с собой"))
-    image = models.ImageField(upload_to='events/', blank=True, null=True)
+    image = models.ImageField(upload_to='events/', validators=[validate_image], blank=True)
     organizer = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='organized_events', 
                                 verbose_name=_("Организатор"))
     price = models.DecimalField(max_digits=10, decimal_places=2, 
@@ -716,6 +725,9 @@ class Subscription(models.Model):
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     sent_at = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
@@ -1136,3 +1148,212 @@ class UserQuest(models.Model):
     def __str__(self):
         status = "Выполнено" if self.is_completed else f"Прогресс: {self.progress*100}%"
         return f"{self.user.username} - {self.quest.name} ({status})"
+
+
+class PromoVideo(models.Model):
+    """Модель для хранения промо-роликов мероприятий"""
+    
+    VIDEO_SOURCES = [
+        ('youtube', 'YouTube'),
+        ('vimeo', 'Vimeo'),
+        ('upload', 'Загруженное видео'),
+        ('external', 'Внешняя ссылка'),
+    ]
+    
+    title = models.CharField(max_length=200, verbose_name="Название ролика")
+    description = models.TextField(blank=True, verbose_name="Описание")
+    event = models.ForeignKey(
+        'Event', 
+        on_delete=models.CASCADE, 
+        related_name='promo_videos',
+        verbose_name="Мероприятие"
+    )
+    
+    # Разные способы хранения видео
+    video_source = models.CharField(
+        max_length=10, 
+        choices=VIDEO_SOURCES, 
+        default='youtube',
+        verbose_name="Источник видео"
+    )
+    youtube_url = models.URLField(blank=True, verbose_name="YouTube URL")
+    vimeo_url = models.URLField(blank=True, verbose_name="Vimeo URL")
+    external_url = models.URLField(blank=True, verbose_name="Внешняя ссылка")
+    uploaded_video = models.FileField(
+        upload_to='promo_videos/%Y/%m/%d/',
+        blank=True,
+        null=True,
+        verbose_name="Загруженное видео",
+        validators=[
+            FileExtensionValidator(allowed_extensions=['mp4', 'mov', 'avi', 'webm'])
+        ]
+    )
+    
+    # Метаданные
+    thumbnail = models.ImageField(
+        upload_to='video_thumbnails/',
+        blank=True,
+        null=True,
+        verbose_name="Превью видео"
+    )
+    duration = models.DurationField(blank=True, null=True, verbose_name="Длительность")
+    is_main_promo = models.BooleanField(default=False, verbose_name="Главное промо")
+    display_order = models.PositiveIntegerField(default=0, verbose_name="Порядок отображения")
+    
+    # Статистика
+    view_count = models.PositiveIntegerField(default=0, verbose_name="Просмотры")
+    autoplay = models.BooleanField(default=False, verbose_name="Автовоспроизведение")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Промо-видео"
+        verbose_name_plural = "Промо-видео"
+        ordering = ['display_order', '-created_at']
+    
+    def __str__(self):
+        return f"{self.title} - {self.event.title}"
+    
+    def get_video_url(self):
+        """Получение URL видео в зависимости от источника"""
+        if self.video_source == 'youtube' and self.youtube_url:
+            return self.extract_youtube_embed_url(self.youtube_url)
+        elif self.video_source == 'vimeo' and self.vimeo_url:
+            return self.extract_vimeo_embed_url(self.vimeo_url)
+        elif self.video_source == 'upload' and self.uploaded_video:
+            return self.uploaded_video.url
+        elif self.video_source == 'external' and self.external_url:
+            return self.external_url
+        return None
+    
+    def extract_youtube_embed_url(self, url):
+        """Извлечение embed URL из YouTube ссылки"""
+        import re
+        # Обработка разных форматов YouTube URL
+        regex = r'(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})'
+        match = re.search(regex, url)
+        if match:
+            video_id = match.group(1)
+            return f"https://www.youtube.com/embed/{video_id}?rel=0&showinfo=0"
+        return url
+    
+    def extract_vimeo_embed_url(self, url):
+        """Извлечение embed URL из Vimeo ссылки"""
+        import re
+        regex = r'vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|)(\d+)(?:|\/\?)'
+        match = re.search(regex, url)
+        if match:
+            video_id = match.group(1)
+            return f"https://player.vimeo.com/video/{video_id}"
+        return url
+    
+    def increment_view_count(self):
+        """Увеличение счетчика просмотров"""
+        self.view_count += 1
+        self.save(update_fields=['view_count'])
+    
+    @property
+    def is_external_embed(self):
+        """Проверка, является ли видео внешним embed"""
+        return self.video_source in ['youtube', 'vimeo']
+    
+    @property
+    def is_uploaded_file(self):
+        """Проверка, является ли видео загруженным файлом"""
+        return self.video_source == 'upload'
+
+class ProjectPromoVideo(models.Model):
+    """Проморолик всего проекта EventHub"""
+    
+    VIDEO_TYPES = [
+        ('main', 'Главный проморолик'),
+        ('demo', 'Демо-ролик'),
+        ('tutorial', 'Обзорный туториал'),
+        ('testimonial', 'Отзывы пользователей'),
+    ]
+    
+    title = models.CharField(max_length=200, verbose_name="Название ролика")
+    description = models.TextField(blank=True, verbose_name="Описание")
+    video_type = models.CharField(
+        max_length=15, 
+        choices=VIDEO_TYPES, 
+        default='main',
+        verbose_name="Тип ролика"
+    )
+    
+    # Видео контент
+    youtube_url = models.URLField(verbose_name="YouTube URL")
+    thumbnail = models.ImageField(
+        upload_to='project_promo/thumbnails/',
+        blank=True,
+        null=True,
+        verbose_name="Превью"
+    )
+    
+    # Настройки отображения
+    is_active = models.BooleanField(default=True, verbose_name="Активный")
+    show_on_homepage = models.BooleanField(default=True, verbose_name="Показывать на главной")
+    show_on_landing = models.BooleanField(default=True, verbose_name="Показывать в лендинге")
+    autoplay = models.BooleanField(default=False, verbose_name="Автовоспроизведение")
+    display_order = models.PositiveIntegerField(default=0, verbose_name="Порядок отображения")
+    
+    # Статистика
+    view_count = models.PositiveIntegerField(default=0, verbose_name="Просмотры")
+    click_count = models.PositiveIntegerField(default=0, verbose_name="Клики")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Проморолик проекта"
+        verbose_name_plural = "Проморолики проекта"
+        ordering = ['display_order', '-created_at']
+    
+    def __str__(self):
+        return f"{self.title} ({self.get_video_type_display()})"
+    
+    def get_embed_url(self):
+        """Получение embed URL для YouTube"""
+        import re
+        regex = r'(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})'
+        match = re.search(regex, self.youtube_url)
+        if match:
+            video_id = match.group(1)
+            params = "rel=0&showinfo=0&modestbranding=1"
+            if self.autoplay:
+                params += "&autoplay=1&mute=1"
+            return f"https://www.youtube.com/embed/{video_id}?{params}"
+        return self.youtube_url
+    
+    def increment_view_count(self):
+        """Увеличение счетчика просмотров"""
+        self.view_count += 1
+        self.save(update_fields=['view_count'])
+    
+    def increment_click_count(self):
+        """Увеличение счетчика кликов"""
+        self.click_count += 1
+        self.save(update_fields=['click_count'])
+    
+    @property
+    def duration_display(self):
+        """Отображаемая длительность"""
+        # Можно интегрировать с YouTube API для получения реальной длительности
+        return "2:30"  # Заглушка
+    
+    video_file = models.FileField(
+        upload_to='videos/project_promo/',
+        blank=True,
+        null=True,
+        verbose_name="Видео файл",
+        validators=[FileExtensionValidator(allowed_extensions=['mp4', 'mov', 'avi', 'webm'])]
+    )
+    
+    def get_video_url(self):
+        """Получение URL видео (приоритет у YouTube)"""
+        if self.youtube_url:
+            return self.get_embed_url()
+        elif self.video_file:
+            return self.video_file.url
+        return None

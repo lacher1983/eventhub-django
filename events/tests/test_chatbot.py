@@ -56,11 +56,11 @@ class EventSearchIntentTest:
     def test_event_search_parsing(self):
         intent = EventSearchIntent()
         
-        # Test location extraction
+        # Тестовое извлечение локации
         location = intent._extract_location('концерты в москве на завтра')
         assert location == 'москве'
         
-        # Test date extraction
+        # Тестовое извлечение даты
         date_info = intent._extract_date('мероприятия на следующей неделе')
         assert date_info is not None
 

@@ -68,4 +68,3 @@ jobs:
       run: |
         pip install bandit
         bandit -r events/ -f html -o security_report.html || true
-      
