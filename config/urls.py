@@ -33,16 +33,15 @@ urlpatterns = [
     path('', include('events.urls')),
     path('events/', include('events.urls')),
 
-    # Включение стандартных auth URLs (для смены пароля и т.д.)
-    path('accounts/', include('django.contrib.auth.urls')),
-
     # Включение кастомных URL
     path('accounts/', include('accounts.urls')),
     
+
     # Аутентификация - ОДИН раз для каждого URL
-    path('accounts/login/', 
-         auth_views.LoginView.as_view(template_name='events/login.html'), 
-         name='login'),
+    # path('accounts/login/', auth_views.LoginView.as_view(template_name='events/login.html'), name='login'),
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='events/login.html'), name='login'),
+    # Включение стандартных auth URLs (для смены пароля и т.д.)
+    path('accounts/', include('django.contrib.auth.urls')),
     
     # Путь для выхода (CustomLogoutView)
     path('accounts/logout/', CustomLogoutView.as_view(), name='logout'),

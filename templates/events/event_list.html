@@ -44,7 +44,7 @@
                     <div class="hero-buttons">
                         <button class="btn btn-outline-light btn-lg" onclick="showProjectVideo()">
                             <i class="fas fa-play-circle me-2"></i>
-                            Смотреть видео мероприятий
+                            Промо видео
                         </button>
                     </div>
                 </div>
@@ -136,7 +136,16 @@
                 <h5 class="modal-title text-white" id="videoModalTitle">Проморолик EventHub</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <video id="projectVideoElement" controls style="width:100%; height:100%;">
+                    <source src="/media/videos/demo.mp4" type="video/mp4">
+                    Ваш браузер не поддерживает видео.
+                    </video>
+                </div>
+            </div>
+            <!-- <div class="modal-body p-0">
                 <div class="ratio ratio-16x9">
                     <iframe id="projectVideoFrame" 
                             src="" 
@@ -145,7 +154,7 @@
                             allowfullscreen>
                     </iframe>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>
@@ -249,23 +258,33 @@
 </style>
 
 <script>
-function showProjectVideo(videoUrl = null, title = 'Проморолик EventHub') {
-    const modal = new bootstrap.Modal(document.getElementById('projectVideoModal'));
-    const frame = document.getElementById('projectVideoFrame');
-    const modalTitle = document.getElementById('videoModalTitle');
+// function showProjectVideo(videoUrl = null, title = 'Проморолик EventHub') {
+//     const modal = new bootstrap.Modal(document.getElementById('projectVideoModal'));
+//     const frame = document.getElementById('projectVideoFrame');
+//     const modalTitle = document.getElementById('videoModalTitle');
     
-    if (videoUrl) {
-        frame.src = videoUrl;
-    } else {
-        // Используем первый активный проморолик
-        frame.src = '{{ project_promos.main.0.get_embed_url }}';
-    }
+//     if (videoUrl) {
+//         frame.src = videoUrl;
+//     } else {
+//         // Используем первый активный проморолик
+//         frame.src = '{{ project_promos.main.0.get_embed_url }}';
+//     }
     
-    modalTitle.textContent = title;
-    modal.show();
+//     modalTitle.textContent = title;
+//     modal.show();
     
-    // Трекинг просмотра
-    trackVideoView();
+//     // Трекинг просмотра
+//     trackVideoView();
+// }
+
+function showProjectVideo() {
+  const modal = new bootstrap.Modal(document.getElementById('projectVideoModal'));
+  const video = document.getElementById('projectVideoElement');
+  if (video) {
+    video.currentTime = 0; // сброс на начало
+    video.play(); // можно убрать, если не нужно автовоспроизведение
+  }
+  modal.show();
 }
 
 function trackVideoView() {

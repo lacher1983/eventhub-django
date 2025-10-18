@@ -1,6 +1,7 @@
 from django.apps import AppConfig
+from django.utils.translation import gettext_lazy as _
 
 class ChatbotConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'chatbot'
-    verbose_name = 'Чатбот мероприятий'
+    verbose_name = _('Чатбот мероприятий')

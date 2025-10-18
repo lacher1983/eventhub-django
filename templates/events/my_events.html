@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Мои мероприятия</h1>
+  {% for event in events %}
+    <p>{{ event.title }} — {{ event.date }}</p>
+  {% empty %}
+    <p>У вас пока нет мероприятий.</p>
+  {% endfor %}
+{% endblock %}

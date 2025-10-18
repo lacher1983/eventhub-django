@@ -24,6 +24,8 @@ from .views import (
 from .views_cart import checkout
 from .views_cart import cart_detail, cart_add, cart_remove, cart_update, payment, payment_success, payment_cancel, checkout
 from . import views_gamification
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -43,6 +45,10 @@ urlpatterns = [
     path('my-registrations/', views.user_registrations, name='user_registrations'),
     path('event/<int:pk>/register/', views.register_for_event, name='event_register'),
     path('confirm-email/<uuid:confirmation_code>/', confirm_email, name='confirm_email'),
+    path('my-events/', views.my_events, name='my_events'),
+    path('favorites/', views.favorite_list, name='favorites'),
+    path('game/profile/', views.game_profile, name='game_profile'),
+    path('game/profile/', views.GameProfileView.as_view(), name='game_profile'),
 
     # Реклама
     path('ads/click/<int:ad_id>/', views.ad_click, name='ad_click'),

@@ -138,17 +138,17 @@
                             <ul class="list-unstyled">
                                 {% if user.is_authenticated %}
                                 <li class="mb-2">
-                                    <a href="{% url 'profile' %}" class="text-decoration-none">
+                                    <a href="{% url 'accounts:profile' %}" class="text-decoration-none">
                                         <i class="fas fa-user text-warning me-2"></i>Мой профиль
                                     </a>
                                 </li>
                                 <li class="mb-2">
-                                    <a href="{% url 'my_events' %}" class="text-decoration-none">
+                                    <a href="{% url 'events:my_events' %}" class="text-decoration-none">
                                         <i class="fas fa-calendar-check text-warning me-2"></i>Мои мероприятия
                                     </a>
                                 </li>
                                 <li class="mb-2">
-                                    <a href="{% url 'favorites' %}" class="text-decoration-none">
+                                    <a href="{% url 'events:favorites' %}" class="text-decoration-none">
                                         <i class="fas fa-heart text-danger me-2"></i>Избранное
                                     </a>
                                 </li>

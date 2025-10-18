@@ -164,7 +164,7 @@ class EventListView(ListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # === ДАННЫЕ ДЛЯ МИНИКАРТЫ ===
         from django.db.models import Q
         import json
@@ -810,6 +810,31 @@ def event_statistics(request, pk):
         'stats': stats,
     })
 
+@login_required
+def my_events(request):
+    events = Event.objects.filter(organizer=request.user)
+    return render(request, 'events/my_events.html', {'events': events})
+
+@login_required
+def favorite_list(request):
+    favorites = Favorite.objects.filter(user=request.user).select_related('event', 'event__organizer')
+    return render(request, 'events/favorite_list.html', {'favorites': favorites})
+
+@login_required
+def game_profile(request):
+    # Заглушка: можно подключить реальную логику геймификации позже
+    context = {
+        'user': request.user,
+        'total_points': 150,
+        'current_level': 1,
+        'achievements': [
+            {'name': 'Первый шаг', 'completed': True},
+            {'name': 'Постоянный посетитель', 'completed': True},
+            {'name': 'Социальная бабочка', 'completed': False},
+        ]
+    }
+    return render(request, 'events/game_profile.html', context)
+
 @admin_required # === ЗАЩИТА АДМИНИСТРАТИВНЫХ ФУНКЦИЙ ===
 def platform_statistics(request):
     """Статистика платформы (только для staff)"""
@@ -860,26 +885,29 @@ class CombinedEventsView(ListView):
     context_object_name = 'events'
     
     def get_queryset(self):
-        # Текущие внутренние мероприятия
+        # === ФИЛЬТРАЦИЯ ВНУТРЕННИХ МЕРОПРИЯТИЙ ===
         internal_events = Event.objects.filter(
             is_active=True,
             date__gte=timezone.now()
-        ).select_related('organizer')
+        ).select_related('organizer', 'category')
         
-        # Фильтр по категории (модель Category)
+        # Применяем фильтры к внутренним мероприятиям по категории (модель Category)
         if self.request.GET.get('category'):
-            qs = qs.filter(category__slug=self.request.GET['category'])
+            internal_events = internal_events.filter(category__slug=self.request.GET['category'])
         # Фильтр по типу (поле event_type)
         if self.request.GET.get('event_type'):
-            qs = qs.filter(event_type=self.request.GET['event_type'])
+            internal_events = internal_events.filter(event_type=self.request.GET['event_type'])
 
-        # Текущие внешние мероприятия (не в архиве)
+        # ФИЛЬТРАЦИЯ ВНЕШНИХ МЕРОПРИЯТИЙ === (не в архиве)
         external_events = ExternalEvent.objects.filter(
             is_archived=False,
             date__gte=timezone.now()
         ).select_related('source')
-        
-        # Объединяем и сортируем по дате
+
+        # Внешние мероприятия НЕ имеют event_type или category (в вашей модели),
+        # поэтому фильтрация по ним НЕ ПРИМЕНЯЕТСЯ к external_events
+
+        # === ОБЪЕДИНЕНИЕ === и сортируем по дате
         combined = []
         
         # Преобразуем внутренние мероприятия

@@ -192,3 +192,9 @@ def update_organizer_rankings():
                 
         except Exception as e:
             print(f"Error updating rank for {organizer.username}: {e}")
+
+@shared_task
+def send_weekly_report():
+    for organizer in User.objects.filter(role='organizer'):
+        # генерация отчёта
+        send_mail(...)

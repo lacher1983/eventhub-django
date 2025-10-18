@@ -62,3 +62,7 @@ __pycache__/
 .venv/
 venv/
 .env.local
+.env
+db.sqlite3
+add_events.py
+add_events copy.py

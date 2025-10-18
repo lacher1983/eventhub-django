@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Игровой профиль" %} - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <!-- Заголовок -->
+      <div class="text-center mb-4">
+        <h1 class="h2 fw-bold text-primary">{% trans "Игровой профиль" %}</h1>
+        <p class="text-muted">{% trans "Ваш прогресс и достижения на платформе" %}</p>
+      </div>
+
+      <!-- Профиль пользователя -->
+      <div class="card mb-4">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <div class="avatar-placeholder rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto"
+                 style="width: 80px; height: 80px; font-size: 2rem;">
+              {{ user.username|first|upper }}
+            </div>
+          </div>
+          <h4 class="mb-1">{{ user.username }}</h4>
+          <div class="d-flex justify-content-center gap-3 mb-3">
+            <span class="badge bg-warning text-dark">
+              <i class="fas fa-trophy me-1"></i> {% trans "Уровень" %} {{ game_stats.current_level }}
+            </span>
+            <span class="badge bg-success">
+              <i class="fas fa-coins me-1"></i> {{ game_stats.total_points }} {% trans "очков" %}
+            </span>
+          </div>
+          <p class="text-muted mb-0">{{ game_stats.member_since|date:"Y" }} · {{ game_stats.favorite_category }}</p>
+        </div>
+      </div>
+
+      <!-- Статистика -->
+      <div class="row mb-4">
+        <div class="col-6 col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="h4">{{ game_stats.total_events_attended }}</div>
+              <small class="text-muted">{% trans "Посещено" %}</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="h4">5</div>
+              <small class="text-muted">{% trans "Отзывов" %}</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="h4">3</div>
+              <small class="text-muted">{% trans "Категорий" %}</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="h4">1</div>
+              <small class="text-muted">{% trans "Организатор" %}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Достижения -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">{% trans "Достижения" %}</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            {% for achievement in achievements %}
+              <div class="col-6 col-md-3 mb-3">
+                <div class="text-center">
+                  <div class="achievement-icon mb-2">
+                    {% if achievement.completed %}
+                      <span class="text-success" style="font-size: 2rem;">{{ achievement.name|first|upper }}</span>
+                    {% else %}
+                      <span class="text-muted" style="font-size: 2rem;">🔒</span>
+                    {% endif %}
+                  </div>
+                  <small class="text-muted">{{ achievement.name }}</small>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Последняя активность -->
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">{% trans "Последняя активность" %}</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            {% for activity in recent_activity %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ activity.event }}</span>
+                <span class="badge bg-primary">{{ activity.points }} {% trans "очков" %}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

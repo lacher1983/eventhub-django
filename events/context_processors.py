@@ -1,6 +1,14 @@
 from django.utils import timezone
 from .models import Advertisement
 from .models import Cart
+from .models import Category, Event
+
+
+def event_filters(request):
+    return {
+        'categories': Category.objects.all(),
+        'event_types': Event.EVENT_TYPES,
+    }
 
 def advertisements(request):
     now = timezone.now()
@@ -42,6 +50,7 @@ def map_pages(request):
         'event_detail', # детальная страница события (если есть мини-карта)
         'event_create', # создание события (если есть карта)
         'event_edit',   # редактирование события
+        'event_list',
     ]
     
     current_url_name = request.resolver_match.url_name if request.resolver_match else None

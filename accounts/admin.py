@@ -10,7 +10,8 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ('role', 'is_staff', 'is_superuser', 'is_active')
     search_fields = ('username', 'email', 'first_name', 'last_name')
     
-    fieldsets = UserAdmin.fieldsets + (
+    # Добавляем add_fieldsets для формы создания пользователя
+    add_fieldsets = UserAdmin.add_fieldsets + (
         ('Дополнительная информация', {
             'fields': ('role', 'phone', 'avatar')
         }),
@@ -18,5 +19,7 @@ class CustomUserAdmin(UserAdmin):
     
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields['role'].initial = 'user'
+        # Безопасная проверка наличия поля
+        if 'role' in form.base_fields:
+            form.base_fields['role'].initial = 'user'
         return form
